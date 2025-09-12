@@ -57,6 +57,16 @@
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-ring: var(--sidebar-ring);
+
+    /* 🔽 aliasy dla nowych kolorów */
+    --color-mint: var(--mint);
+    --color-mint-foreground: var(--mint-foreground);
+    --color-sea: var(--sea);
+    --color-sea-foreground: var(--sea-foreground);
+    --color-blush: var(--blush);
+    --color-blush-foreground: var(--blush-foreground);
+    --color-coral: var(--coral);
+    --color-coral-foreground: var(--coral-foreground);
 }
 
 :root {
@@ -93,6 +103,19 @@
     --sidebar-accent-foreground: oklch(0.205 0 0);
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.87 0 0);
+
+    /* 🔽 nowe zmienne z obrazka */
+    --mint: #c0d6ca;            /* badge 1 */
+    --mint-foreground: #0b0b0b; /* tekst na #c0d6ca */
+
+    --sea: #87b5a8;             /* badge 2 */
+    --sea-foreground: #0b0b0b;
+
+    --blush: #f6d7d2;           /* badge 3 */
+    --blush-foreground: #0b0b0b;
+
+    --coral: #ec8f81;           /* badge 4 */
+    --coral-foreground: #0b0b0b;
 }
 
 .dark {
@@ -128,14 +151,51 @@
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(0.269 0 0);
     --sidebar-ring: oklch(0.439 0 0);
+
+    /* 🔽 te same barwy w dark — foreground zostawiamy ciemny dla czytelności na pastelach */
+    --mint: #c0d6ca;
+    --mint-foreground: #0b0b0b;
+
+    --sea: #87b5a8;
+    --sea-foreground: #0b0b0b;
+
+    --blush: #f6d7d2;
+    --blush-foreground: #0b0b0b;
+
+    --coral: #ec8f81;
+    --coral-foreground: #0b0b0b;
 }
 
 @layer base {
-    * {
-        @apply border-border;
-    }
+    * { @apply border-border; }
+    body { @apply bg-background text-foreground; }
+}
 
-    body {
-        @apply bg-background text-foreground;
-    }
+@layer utilities {
+    /* tła */
+    .bg-coral { background-color: var(--coral) !important; }
+    .bg-mint  { background-color: var(--mint) !important; }
+    .bg-sea   { background-color: var(--sea) !important; }
+    .bg-blush { background-color: var(--blush) !important; }
+
+    /* tekst */
+    .text-coral           { color: var(--coral) !important; }
+    .text-coral-foreground{ color: var(--coral-foreground) !important; }
+    .text-mint            { color: var(--mint) !important; }
+    .text-mint-foreground { color: var(--mint-foreground) !important; }
+    .text-sea             { color: var(--sea) !important; }
+    .text-sea-foreground  { color: var(--sea-foreground) !important; }
+    .text-blush           { color: var(--blush) !important; }
+    .text-blush-foreground{ color: var(--blush-foreground) !important; }
+
+    /* obrysy / ring */
+    .border-coral { border-color: var(--coral) !important; }
+    .border-mint  { border-color: var(--mint) !important; }
+    .border-sea   { border-color: var(--sea) !important; }
+    .border-blush { border-color: var(--blush) !important; }
+
+    .ring-coral { --tw-ring-color: var(--coral) !important; }
+    .ring-mint  { --tw-ring-color: var(--mint) !important; }
+    .ring-sea   { --tw-ring-color: var(--sea) !important; }
+    .ring-blush { --tw-ring-color: var(--blush) !important; }
 }
