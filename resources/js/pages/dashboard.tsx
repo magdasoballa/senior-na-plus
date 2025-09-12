@@ -5,6 +5,7 @@ import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import MapCard from '@/components/mapCard';
+import FooterCard from '@/components/footer';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -20,7 +21,7 @@ export default function Dashboard() {
             <OffersSwiper />
             <ContactFormCard />
             <MapCard address="Senior na Plus, Gliwice" />
-
+<FooterCard/>
         </AppLayout>
     );
 }

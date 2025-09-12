@@ -15,7 +15,7 @@ export default function MapCard(props: Props) {
 
     return (
         <div className=" mx-auto w-full max-w-lg px-2">
-            <div className="rounded-[2rem] border bg-card p-2 shadow-[16px_16px_0_rgba(0,0,0,0.25)]">
+            <div className="rounded-[5px] border bg-card  shadow-[8px_8px_0_rgba(0,0,0,0.5)]">
                 <div className="overflow-hidden rounded-[1rem]">
                     <iframe
                         src={src}
