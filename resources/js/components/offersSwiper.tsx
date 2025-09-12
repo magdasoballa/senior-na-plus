@@ -12,6 +12,7 @@ import {
     ChevronLeft,
     ChevronRight,
 } from 'lucide-react'
+import { Link, router } from '@inertiajs/react'
 
 /** Dane pojedynczego slajdu */
 type Slide = {
@@ -25,7 +26,7 @@ type Slide = {
     gender: string
     mobility: string
     alone: string
-    ctaHref?: string
+    ctaHref?: string // np. "/offers/1"
 }
 
 const defaultSlides: Slide[] = [
@@ -40,7 +41,7 @@ const defaultSlides: Slide[] = [
         gender: 'podopieczna',
         mobility: 'mobilna',
         alone: 'samotna',
-        ctaHref: '#',
+        ctaHref: '/offers/1',
     },
     {
         id: '2',
@@ -53,7 +54,7 @@ const defaultSlides: Slide[] = [
         gender: 'podopieczna',
         mobility: 'ograniczona',
         alone: 'nie',
-        ctaHref: '#',
+        ctaHref: '/offers/2',
     },
     {
         id: '3',
@@ -66,7 +67,7 @@ const defaultSlides: Slide[] = [
         gender: 'podopieczny',
         mobility: 'mobilny',
         alone: 'sam',
-        ctaHref: '#',
+        ctaHref: '/offers/3',
     },
 ]
 
@@ -93,16 +94,16 @@ export default function OffersSwiper({ slides = defaultSlides }: { slides?: Slid
                 <p className="mt-2 text-lg text-sea md:text-xl">sprawdź nowości</p>
             </header>
 
-            <div className="relative">
+            <div className="relative" role="region" aria-roledescription="carousel" aria-label="Slider ofert">
                 {/* strzałka lewo */}
                 <button
                     aria-label="Poprzednia oferta"
                     onClick={prev}
                     disabled={index === 0}
-                    className="absolute top-1/2 left-[-14px] z-10 -translate-y-1/2 rounded-full bg-coral p-3 text-coral-foreground shadow-md ring-1 ring-black/10 disabled:opacity-40"
+                    className="absolute top-1/2 left-[-14px] z-10 -translate-y-1/2 rounded-full bg-coral p-3 text-white shadow-md ring-1 ring-black/10 disabled:opacity-40 disabled:pointer-events-none"
                     type="button"
                 >
-                    <ChevronLeft className="h-5 w-5 text-white" />
+                    <ChevronLeft className="h-5 w-5" />
                 </button>
 
                 {/* strzałka prawo */}
@@ -110,15 +111,14 @@ export default function OffersSwiper({ slides = defaultSlides }: { slides?: Slid
                     aria-label="Następna oferta"
                     onClick={next}
                     disabled={index === slides.length - 1}
-                    className="absolute top-1/2 right-[-14px] z-10 -translate-y-1/2 rounded-full bg-coral p-3 text-coral-foreground shadow-md ring-1 ring-black/10 disabled:opacity-40"
+                    className="absolute top-1/2 right-[-14px] z-10 -translate-y-1/2 rounded-full bg-coral p-3 text-white shadow-md ring-1 ring-black/10 disabled:opacity-40 disabled:pointer-events-none"
                     type="button"
                 >
-                    <ChevronRight className="h-5 w-5 text-white" />
+                    <ChevronRight className="h-5 w-5" />
                 </button>
 
                 {/* viewport */}
-                <div className="overflow-hidden rounded-[2rem]">
-                    {/* track */}
+                <div className="overflow-hidden rounded-[2rem]" aria-live="polite">
                     <div
                         className="flex transition-transform duration-500 ease-out"
                         style={{ transform: `translateX(-${index * 100}%)` }}
@@ -136,9 +136,11 @@ export default function OffersSwiper({ slides = defaultSlides }: { slides?: Slid
                             key={i}
                             onClick={() => setIndex(i)}
                             aria-label={`Przejdź do slajdu ${i + 1}`}
-                            className={['h-2.5 w-2.5 rounded-full ring-1 ring-black/10', i === index ? 'bg-coral' : 'bg-blush'].join(
-                                ' ',
-                            )}
+                            aria-current={i === index ? 'true' : undefined}
+                            className={[
+                                'h-2.5 w-2.5 rounded-full ring-1 ring-black/10',
+                                i === index ? 'bg-coral' : 'bg-blush',
+                            ].join(' ')}
                         />
                     ))}
                 </div>
@@ -149,9 +151,20 @@ export default function OffersSwiper({ slides = defaultSlides }: { slides?: Slid
 
 /** pojedynczy slajd */
 function SlideCard({ slide }: { slide: Slide }) {
+    const go = () => {
+        if (slide.ctaHref) router.visit(slide.ctaHref)
+    }
+
     return (
         <article className="w-full shrink-0 px-2 py-4 md:px-4">
-            <div className="relative mx-auto w-[70%] rounded-[7rem] border bg-card p-6 shadow-2xl shadow-black/20 md:p-10 flex fle-col">
+            <div
+                className="relative mx-auto w-[70%] rounded-[7rem] border bg-card p-6 shadow-2xl shadow-black/20 md:p-10 flex flex-col overflow-hidden cursor-pointer"
+                onClick={go}
+                role="link"
+                tabIndex={0}
+                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && go()}
+                aria-label={`Zobacz ofertę: ${slide.title}`}
+            >
                 {/* nagłówek slajdu */}
                 <h3 className="text-center text-xl font-extrabold tracking-wide text-coral uppercase md:text-2xl">
                     {slide.title}
@@ -173,22 +186,16 @@ function SlideCard({ slide }: { slide: Slide }) {
                     </ul>
                 </div>
 
-                {/* CTA */}
+                {/* CTA jako Link – zatrzymujemy propagację, żeby nie odpalić onClick karty */}
                 {slide.ctaHref ? (
-                    <a
+                    <Link
                         href={slide.ctaHref}
-                        className="group mx-auto mt-8 inline-flex w-max items-center rounded-full bg-coral px-4 py-2 text-sm font-semibold text-coral-foreground shadow-md ring-1 ring-black/10 transition hover:opacity-95 focus-visible:ring-2 focus-visible:ring-coral focus-visible:outline-none"
+                        onClick={(e) => e.stopPropagation()}
+                        className="group mx-auto mt-8 inline-flex w-max items-center rounded-full bg-coral px-4 py-2 text-sm font-semibold text-white shadow-md ring-1 ring-black/10 transition hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral"
                     >
                         <CtaContent />
-                    </a>
-                ) : (
-                    <button
-                        type="button"
-                        className="group mx-auto mt-8 inline-flex w-max items-center rounded-full bg-coral px-6 py-3 text-sm font-semibold text-coral-foreground shadow-md ring-1 ring-black/10 transition hover:opacity-95 focus-visible:ring-2 focus-visible:ring-coral focus-visible:outline-none"
-                    >
-                        <CtaContent />
-                    </button>
-                )}
+                    </Link>
+                ) : null}
             </div>
         </article>
     )
@@ -200,13 +207,9 @@ function Li({
                 icon: Icon,
                 className = '',
                 children,
-            }: React.PropsWithChildren<{
-    icon: (p: { className?: string }) => JSX.Element
-    className?: string
-}>) {
+            }: React.PropsWithChildren<{ icon: (p: { className?: string }) => JSX.Element; className?: string }>) {
     return (
         <li className={`flex items-center gap-3 rounded-lg px-3 py-2 ${className}`}>
-            {/* ikona w pastelowym kolorze */}
             <Icon className="h-5 w-5 text-blush" />
             <span className="text-[15px] font-medium text-foreground">{children}</span>
         </li>
@@ -216,10 +219,9 @@ function Li({
 function CtaContent() {
     return (
         <>
-            <span className="font-extrabold tracking-wide text-white">SPRAWDŹ</span>
-            {/* okrągły badge na prawo */}
+            <span className="font-extrabold tracking-wide text-white text-xl">SPRAWDŹ</span>
             <span className="ml-3 grid h-9 w-9 place-items-center rounded-full bg-black/10 ring-1 ring-black/10 transition-transform group-hover:translate-x-0.5">
-        <ChevronsRight className="h-4 w-4 text-white" />
+        <ChevronsRight className="h-7 w-7 text-white" />
       </span>
         </>
     )
