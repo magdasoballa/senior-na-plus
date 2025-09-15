@@ -1,13 +1,13 @@
 <?php
 
 use App\Http\Controllers\ContactMessageController;
+use App\Http\Controllers\QuickApplicationController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
-// routes/web.php
 Route::get('/offers/{id}', function (string $id) {
     // TODO: pobierz z bazy, a na start stub:
     $offer = [
@@ -43,6 +43,11 @@ Route::get('/offers/{id}', function (string $id) {
 
 Route::post('/kontakt', [ContactMessageController::class, 'store'])
     ->name('contact.store');
+
+Route::post('/szybka-aplikacja', [QuickApplicationController::class, 'store'])
+    ->name('quick.apply.store');
+
+
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
