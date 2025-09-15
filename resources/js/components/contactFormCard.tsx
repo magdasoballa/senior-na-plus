@@ -1,5 +1,6 @@
 import * as React from 'react'
-import { ChevronsRight } from 'lucide-react'
+import { AtSign, ChevronsRight, Phone } from 'lucide-react';
+import MapCard from '@/components/mapCard';
 
 type FormData = {
     name: string
@@ -111,6 +112,48 @@ export default function ContactFormCard() {
                     </button>
                 </div>
             </form>
+            <div className='mt-20'>
+
+                {/* kafelki kontaktowe */}
+                <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    {/* E-MAIL */}
+                    <a
+                        // href={`mailto:${email}`}
+                        className="
+      group block rounded-[28px] bg-sea text-white
+      ring-1 ring-black/10 shadow-sm p-6 md:p-8 text-center
+      transition hover:brightness-105 focus-visible:outline-none
+      focus-visible:ring-2 focus-visible:ring-white/70
+    "
+                    >
+                        <AtSign className="mx-auto h-12 w-12 opacity-95" aria-hidden />
+                        <div className="mt-3 font-semibold tracking-wide text-xl">E-MAIL</div>
+                        <div className="mt-2 underline underline-offset-4 group-hover:opacity-90">
+                            kontakt@seniornaplus.pl
+                        </div>
+                    </a>
+
+                    {/* TELEFON */}
+                    <a
+                        // href={`tel:${phone.replace(/\s+/g, "")}`}
+                        className="
+      group block rounded-[28px] bg-sea text-white
+      ring-1 ring-black/10 shadow-sm p-6 md:p-8 text-center
+      transition hover:brightness-105 focus-visible:outline-none
+      focus-visible:ring-2 focus-visible:ring-white/70
+    "
+                    >
+                        <Phone className="mx-auto h-12 w-12 opacity-95" aria-hidden />
+                        <div className="mt-3 font-semibold tracking-wide text-xl">TELEFON</div>
+                        <div className="mt-2 underline underline-offset-4 group-hover:opacity-90">
+                            32 440 15 54
+                        </div>
+                    </a>
+                </div>
+
+<div className='mt-20'>
+                <MapCard address="Senior na Plus, Gliwice" /></div>
+            </div>
         </section>
     )
 }

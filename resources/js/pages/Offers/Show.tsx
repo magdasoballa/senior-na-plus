@@ -1,6 +1,7 @@
 import * as React from "react";
 import { ChevronsRight } from "lucide-react";
 import { Link } from "@inertiajs/react";
+import AppLayout from '@/layouts/app-layout';
 
 export type Offer = {
     id: string;
@@ -13,6 +14,7 @@ export type Offer = {
 
 export default function OfferDetails({ offer }: { offer: Offer }) {
     return (
+        <AppLayout>
         <section className="mx-auto w-full max-w-2xl px-3">
             <article className="rounded-[2.5rem] border bg-card p-6 md:p-8 shadow-2xl shadow-black/25">
                 {/* tytuł oferty (opcjonalnie) */}
@@ -50,6 +52,7 @@ export default function OfferDetails({ offer }: { offer: Offer }) {
                 </div>
             </article>
         </section>
+        </AppLayout>
     );
 }
 

@@ -14,7 +14,7 @@ export default function MapCard(props: Props) {
     const src = `https://www.google.com/maps?hl=pl&q=${q}&z=${zoom}&output=embed`;
 
     return (
-        <div className=" mx-auto w-full max-w-lg px-2">
+        <div className=" mx-auto w-full max-w-3xl px-2">
             <div className="rounded-[5px] border bg-card  shadow-[8px_8px_0_rgba(0,0,0,0.5)]">
                 <div className="overflow-hidden rounded-[1rem]">
                     <iframe

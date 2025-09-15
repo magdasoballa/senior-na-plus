@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Facebook, Instagram, Linkedin } from "lucide-react";
-import AppLogoIcon from '@/components/app-logo-icon';
+import AppLogoIcon from "@/components/app-logo-icon";
 
 type Props = {
     brand?: string;
@@ -21,17 +21,54 @@ export default function FooterCard({
                                        instagramUrl = "#",
                                        linkedinUrl = "#",
                                    }: Props) {
+    const footerRef = React.useRef<HTMLElement>(null);
+
+    // Doklejenie do dołu tylko, gdy strona jest krótsza niż viewport
+    React.useEffect(() => {
+        const applyStickyGap = () => {
+            // ile brakuje do wysokości okna
+            const viewport = window.innerHeight;
+            const doc = document.documentElement;
+            const page = doc.scrollHeight; // pełna wysokość strony (treść + footer)
+            const footer = footerRef.current;
+
+            if (!footer) return;
+
+            // tymczasowo wyzeruj, żeby policzyć "czystą" wysokość strony
+            footer.style.marginTop = "0px";
+
+            // przelicz po wyzerowaniu
+            const pageWithoutMargin = document.documentElement.scrollHeight;
+            const gap = viewport - pageWithoutMargin;
+
+            footer.style.marginTop = gap > 0 ? `${gap}px` : "0px";
+        };
+
+        // pierwsze wywołanie + na resize/orientchange
+        applyStickyGap();
+        window.addEventListener("resize", applyStickyGap);
+        window.addEventListener("orientationchange", applyStickyGap);
+
+        // reaguj na zmiany treści (np. obrazki, lazy-load) bez ruszania layoutu wyżej
+        const ro = new ResizeObserver(applyStickyGap);
+        ro.observe(document.body);
+
+        return () => {
+            window.removeEventListener("resize", applyStickyGap);
+            window.removeEventListener("orientationchange", applyStickyGap);
+            ro.disconnect();
+            if (footerRef.current) footerRef.current.style.marginTop = "0px";
+        };
+    }, []);
+
     return (
         <footer
+            ref={footerRef}
             role="contentinfo"
-            className="
-        relative left-1/2 right-1/2 -mx-[50vw] w-screen
-        bg-blush text-foreground
-      "
+            className="w-[vw] bg-blush border-t border-black/10"
         >
-            {/* wewnętrzny kontener na treść */}
             <div className="mx-auto max-w-3xl p-6 md:p-8 text-center">
-              <AppLogoIcon  height='100px' className=' mx-auto'/>
+                <AppLogoIcon height="100px" className="mx-auto" />
 
                 <div className="mt-3 space-y-1 text-[17px]">
                     {addressLines.map((line, i) => (
