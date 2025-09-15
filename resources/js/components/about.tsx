@@ -21,8 +21,8 @@ const offers = [
 
 const team: TeamMember[] = [
     { name: "Ewa Grędzińska", title: "Specjalista ds. rekrutacji", photo: "/images/pracownik.jpg" },
-    { name: "Agata Zabulksa", title: "Specjalista ds. rekrutacji", photo: "/images/pracownik.jpg" },
-    { name: "Dorota Szuleck", title: "Specjalista ds. rekrutacji", photo: "/images/pracownik.jpg" },
+    { name: "Agata Zabulska", title: "Specjalista ds. rekrutacji", photo: "/images/pracownik.jpg" },
+    { name: "Dorota Szulcek", title: "Specjalista ds. rekrutacji", photo: "/images/pracownik.jpg" },
     { name: "Agnieszka Thim", title: "Specjalista ds. rekrutacji", photo: "/images/pracownik.jpg" },
 ];
 

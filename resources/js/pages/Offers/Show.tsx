@@ -15,7 +15,7 @@ export type Offer = {
 export default function OfferDetails({ offer }: { offer: Offer }) {
     return (
         <AppLayout>
-        <section className="mx-auto w-full max-w-2xl px-3">
+        <section className="mx-auto w-full max-w-2xl px-3 mb-5">
             <article className="rounded-[2.5rem] border bg-card p-6 md:p-8 shadow-2xl shadow-black/25">
                 {/* tytuł oferty (opcjonalnie) */}
                 <h1 className="text-center text-xl md:text-2xl font-extrabold text-foreground">

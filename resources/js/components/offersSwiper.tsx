@@ -87,7 +87,7 @@ export default function OffersSwiper({ slides = defaultSlides }: { slides?: Slid
     }, [])
 
     return (
-        <section className="max-w-4xl  select-none ">
+        <section className="  select-none ">
             {/* nagłówek */}
             <header className="mb-6 text-center">
                 <h2 className="text-3xl leading-tight font-semibold tracking-tight md:text-4xl">Oferty pracy</h2>

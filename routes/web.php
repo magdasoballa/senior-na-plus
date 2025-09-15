@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ContactMessageController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -38,6 +39,11 @@ Route::get('/offers/{id}', function (string $id) {
 
     return Inertia::render('Offers/Show', ['offer' => $offer]);
 })->name('offers.show');
+
+
+Route::post('/kontakt', [ContactMessageController::class, 'store'])
+    ->name('contact.store');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');

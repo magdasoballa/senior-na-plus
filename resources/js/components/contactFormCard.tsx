@@ -1,6 +1,7 @@
 import * as React from 'react'
-import { AtSign, ChevronsRight, Phone } from 'lucide-react';
-import MapCard from '@/components/mapCard';
+import { AtSign, ChevronsRight, Phone } from 'lucide-react'
+import { useForm, usePage } from '@inertiajs/react'
+import MapCard from '@/components/mapCard'
 
 type FormData = {
     name: string
@@ -13,7 +14,9 @@ type FormData = {
 }
 
 export default function ContactFormCard() {
-    const [data, setData] = React.useState<FormData>({
+    const { flash } = usePage<{ flash?: { success?: string } }>().props as any
+
+    const { data, setData, post, processing, errors, reset } = useForm<FormData>({
         name: '',
         email: '',
         phone: '',
@@ -23,15 +26,17 @@ export default function ContactFormCard() {
         consent3: false,
     })
 
-    const set = (patch: Partial<FormData>) => setData((d) => ({ ...d, ...patch }))
+    const acceptAll = () => setData(prev => ({ ...prev, consent1: true, consent2: true, consent3: true }))
 
     const onSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        // TODO: wyślij dane – fetch/axios/Inertia
-        console.log('form submit', data)
+        post('/kontakt', {
+            preserveScroll: true,
+            onSuccess: () => {
+                reset()
+            },
+        })
     }
-
-    const acceptAll = () => set({ consent1: true, consent2: true, consent3: true })
 
     return (
         <section className="mx-auto w-full max-w-lg px-2">
@@ -43,32 +48,42 @@ export default function ContactFormCard() {
                     Formularz <span className="text-foreground">kontaktowy</span>
                 </h2>
 
+                {/* komunikat sukcesu */}
+                {flash?.success && (
+                    <p className="mt-4 rounded-md bg-emerald-50 text-emerald-700 px-3 py-2 text-sm">
+                        {flash.success}
+                    </p>
+                )}
+
                 {/* Pola */}
                 <div className="mt-6 space-y-6">
                     <FieldUnderline
                         placeholder="imię i nazwisko"
                         value={data.name}
-                        onChange={(v) => set({ name: v })}
+                        onChange={(v) => setData('name', v)}
                         type="text"
+                        error={errors.name}
                     />
                     <FieldUnderline
                         placeholder="e-mail"
                         value={data.email}
-                        onChange={(v) => set({ email: v })}
+                        onChange={(v) => setData('email', v)}
                         type="email"
+                        error={errors.email}
                     />
                     <FieldUnderline
                         placeholder="numer kontaktowy"
                         value={data.phone}
-                        onChange={(v) => set({ phone: v })}
+                        onChange={(v) => setData('phone', v)}
                         type="tel"
+                        error={errors.phone}
                     />
                     <FieldUnderline
                         placeholder="wpisz treść wiadomości"
-
                         value={data.message}
-                        onChange={(v) => set({ message: v })}
-                        // textarea
+                        onChange={(v) => setData('message', v)}
+                        textarea
+                        error={errors.message}
                     />
                 </div>
 
@@ -76,18 +91,21 @@ export default function ContactFormCard() {
                 <div className="mt-4 space-y-2">
                     <ConsentRow
                         checked={data.consent1}
-                        onChange={(v) => set({ consent1: v })}
+                        onChange={(v) => setData('consent1', v)}
                         label="Wyrażam zgodę na przetwarzanie moich danych..."
+                        error={errors.consent1}
                     />
                     <ConsentRow
                         checked={data.consent2}
-                        onChange={(v) => set({ consent2: v })}
+                        onChange={(v) => setData('consent2', v)}
                         label="Wyrażam zgodę na przetwarzanie moich danych..."
+                        error={errors.consent2}
                     />
                     <ConsentRow
                         checked={data.consent3}
-                        onChange={(v) => set({ consent3: v })}
+                        onChange={(v) => setData('consent3', v)}
                         label="Wyrażam zgodę na przetwarzanie moich danych..."
+                        error={errors.consent3}
                     />
 
                     <button
@@ -103,28 +121,24 @@ export default function ContactFormCard() {
                 <div className="mt-6 flex justify-center">
                     <button
                         type="submit"
-                        className="group inline-flex items-center rounded-full bg-coral px-4 py-2  font-extrabold text-white shadow-md ring-1 ring-black/10 transition hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral text-xl"
+                        disabled={processing}
+                        className="group inline-flex items-center rounded-full bg-coral px-4 py-2 font-extrabold text-white shadow-md ring-1 ring-black/10 transition hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral text-xl disabled:opacity-60"
                     >
-                        WYŚLIJ
+                        {processing ? 'Wysyłanie…' : 'WYŚLIJ'}
                         <span className="ml-3 grid h-9 w-9 place-items-center rounded-full bg-black/10 ring-1 ring-black/10 transition-transform group-hover:translate-x-0.5">
               <ChevronsRight className="h-7 w-7" />
             </span>
                     </button>
                 </div>
             </form>
-            <div className='mt-20'>
 
+            <div className="mt-20">
                 {/* kafelki kontaktowe */}
                 <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
                     {/* E-MAIL */}
                     <a
-                        // href={`mailto:${email}`}
-                        className="
-      group block rounded-[28px] bg-sea text-white
-      ring-1 ring-black/10 shadow-sm p-6 md:p-8 text-center
-      transition hover:brightness-105 focus-visible:outline-none
-      focus-visible:ring-2 focus-visible:ring-white/70
-    "
+                        href="mailto:kontakt@seniornaplus.pl"
+                        className="group block rounded-[28px] bg-sea text-white ring-1 ring-black/10 shadow-sm p-6 md:p-8 text-center transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                     >
                         <AtSign className="mx-auto h-12 w-12 opacity-95" aria-hidden />
                         <div className="mt-3 font-semibold tracking-wide text-xl">E-MAIL</div>
@@ -135,13 +149,8 @@ export default function ContactFormCard() {
 
                     {/* TELEFON */}
                     <a
-                        // href={`tel:${phone.replace(/\s+/g, "")}`}
-                        className="
-      group block rounded-[28px] bg-sea text-white
-      ring-1 ring-black/10 shadow-sm p-6 md:p-8 text-center
-      transition hover:brightness-105 focus-visible:outline-none
-      focus-visible:ring-2 focus-visible:ring-white/70
-    "
+                        href="tel:324401554"
+                        className="group block rounded-[28px] bg-sea text-white ring-1 ring-black/10 shadow-sm p-6 md:p-8 text-center transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                     >
                         <Phone className="mx-auto h-12 w-12 opacity-95" aria-hidden />
                         <div className="mt-3 font-semibold tracking-wide text-xl">TELEFON</div>
@@ -151,8 +160,9 @@ export default function ContactFormCard() {
                     </a>
                 </div>
 
-<div className='mt-20'>
-                <MapCard address="Senior na Plus, Gliwice" /></div>
+                <div className="mt-20">
+                    <MapCard address="Senior na Plus, Gliwice" />
+                </div>
             </div>
         </section>
     )
@@ -166,7 +176,8 @@ function FieldUnderline({
                             onChange,
                             type = 'text',
                             textarea = false,
-    placeholder
+                            placeholder,
+                            error,
                         }: {
     label?: string
     value: string
@@ -174,7 +185,11 @@ function FieldUnderline({
     type?: React.HTMLInputTypeAttribute
     textarea?: boolean
     placeholder?: string
+    error?: string
 }) {
+    const base =
+        'mt-1 block w-full bg-transparent pb-2 outline-none border-0 border-b-2 focus:border-coral'
+    const border = error ? 'border-red-500' : 'border-foreground/70'
     return (
         <label className="block">
             <span className="text-[15px] text-muted-foreground">{label}</span>
@@ -183,7 +198,8 @@ function FieldUnderline({
                     rows={4}
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
-                    className="mt-1 block w-full resize-y bg-transparent pb-2 outline-none border-0 border-b-2 border-foreground/70 focus:border-coral"
+                    placeholder={placeholder}
+                    className={`${base} ${border}`}
                 />
             ) : (
                 <input
@@ -191,9 +207,10 @@ function FieldUnderline({
                     placeholder={placeholder}
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
-                    className="mt-1 block w-full bg-transparent pb-2 outline-none border-0 border-b-2 border-foreground/70 focus:border-coral"
+                    className={`${base} ${border}`}
                 />
             )}
+            {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
         </label>
     )
 }
@@ -202,41 +219,45 @@ function ConsentRow({
                         checked,
                         onChange,
                         label,
+                        error,
                     }: {
     checked: boolean
     onChange: (v: boolean) => void
     label: string
+    error?: string
 }) {
     const [open, setOpen] = React.useState(false)
 
     return (
-        <div className="flex items-start gap-2 text-sm">
-            <input
-                type="checkbox"
-                checked={checked}
-                onChange={(e) => onChange(e.target.checked)}
-                className="mt-1 h-4 w-4 rounded-full border-2 border-blush"
-                style={{ accentColor: 'var(--coral)' }}
-                aria-label={label}
-            />
+        <div className="text-sm">
+            {/* klik w label (w tym tekst) zaznacza checkbox, bo input jest w środku */}
+            <label className="flex items-start gap-2 cursor-pointer select-none">
+                <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={(e) => onChange(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded-full border-2 border-blush"
+                    style={{ accentColor: 'var(--coral)' }}
+                />
+                <span className="text-foreground/80">{label}</span>
+            </label>
 
-            <div className="flex-1">
-                <span className="text-foreground/80">{label}</span>{' '}
-                <button
-                    type="button"
-                    onClick={() => setOpen((v) => !v)}
-                    className="text-coral text-sm font-semibold hover:underline"
-                >
-                    {open ? 'zwiń' : 'rozwiń'}
-                </button>
+            {/* przycisk poza <label>, więc nie zmienia checkboxa */}
+            <button
+                type="button"
+                onClick={() => setOpen((v) => !v)}
+                className="ml-6 text-coral text-sm font-semibold hover:underline"
+            >
+                {open ? 'zwiń' : 'rozwiń'}
+            </button>
 
-                {open && (
-                    <p className="mt-1 text-xs text-muted-foreground">
-                        Tu wstaw treść zgody/klauzuli informacyjnej RODO. Możesz zalinkować do pełnej polityki
-                        prywatności lub pokazać dłuższy opis.
-                    </p>
-                )}
-            </div>
+            {open && (
+                <p className="mt-1 ml-6 text-xs text-muted-foreground">
+                   tresc zgody
+                </p>
+            )}
+
+            {error && <p className="mt-1 ml-6 text-xs text-red-600">{error}</p>}
         </div>
     )
 }

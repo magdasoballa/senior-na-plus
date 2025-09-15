@@ -8,12 +8,23 @@ import FooterCard from '@/components/footer';
 export default function Welcome() {
     return (
         <AppLayout>
-            <div className="flex min-h-screen flex-col items-center  p-6 text-[#1b1b18] lg:justify-center lg:p-8 dark:bg-[#0a0a0a] bg-[#FDFDFC]">
+            <div className="flex min-h-screen flex-col items-center p-6 text-[#1b1b18] lg:justify-center lg:p-8 dark:bg-[#0a0a0a] bg-[#FDFDFC]">
                 <FirstBanner />
-                <OffersSwiper />
-                <AboutSection />
-                <ContactFormCard />
+
+                <section id="oferty" className="w-full scroll-mt-4">
+                    <OffersSwiper />
+                </section>
+
+                <section id="o-nas" className="w-full ">
+                    <AboutSection />
+                </section>
+
+                <section id="kontakt" className="w-full scroll-mt-4">
+                    <ContactFormCard />
+                </section>
+
             </div>
+
         </AppLayout>
     );
 }
