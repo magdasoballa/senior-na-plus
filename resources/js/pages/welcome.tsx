@@ -4,15 +4,18 @@ import OffersSwiper from '@/components/offersSwiper';
 import AboutSection from '@/components/about';
 import ContactFormCard from '@/components/contactFormCard';
 import FooterCard from '@/components/footer';
+import { usePage } from '@inertiajs/react';
 
 export default function Welcome() {
+    const { offers } = usePage().props as { offers: any[] };
+
     return (
         <AppLayout>
             <div className="flex min-h-screen flex-col items-center p-6 text-[#1b1b18] lg:justify-center lg:p-8 dark:bg-[#0a0a0a] bg-[#FDFDFC]">
                 <FirstBanner />
 
                 <section id="oferty" className="w-full scroll-mt-4">
-                    <OffersSwiper />
+                    <OffersSwiper  offers={offers ?? []} />
                 </section>
 
                 <section id="o-nas" className="w-full ">

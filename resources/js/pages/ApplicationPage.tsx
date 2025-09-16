@@ -396,7 +396,7 @@ function InputFloat({
                 maxLength={maxLength}
                 className={`peer h-12 w-full rounded-full bg-white px-5 pt-4 pb-1
                     focus:outline-none focus:ring-2 focus:ring-mint
-                    ring-1 ring-black/10
+
                     ${rightSlot ? "pr-12" : ""}`}
             />
 

@@ -14,7 +14,7 @@ import ONasBanner from "@/components/onas-banner";
 /* ---------- typy ---------- */
 
 export type Offer = {
-    id: string;
+    id: string|number;
     title: string;
     description: string;
     duties: string[];
@@ -22,13 +22,13 @@ export type Offer = {
     benefits: string[];
     country?: string;
     city?: string;
-    postalCode?: string;
-    startDate?: string;
+    postal_code?: string;
+    start_date?: string;
     duration?: string;
     language?: string;
     wage?: string;
     bonus?: string;
-    heroImage?: string;
+    hero_image?: string|null;
 };
 
 type QuickApplyModalProps = {
@@ -97,12 +97,13 @@ export default function OfferDetails({ offer }: { offer: Offer }) {
         benefits,
         country = "Niemcy",
         city = "Berlin",
-        postalCode = "654833 Berlin",
-        startDate = "15.03.2025",
+        postal_code = "654833 Berlin",
+        start_date = "15.03.2025",
         duration = "2 tygodnie",
         language = "niemiecki dobry",
         wage = "2000€",
         bonus = "100€",
+        hero_image = null,
     } = offer;
 
     const [quickOpen, setQuickOpen] = React.useState(false);
@@ -134,10 +135,10 @@ export default function OfferDetails({ offer }: { offer: Offer }) {
                         <div className="space-y-2">
                             <InfoRow icon={<MapPin className="h-5 w-5" />} text={country} />
                             <InfoRow icon={<MapPin className="h-5 w-5" />} text={city} />
-                            <InfoRow icon={<MapPin className="h-5 w-5" />} text={postalCode} />
+                            <InfoRow icon={<MapPin className="h-5 w-5" />} text={postal_code} />
                         </div>
                         <div className="space-y-2">
-                            <InfoRow icon={<CalendarDays className="h-5 w-5" />} text={startDate} />
+                            <InfoRow icon={<CalendarDays className="h-5 w-5" />} text={start_date} />
                             <InfoRow icon={<CalendarClock className="h-5 w-5" />} text={duration} />
                             <InfoRow icon={<MessageCircle className="h-5 w-5" />} text={language} />
                         </div>
@@ -147,10 +148,10 @@ export default function OfferDetails({ offer }: { offer: Offer }) {
                     <div className="mt-6 rounded-[28px] bg-blush px-6 py-5 flex items-center justify-between overflow-hidden">
                         <div className="flex flex-col justify-center items-center">
                             <div className="text-sm tracking-wider text-foreground/70">STAWKA:</div>
-                            <div className="text-3xl font-extrabold">{wage}</div>
+                            <div className="text-3xl font-extrabold">{wage}€</div>
 
                             <div className="mt-3 text-sm tracking-wider text-foreground/70">PREMIA:</div>
-                            <div className="text-2xl font-extrabold">{bonus}</div>
+                            <div className="text-2xl font-extrabold">{bonus}€</div>
                         </div>
 
                         <ONasBanner className="max-h-[150px]" width="300px" />
@@ -555,7 +556,7 @@ function QuickApplyModal({ open, onClose, offer }: QuickApplyModalProps) {
         >
             <form
                 onSubmit={submit}
-                className="mt-8 sm:mt-16 w-[92%] max-w-md rounded-[2rem] bg-white p-6 sm:p-8 shadow-2xl shadow-black/30 relative"
+                className="mt-8 sm:mt-16 w-[92%] max-w-md rounded-[2rem] p-6 sm:p-8  relative"
             >
                 <button
                     type="button"
@@ -642,7 +643,7 @@ function QuickApplyModal({ open, onClose, offer }: QuickApplyModalProps) {
 
 function InfoRow({ icon, text }: { icon: React.ReactNode; text: React.ReactNode }) {
     return (
-        <div className="flex items-center gap-3 rounded-xl bg-white/50 px-3 py-2">
+        <div className="flex items-center gap-3 rounded-xl  px-3 py-2">
             <span className="text-coral">{icon}</span>
             <span className="text-[17px] text-foreground">{text}</span>
         </div>
@@ -651,7 +652,7 @@ function InfoRow({ icon, text }: { icon: React.ReactNode; text: React.ReactNode 
 
 function Section({ heading, children }: React.PropsWithChildren<{ heading: string }>) {
     return (
-        <section className="mt-6 p-6 bg-white rounded-lg shadow-sm border">
+        <section className="mt-6 p-6  rounded-lg ">
             <h2 className="text-center text-foreground font-extrabold tracking-wide uppercase mb-4">
                 {heading}
             </h2>
