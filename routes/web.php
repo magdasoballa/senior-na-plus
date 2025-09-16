@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\OfferController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ContactMessageController;
 use App\Http\Controllers\QuickApplicationController;
@@ -59,6 +60,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::put('/applications/{id}/status', [ApplicationController::class, 'updateStatus'])->name('admin.applications.status');
     Route::delete('/applications/{id}', [ApplicationController::class, 'destroy'])->name('admin.applications.destroy');
     Route::get('/applications/{id}/download-references', [ApplicationController::class, 'downloadReferences'])->name('admin.applications.download');
+});
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('offers', OfferController::class)->except(['show']);
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

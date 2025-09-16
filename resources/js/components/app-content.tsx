@@ -12,13 +12,11 @@ export function AppContent({ variant = 'header', children, ...props }: AppConten
     }
 
     return (
-        <div>
-        <main className="mx-auto flex h-full w-full max-w-7xl flex-1 flex-col gap-4 rounded-xl " {...props}>
-            {children}
-
-        </main>
-    <FooterCard />
+        <div className="flex flex-col min-h-screen">
+            <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-4 rounded-xl" {...props}>
+                {children}
+            </main>
+            <FooterCard className="mt-auto" />
         </div>
-
-);
+    );
 }

@@ -65,7 +65,6 @@ export default function ApplicationPage() {
 
         if (firstInvalid) {
             firstInvalid.focus(); // pokaże ramkę/fokus
-            // @ts-ignore – nie wszystkie mają typowo zdefiniowane reportValidity, ale w przeglądarce jest
             firstInvalid.reportValidity?.();
             return; // przerwij wysyłkę
         }
@@ -85,7 +84,7 @@ export default function ApplicationPage() {
 
     return (
         <AppLayout>
-            <div className="mx-auto max-w-2xl bg-[#F5F5F4] px-4 pt-4 pb-12">
+            <div className="mx-auto max-w-2xl bg-[#F5F5F4] px-4 pt-4 pb-12 ">
                 {/* powrót */}
                 <Link href="/" className="inline-flex items-center text-sm text-foreground/60 hover:text-foreground">
                     <ArrowLeft className="mr-2 h-4 w-4" />
@@ -289,7 +288,9 @@ export default function ApplicationPage() {
                     </Section>
 
                     {/* ZGODY */}
-                    <Section title="ZAAKCEPTUJ ZGODY">
+                    <Section >
+                        <h3 className="font-semibold mb-3">ZAAKCEPTUJ ZGODY</h3>
+
                         <div className="space-y-3">
                             <ConsentRow
                                 checked={data.consent1}
@@ -321,7 +322,7 @@ export default function ApplicationPage() {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="group inline-flex items-center justify-center rounded-full bg-coral px-8 py-3 font-extrabold text-white shadow-md ring-1 ring-black/10 transition hover:opacity-95 disabled:opacity-60"
+                            className="group inline-flex items-center justify-center rounded-full bg-coral px-6 py-2 font-extrabold text-white shadow-md ring-1 ring-black/10 transition hover:opacity-95 disabled:opacity-60"
                         >
                             {processing ? 'Wysyłanie...' : 'WYŚLIJ'}
                             <span className="ml-3 grid h-9 w-9 place-items-center rounded-full bg-white/15 ring-1 ring-black/10 transition-transform group-hover:translate-x-0.5">
@@ -337,7 +338,7 @@ export default function ApplicationPage() {
 
 /* ---------- subkomponenty / UI ---------- */
 
-function Section({ title, children }: React.PropsWithChildren<{ title: string }>) {
+function Section({ title, children }: React.PropsWithChildren<{ title?: string }>) {
     return (
         <section className="rounded-[1rem] p-4">
             <h2 className="mb-4 text-center text-xl font-extrabold tracking-wide text-coral">{title}</h2>
@@ -346,7 +347,7 @@ function Section({ title, children }: React.PropsWithChildren<{ title: string }>
     );
 }
 
-function Field({ children }: React.PropsWithChildren<{ label: string }>) {
+function Field({ children }: React.PropsWithChildren<{ label?: string }>) {
     return <div>{children}</div>;
 }
 

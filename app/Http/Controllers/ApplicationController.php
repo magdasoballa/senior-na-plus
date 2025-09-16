@@ -10,168 +10,134 @@ use Inertia\Inertia;
 
 class ApplicationController extends Controller
 {
-    /**
-     * Wyświetl formularz aplikacyjny
-     */
-    public function create($offerId)
+    /** Public: formularz aplikacyjny dla oferty */
+    public function create(Offer $offer)
     {
-        $offer = Offer::findOrFail($offerId);
-
+        // Do frontu zwykle wystarczy id + title
         return Inertia::render('ApplicationPage', [
-            'offer' => $offer
+            'offer' => [
+                'id' => $offer->id,
+                'title' => $offer->title,
+            ],
         ]);
     }
 
-    /**
-     * Zapisz aplikację
-     */
+    /** Public: zapis pełnej aplikacji */
     public function store(Request $request)
     {
-        // Walidacja danych
         $validated = $request->validate([
-            // Podstawowe informacje
-            'name' => 'required|string|max:255',
+            // podstawowe
+            'name'  => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'phone' => 'required|string|max:20',
             'language_level' => 'required|string|max:50',
 
-            // Dodatkowe informacje
+            // dodatkowe
             'additional_language' => 'nullable|string|max:100',
-            'learned_profession' => 'nullable|string|max:255',
-            'current_profession' => 'nullable|string|max:255',
+            'learned_profession'  => 'nullable|string|max:255',
+            'current_profession'  => 'nullable|string|max:255',
 
-            // Doświadczenie zawodowe
+            // doświadczenie
             'experience' => 'required|string|in:brak,od 1 roku,od 1 do 3 lat,powyżej 3 lat',
-            'first_aid_course' => 'boolean',
-            'medical_caregiver_course' => 'boolean',
-            'care_experience' => 'boolean',
-            'housekeeping_experience' => 'boolean',
-            'cooking_experience' => 'boolean',
-            'driving_license' => 'boolean',
-            'smoker' => 'boolean',
 
-            // Oczekiwania finansowe
-            'salary_expectations' => 'nullable|string|max:50',
-
-            // Referencje (plik)
+            // plik
             'references' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',
 
-            // Zgody
+            // zgody
             'consent1' => 'required|accepted',
             'consent2' => 'required|accepted',
             'consent3' => 'required|accepted',
 
-            // ID oferty
+            // oferta
             'offer_id' => 'required|exists:offers,id',
-            'offer_title' => 'required|string|max:255',
+            // UWAGA: nie przyjmujemy offer_title z frontu
         ]);
 
-        // Przygotuj dane do zapisania
-        $applicationData = [
-            'name' => $validated['name'],
+        $offer = Offer::findOrFail($validated['offer_id']);
+
+        $application = new Application();
+        $application->fill([
+            'name'  => $validated['name'],
             'email' => $validated['email'],
             'phone' => $validated['phone'],
-            'language_level' => $validated['language_level'],
-            'additional_language' => $validated['additional_language'],
-            'learned_profession' => $validated['learned_profession'],
-            'current_profession' => $validated['current_profession'],
-            'experience' => $validated['experience'],
-            'first_aid_course' => $validated['first_aid_course'] ?? false,
-            'medical_caregiver_course' => $validated['medical_caregiver_course'] ?? false,
-            'care_experience' => $validated['care_experience'] ?? false,
-            'housekeeping_experience' => $validated['housekeeping_experience'] ?? false,
-            'cooking_experience' => $validated['cooking_experience'] ?? false,
-            'driving_license' => $validated['driving_license'] ?? false,
-            'smoker' => $validated['smoker'] ?? false,
-            'salary_expectations' => $validated['salary_expectations'],
-            'offer_id' => $validated['offer_id'],
-            'offer_title' => $validated['offer_title'],
-            'consent1' => $validated['consent1'],
-            'consent2' => $validated['consent2'],
-            'consent3' => $validated['consent3'],
-        ];
+            'language_level'      => $validated['language_level'],
+            'additional_language' => $validated['additional_language'] ?? null,
+            'learned_profession'  => $validated['learned_profession'] ?? null,
+            'current_profession'  => $validated['current_profession'] ?? null,
+            'experience'          => $validated['experience'],
+            'first_aid_course'        => $request->boolean('first_aid_course'),
+            'medical_caregiver_course'=> $request->boolean('medical_caregiver_course'),
+            'care_experience'         => $request->boolean('care_experience'),
+            'housekeeping_experience' => $request->boolean('housekeeping_experience'),
+            'cooking_experience'      => $request->boolean('cooking_experience'),
+            'driving_license'         => $request->boolean('driving_license'),
+            'smoker'                  => $request->boolean('smoker'),
+            'salary_expectations' => $request->input('salary_expectations'),
+            'offer_id'   => $offer->id,
+            'offer_title'=> $offer->title,  // ← z bazy, nie z requestu
+            'consent1'   => $request->boolean('consent1'),
+            'consent2'   => $request->boolean('consent2'),
+            'consent3'   => $request->boolean('consent3'),
+            'status'     => 'new',
+        ]);
 
-        // Obsługa pliku referencji
-        if ($request->hasFile('references')) {
-            $file = $request->file('references');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $path = $file->storeAs('references', $fileName, 'public');
-            $applicationData['references_path'] = $path;
+        if ($file = $request->file('references')) {
+            // np. references/abc123.pdf
+            $path = $file->store('references', 'public');
+            $application->references_path = $path;
         }
 
-        // Zapisz aplikację
-        $application = Application::create($applicationData);
+        $application->save();
 
-        // Tutaj możesz dodać wysyłkę emaila powiadamiającego
-        // $this->sendNotificationEmail($application);
-
-        return redirect()->back()->with('success', 'Aplikacja została pomyślnie wysłana! Dziękujemy.');
+        return back()->with('success', 'Aplikacja została pomyślnie wysłana! Dziękujemy.');
     }
 
-    /**
-     * Wyświetl listę aplikacji (dla admina)
-     */
+    /** Admin: lista */
     public function index()
     {
         $applications = Application::with('offer')
-            ->orderBy('created_at', 'desc')
-            ->get();
+            ->latest()
+            ->paginate(20) // lepiej niż get()
+            ->withQueryString();
 
-        return Inertia::render('ApplicationPage', [
-            'applications' => $applications
+        return Inertia::render('Admin/Applications/Index', [
+            'applications' => $applications,
         ]);
     }
 
-    /**
-     * Wyświetl pojedynczą aplikację (dla admina)
-     */
-    public function show($id)
+    /** Admin: szczegóły */
+    public function show(Application $application)
     {
-        $application = Application::with('offer')->findOrFail($id);
+        $application->load('offer');
 
-        return Inertia::render('Offers/Show', [
-            'application' => $application
+        return Inertia::render('Admin/Applications/Show', [
+            'application' => $application,
         ]);
     }
 
-    /**
-     * Pobierz plik referencji
-     */
-    public function downloadReferences($id)
+    /** Admin: pobranie referencji */
+    public function downloadReferences(Application $application)
     {
-        $application = Application::findOrFail($id);
-
-        if (!$application->references_path) {
-            abort(404, 'Plik nie istnieje');
-        }
+        abort_if(!$application->references_path, 404, 'Plik nie istnieje');
 
         return Storage::disk('public')->download($application->references_path);
     }
 
-    /**
-     * Zmień status aplikacji (dla admina)
-     */
-    public function updateStatus(Request $request, $id)
+    /** Admin: zmiana statusu */
+    public function updateStatus(Request $request, Application $application)
     {
-        $application = Application::findOrFail($id);
-
         $validated = $request->validate([
             'status' => 'required|in:new,reviewed,accepted,rejected'
         ]);
 
         $application->update(['status' => $validated['status']]);
 
-        return redirect()->back()->with('success', 'Status aplikacji zaktualizowany.');
+        return back()->with('success', 'Status aplikacji zaktualizowany.');
     }
 
-    /**
-     * Usuń aplikację (dla admina)
-     */
-    public function destroy($id)
+    /** Admin: usunięcie */
+    public function destroy(Application $application)
     {
-        $application = Application::findOrFail($id);
-
-        // Usuń plik referencji jeśli istnieje
         if ($application->references_path && Storage::disk('public')->exists($application->references_path)) {
             Storage::disk('public')->delete($application->references_path);
         }
@@ -180,15 +146,5 @@ class ApplicationController extends Controller
 
         return redirect()->route('admin.applications.index')
             ->with('success', 'Aplikacja została usunięta.');
-    }
-
-    /**
-     * Wyślij email powiadamiający (opcjonalne)
-     */
-    private function sendNotificationEmail(Application $application)
-    {
-        // Przykładowa implementacja wysyłki emaila
-        // \Mail::to('rekrutacja@seniornaplus.pl')->send(new NewApplicationMail($application));
-        // \Mail::to($application->email)->send(new ApplicationConfirmationMail($application));
     }
 }
