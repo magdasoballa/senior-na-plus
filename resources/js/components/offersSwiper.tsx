@@ -136,7 +136,7 @@ function SlideCard({
     return (
         <article className="w-full shrink-0 px-2 py-4 md:px-4">
             <div
-                className="relative mx-auto w-[70%] rounded-[7rem] border bg-card p-6 shadow-2xl shadow-black/20 md:p-10 flex flex-col overflow-hidden cursor-pointer"
+                className="relative mx-auto md:w-[70%] rounded-[7rem] border bg-card p-6  md:p-10 flex flex-col overflow-hidden cursor-pointer"
                 onClick={go}
                 role="link"
                 tabIndex={0}

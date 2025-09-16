@@ -68,7 +68,7 @@ export default function FooterCard({
             className="w-[vw] bg-blush border-t border-black/10"
         >
             <div className="mx-auto max-w-3xl p-6 md:p-8 text-center">
-                <AppLogoIcon height="100px" className="mx-auto" />
+                <AppLogoIcon height="100px" className="mx-auto w-[300px]" />
 
                 <div className="mt-3 space-y-1 text-[17px]">
                     {addressLines.map((line, i) => (

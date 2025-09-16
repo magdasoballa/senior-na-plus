@@ -148,10 +148,10 @@ export default function OfferDetails({ offer }: { offer: Offer }) {
                     <div className="mt-6 rounded-[28px] bg-blush px-6 py-5 flex items-center justify-between overflow-hidden">
                         <div className="flex flex-col justify-center items-center">
                             <div className="text-sm tracking-wider text-foreground/70">STAWKA:</div>
-                            <div className="text-3xl font-extrabold">{wage}€</div>
+                            <div className="text-3xl font-extrabold">{wage}</div>
 
                             <div className="mt-3 text-sm tracking-wider text-foreground/70">PREMIA:</div>
-                            <div className="text-2xl font-extrabold">{bonus}€</div>
+                            <div className="text-2xl font-extrabold">{bonus}</div>
                         </div>
 
                         <ONasBanner className="max-h-[150px]" width="300px" />

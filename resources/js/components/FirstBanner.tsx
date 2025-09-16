@@ -77,7 +77,7 @@ const FirstBanner: React.FC = () => {
                 {/* Rząd: tekst + obrazek */}
                 <div className="flex flex-col-reverse items-center gap-8 md:flex-row md:items-end">
                     {/* Tekst (lewa kolumna) */}
-                    <div className="max-w-[30%] self-start">
+                    <div className="md:max-w-[30%] md:self-start">
                         <p className="text-4xl leading-relaxed text-slate-700">
                             <span className="block text-center">Z troską o </span>
                             <span className="block text-center">seniorów -</span>
