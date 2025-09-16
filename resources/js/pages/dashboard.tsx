@@ -1,11 +1,11 @@
 import ContactFormCard from '@/components/contactFormCard';
+import FooterCard from '@/components/footer';
+import MapCard from '@/components/mapCard';
 import OffersSwiper from '@/components/offersSwiper';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
-import MapCard from '@/components/mapCard';
-import FooterCard from '@/components/footer';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -21,7 +21,7 @@ export default function Dashboard() {
             <OffersSwiper />
             <ContactFormCard />
             <MapCard address="Senior na Plus, Gliwice" />
-<FooterCard/>
+            <FooterCard />
         </AppLayout>
     );
 }

@@ -5,8 +5,9 @@ import {
     CalendarDays,
     CalendarClock,
     MessageCircle,
+    ArrowLeft,
 } from "lucide-react";
-import { Link, useForm } from "@inertiajs/react";
+import { Link, useForm, usePage } from "@inertiajs/react";
 import AppLayout from "@/layouts/app-layout";
 import ONasBanner from "@/components/onas-banner";
 
@@ -47,6 +48,44 @@ type QuickFormData = {
     offer_title?: string;
 };
 
+type ApplicationFormData = {
+    // Podstawowe informacje
+    name: string;
+    email: string;
+    phone: string;
+    language_level: string;
+
+    // Dodatkowe informacje
+    additional_language: string;
+    learned_profession: string;
+    current_profession: string;
+
+    // Doświadczenie zawodowe
+    experience: string;
+    first_aid_course: boolean;
+    medical_caregiver_course: boolean;
+    care_experience: boolean;
+    housekeeping_experience: boolean;
+    cooking_experience: boolean;
+    driving_license: boolean;
+    smoker: boolean;
+
+    // Oczekiwania finansowe
+    salary_expectations: string;
+
+    // Referencje (plik)
+    references: File | null;
+
+    // Zgody
+    consent1: boolean;
+    consent2: boolean;
+    consent3: boolean;
+
+    // ID oferty
+    offer_id?: string;
+    offer_title?: string;
+};
+
 /* ---------- strona oferty ---------- */
 
 export default function OfferDetails({ offer }: { offer: Offer }) {
@@ -71,7 +110,7 @@ export default function OfferDetails({ offer }: { offer: Offer }) {
     return (
         <AppLayout>
             <section className="mx-auto w-full max-w-2xl px-3 mb-5 bg-[#FDFDFC]">
-                <article className="rounded-[1rem] bg-card p-6 md:p-8">
+                <article className="rounded-[1rem]  p-6 md:p-8">
                     <a href="/" className="text-center text-xs tracking-widest text-foreground/60">
                         WSTECZ
                     </a>
@@ -137,7 +176,7 @@ export default function OfferDetails({ offer }: { offer: Offer }) {
                     {/* CTA na dole */}
                     <div className="mt-6 flex justify-center">
                         <Link
-                            href={`/aplikuj?offer_id=${encodeURIComponent(offer.id)}&offer_title=${encodeURIComponent(offer.title)}`}
+                            href={`/aplikacja/${offer.id}`}
                             preserveScroll={false}
                             className="group inline-flex items-center rounded-full bg-mint px-8 py-3 text-base font-extrabold text-foreground ring-1 ring-black/10 shadow-md transition hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A7C8B6]"
                         >
@@ -154,6 +193,312 @@ export default function OfferDetails({ offer }: { offer: Offer }) {
                 onClose={() => setQuickOpen(false)}
                 offer={{ id: offer.id, title: offer.title }}
             />
+        </AppLayout>
+    );
+}
+
+/* ---------- Strona formularza aplikacyjnego ---------- */
+
+export function ApplicationForm({ offer }: { offer?: Offer }) {
+    const { data, setData, post, processing, errors, reset } = useForm<ApplicationFormData>({
+        // Podstawowe informacje
+        name: "",
+        email: "",
+        phone: "",
+        language_level: "",
+
+        // Dodatkowe informacje
+        additional_language: "",
+        learned_profession: "",
+        current_profession: "",
+
+        // Doświadczenie zawodowe
+        experience: "",
+        first_aid_course: false,
+        medical_caregiver_course: false,
+        care_experience: false,
+        housekeeping_experience: false,
+        cooking_experience: false,
+        driving_license: false,
+        smoker: false,
+
+        // Oczekiwania finansowe
+        salary_expectations: "",
+
+        // Referencje
+        references: null,
+
+        // Zgody
+        consent1: false,
+        consent2: false,
+        consent3: false,
+
+        // ID oferty
+        offer_id: offer?.id,
+        offer_title: offer?.title,
+    });
+
+    const submit = (e: React.FormEvent) => {
+        e.preventDefault();
+        post("/aplikuj", {
+            preserveScroll: true,
+            onSuccess: () => {
+                reset();
+            },
+        });
+    };
+
+    const acceptAll = () =>
+        setData((d) => ({ ...d, consent1: true, consent2: true, consent3: true }));
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0] || null;
+        setData("references", file);
+    };
+
+    return (
+        <AppLayout>
+            <div className="max-w-2xl mx-auto px-4 py-8">
+                {/* Nagłówek z powrotem */}
+                <Link
+                    href="/"
+                    className="inline-flex items-center text-sm text-foreground/60 hover:text-foreground mb-6"
+                >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    WSTECZ
+                </Link>
+
+                <h1 className="text-3xl font-bold text-center mb-8">WYPEŁNIJ FORMULARZ</h1>
+
+                <form onSubmit={submit} className="space-y-8">
+                    {/* PODSTAWOWE INFORMACJE */}
+                    <Section heading="PODSTAWOWE INFORMACJE">
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-1">
+                                    IMIĘ I NAZWISKO*
+                                </label>
+                                <input
+                                    type="text"
+                                    value={data.name}
+                                    onChange={(e) => setData("name", e.target.value)}
+                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-mint focus:border-transparent"
+                                    required
+                                />
+                                {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">
+                                    E-MAIL*
+                                </label>
+                                <input
+                                    type="email"
+                                    value={data.email}
+                                    onChange={(e) => setData("email", e.target.value)}
+                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-mint focus:border-transparent"
+                                    required
+                                />
+                                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">
+                                    NUMER KONTAKTOWY*
+                                </label>
+                                <input
+                                    type="tel"
+                                    value={data.phone}
+                                    onChange={(e) => setData("phone", e.target.value)}
+                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-mint focus:border-transparent"
+                                    required
+                                />
+                                {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">
+                                    ZNAJOMOŚĆ JĘZYKA*
+                                </label>
+                                <select
+                                    value={data.language_level}
+                                    onChange={(e) => setData("language_level", e.target.value)}
+                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-mint focus:border-transparent"
+                                    required
+                                >
+                                    <option value="">Wybierz poziom</option>
+                                    <option value="podstawowy">Podstawowy</option>
+                                    <option value="średni">Średni</option>
+                                    <option value="zaawansowany">Zaawansowany</option>
+                                    <option value="biegły">Biegły</option>
+                                </select>
+                                {errors.language_level && <p className="text-red-500 text-sm mt-1">{errors.language_level}</p>}
+                            </div>
+                        </div>
+                    </Section>
+
+                    {/* DODATKOWE INFORMACJE */}
+                    <Section heading="DODATKOWE INFORMACJE">
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-1">
+                                    DODATKOWY JĘZYK
+                                </label>
+                                <input
+                                    type="text"
+                                    value={data.additional_language}
+                                    onChange={(e) => setData("additional_language", e.target.value)}
+                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-mint focus:border-transparent"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">
+                                    ZAWÓD WYUCZONY
+                                </label>
+                                <input
+                                    type="text"
+                                    value={data.learned_profession}
+                                    onChange={(e) => setData("learned_profession", e.target.value)}
+                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-mint focus:border-transparent"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">
+                                    ZAWÓD WYKONYWANY
+                                </label>
+                                <input
+                                    type="text"
+                                    value={data.current_profession}
+                                    onChange={(e) => setData("current_profession", e.target.value)}
+                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-mint focus:border-transparent"
+                                />
+                            </div>
+                        </div>
+                    </Section>
+
+                    {/* DOŚWIADCZENIE ZAWODOWE */}
+                    <Section heading="DOŚWIADCZENIE ZAWODOWE">
+                        <div className="space-y-6">
+                            <div>
+                                <h3 className="font-semibold mb-3">DOŚWIADCZENIE JAKO OPIEKUN OSÓB STARSZYCH</h3>
+                                <div className="space-y-2">
+                                    {["brak", "od 1 roku", "od 1 do 3 lat", "powyżej 3 lat"].map((option) => (
+                                        <label key={option} className="flex items-center">
+                                            <input
+                                                type="radio"
+                                                name="experience"
+                                                value={option}
+                                                checked={data.experience === option}
+                                                onChange={(e) => setData("experience", e.target.value)}
+                                                className="mr-2"
+                                            />
+                                            {option}
+                                        </label>
+                                    ))}
+                                </div>
+                                {errors.experience && <p className="text-red-500 text-sm mt-1">{errors.experience}</p>}
+                            </div>
+
+                            <div>
+                                <h3 className="font-semibold mb-3">DODATKOWE INFORMACJE</h3>
+                                <div className="space-y-2">
+                                    {[
+                                        { key: "first_aid_course", label: "kurs pierwszej pomocy" },
+                                        { key: "medical_caregiver_course", label: "kurs opiekuna medycznego" },
+                                        { key: "care_experience", label: "doświadczenie w wykonywaniu czynności opiekuńczych" },
+                                        { key: "housekeeping_experience", label: "doświadczenie w porządkach domowych" },
+                                        { key: "cooking_experience", label: "doświadczenie w przygotowywaniu posiłków" },
+                                        { key: "driving_license", label: "prawo jazdy" },
+                                        { key: "smoker", label: "osoba paląca" },
+                                    ].map((item) => (
+                                        <label key={item.key} className="flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                checked={data[item.key as keyof ApplicationFormData] as boolean}
+                                                onChange={(e) => setData(item.key as any, e.target.checked)}
+                                                className="mr-2"
+                                            />
+                                            {item.label}
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">
+                                    OCZEKIWANIA FINANSOWE W EURO
+                                </label>
+                                <input
+                                    type="text"
+                                    value={data.salary_expectations}
+                                    onChange={(e) => setData("salary_expectations", e.target.value)}
+                                    placeholder="np. 2000€"
+                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-mint focus:border-transparent"
+                                />
+                                {errors.salary_expectations && <p className="text-red-500 text-sm mt-1">{errors.salary_expectations}</p>}
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">
+                                    DODAJ REFERENCJE
+                                </label>
+                                <input
+                                    type="file"
+                                    onChange={handleFileChange}
+                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-mint focus:border-transparent"
+                                    accept=".pdf,.doc,.docx,image/*"
+                                />
+                                {errors.references && <p className="text-red-500 text-sm mt-1">{errors.references}</p>}
+                            </div>
+                        </div>
+                    </Section>
+
+                    {/* ZGODY */}
+                    <Section heading="ZAAKCEPTUJ ZGODY">
+                        <div className="space-y-4">
+                            <ConsentRow
+                                checked={data.consent1}
+                                onChange={(v) => setData("consent1", v)}
+                                label="Wyrażam zgodę na przetwarzanie moich danych osobowych podanych powyżej przez Senior na Plus sp. z o.o..."
+                                error={errors.consent1}
+                            />
+                            <ConsentRow
+                                checked={data.consent2}
+                                onChange={(v) => setData("consent2", v)}
+                                label="Wyrażam zgodę na przetwarzanie moich danych osobowych podanych powyżej przez Senior na Plus sp. z o.o..."
+                                error={errors.consent2}
+                            />
+                            <ConsentRow
+                                checked={data.consent3}
+                                onChange={(v) => setData("consent3", v)}
+                                label="Wyrażam zgodę na przetwarzanie moich danych osobowych podanych powyżej przez Administratora Danych..."
+                                error={errors.consent3}
+                            />
+
+                            <button
+                                type="button"
+                                onClick={acceptAll}
+                                className="text-sm font-semibold text-coral hover:underline"
+                            >
+                                AKCEPTUJ WSZYSTKIE
+                            </button>
+                        </div>
+                    </Section>
+
+                    {/* PRZYCISK WYŚLIJ */}
+                    <div className="flex justify-center">
+                        <button
+                            type="submit"
+                            disabled={processing}
+                            className="group inline-flex items-center rounded-full bg-mint px-8 py-3 text-base font-extrabold text-foreground ring-1 ring-black/10 shadow-md transition hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A7C8B6] disabled:opacity-50"
+                        >
+                            {processing ? "Wysyłanie..." : "WYŚLIJ FORMULARZ"}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </AppLayout>
     );
 }
@@ -306,8 +651,8 @@ function InfoRow({ icon, text }: { icon: React.ReactNode; text: React.ReactNode 
 
 function Section({ heading, children }: React.PropsWithChildren<{ heading: string }>) {
     return (
-        <section className="mt-6">
-            <h2 className="text-center text-foreground font-extrabold tracking-wide uppercase">
+        <section className="mt-6 p-6 bg-white rounded-lg shadow-sm border">
+            <h2 className="text-center text-foreground font-extrabold tracking-wide uppercase mb-4">
                 {heading}
             </h2>
             <div className="mt-3">{children}</div>
@@ -393,7 +738,7 @@ function ConsentRow({
                     type="checkbox"
                     checked={checked}
                     onChange={(e) => onChange(e.target.checked)}
-                    className="mt-1 h-4 w-4 rounded-full border-2 border-blush"
+                    className="mt-1 h-4 w-4 rounded border-2 border-blush"
                     style={{ accentColor: "var(--coral)" }}
                 />
                 <span className="text-foreground/80">{label}</span>

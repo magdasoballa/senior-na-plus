@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ContactMessageController;
 use App\Http\Controllers\QuickApplicationController;
 use Illuminate\Support\Facades\Route;
@@ -47,7 +48,18 @@ Route::post('/kontakt', [ContactMessageController::class, 'store'])
 Route::post('/szybka-aplikacja', [QuickApplicationController::class, 'store'])
     ->name('quick.apply.store');
 
+// Aplikacje
+Route::get('/aplikacja/{offer}', [ApplicationController::class, 'create'])->name('application.create');
+Route::post('/aplikuj', [ApplicationController::class, 'store'])->name('application.store');
 
+// Trasy dla admina (zabezpiecz middleware)
+Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/applications', [ApplicationController::class, 'index'])->name('admin.applications.index');
+    Route::get('/applications/{id}', [ApplicationController::class, 'show'])->name('admin.applications.show');
+    Route::put('/applications/{id}/status', [ApplicationController::class, 'updateStatus'])->name('admin.applications.status');
+    Route::delete('/applications/{id}', [ApplicationController::class, 'destroy'])->name('admin.applications.destroy');
+    Route::get('/applications/{id}/download-references', [ApplicationController::class, 'downloadReferences'])->name('admin.applications.download');
+});
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
