@@ -100,44 +100,44 @@ export default function ApplicationPage() {
                     <Section title="PODSTAWOWE INFORMACJE">
                         <div className="space-y-4">
                             <Field>
-                                <InputPill
+                                <InputFloat
                                     name="name"
+                                    label="IMIĘ I NAZWISKO*"
                                     required
                                     value={data.name}
-                                    onChange={(v) => setData('name', v)}
-                                    placeholder="IMIĘ I NAZWISKO*"
+                                    onChange={(v) => setData("name", v)}
                                 />
                             </Field>
 
                             <Field label="E-MAIL*">
-                                <InputPill
+                                <InputFloat
                                     name="email"
+                                    label="E-MAIL*"
                                     type="email"
                                     required
                                     value={data.email}
-                                    onChange={(v) => setData('email', v)}
-                                    placeholder="E-MAIL*"
+                                    onChange={(v) => setData("email", v)}
                                 />
                             </Field>
 
                             <Field label="NUMER KONTAKTOWY*">
-                                <InputPill
+                                <InputFloat
                                     name="phone"
+                                    label="NUMER KONTAKTOWY*"
                                     type="tel"
                                     required
                                     value={data.phone}
-                                    onChange={(v) => setData('phone', v)}
-                                    placeholder="NUMER KONTAKTOWY*"
+                                    onChange={(v) => setData("phone", v)}
                                 />
                             </Field>
 
                             <Field label="ZNAJOMOŚĆ JĘZYKA*">
-                                <InputPill
+                                <InputFloat
                                     name="language_level"
+                                    label="ZNAJOMOŚĆ JĘZYKA*"
                                     required
                                     value={data.language_level}
-                                    onChange={(v) => setData('language_level', v)}
-                                    placeholder="ZNAJOMOŚĆ JĘZYKA*"
+                                    onChange={(v) => setData("language_level", v)}
                                 />
                             </Field>
                         </div>
@@ -146,27 +146,30 @@ export default function ApplicationPage() {
                     {/* DODATKOWE INFORMACJE */}
                     <Section title="DODATKOWE INFORMACJE">
                         <div className="space-y-4">
-                            <Field label="DODATKOWY JĘZYK">
-                                <InputPill
+                            <Field>
+                                <InputFloat
+                                    name="additional_language"
+                                    label="DODATKOWY JĘZYK"
                                     value={data.additional_language}
                                     onChange={(v) => setData('additional_language', v)}
-                                    placeholder="DODATKOWY JĘZYK"
                                 />
                             </Field>
 
-                            <Field label="ZAWÓD WYUCZONY">
-                                <InputPill
+                            <Field>
+                                <InputFloat
+                                    name="learned_profession"
+                                    label="ZAWÓD WYUCZONY"
                                     value={data.learned_profession}
                                     onChange={(v) => setData('learned_profession', v)}
-                                    placeholder="ZAWÓD WYUCZONY"
                                 />
                             </Field>
 
-                            <Field label="ZAWÓD WYKONYWANY">
-                                <InputPill
+                            <Field>
+                                <InputFloat
+                                    name="current_profession"
+                                    label="ZAWÓD WYKONYWANY"
                                     value={data.current_profession}
                                     onChange={(v) => setData('current_profession', v)}
-                                    placeholder="ZAWÓD WYKONYWANY"
                                 />
                             </Field>
                         </div>
@@ -230,13 +233,18 @@ export default function ApplicationPage() {
                             </div>
 
                             <Field>
-                                <InputPill
+                                <InputFloat
+                                    name="salary_expectations"
+                                    label="OCZEKIWANIA FINANSOWE W EURO"
                                     value={data.salary_expectations}
-                                    onChange={(v) => setData('salary_expectations', v)}
-                                    placeholder="OCZEKIWANIA FINANSOWE W EURO"
+                                    onChange={(v) => setData("salary_expectations", v)}
+                                    inputMode="numeric"
+                                    pattern="[0-9]+([,.][0-9]+)?"
+                                    rightSlot="€"
                                 />
-                                <ErrorText msg={errors.salary_expectations} />
                             </Field>
+
+
 
                             {/* DODAJ REFERENCJE – wygląd jak na screenie */}
                             <div className="mt-2">
@@ -342,49 +350,81 @@ function Field({ children }: React.PropsWithChildren<{ label: string }>) {
     return <div>{children}</div>;
 }
 
-function InputPill({
-    name,
-    value,
-    onChange,
-    placeholder,
-    type = 'text',
-    required,
-    pattern, // możesz pominąć przy innych polach
-    title,
-}: {
+function InputFloat({
+                        id,
+                        name,
+                        label,
+                        value,
+                        onChange,
+                        type = "text",
+                        required,
+                        inputMode,
+                        pattern,
+                        autoComplete,
+                        rightSlot,
+                        maxLength,
+                    }: {
+    id?: string;
     name: string;
+    label: string;
     value: string;
     onChange: (v: string) => void;
-    placeholder?: string;
     type?: React.HTMLInputTypeAttribute;
     required?: boolean;
+    inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
     pattern?: string;
-    title?: string;
+    autoComplete?: string;
+    rightSlot?: React.ReactNode;
+    maxLength?: number;
 }) {
+    const inputId = id ?? name;
+
     return (
-        <input
-            name={name}
-            required={required}
-            // blokuje same spacje – dla "imię i nazwisko" będzie idealne
-            pattern={pattern ?? (required ? '.*\\S.*' : undefined)}
-            title={title}
-            type={type}
-            value={value}
-            onChange={(e) => onChange(e.currentTarget.value)}
-            onInvalid={(e) => {
-                const el = e.currentTarget as HTMLInputElement;
-                // własny komunikat; jeśli chcesz inny per-pole, przekaż przez props `title`
-                if (required && !el.value.trim()) el.setCustomValidity('To pole nie może być puste.');
-            }}
-            onInput={(e) => {
-                // czyszczenie niestandardowego komunikatu przy edycji
-                (e.currentTarget as HTMLInputElement).setCustomValidity('');
-            }}
-            placeholder={placeholder}
-            className="h-11 w-full rounded-full bg-white px-5 focus:ring-2 focus:ring-mint focus:outline-none [&::placeholder]:font-extrabold [&::placeholder]:text-black [&::placeholder]:opacity-80"
-        />
+        <div className="relative">
+            <input
+                id={inputId}
+                name={name}
+                type={type}
+                required={required}
+                value={value}
+                onChange={(e) => onChange(e.currentTarget.value)}
+                placeholder=" "                              // ważne dla :placeholder-shown
+                inputMode={inputMode}
+                pattern={pattern}
+                autoComplete={autoComplete}
+                maxLength={maxLength}
+                className={`peer h-12 w-full rounded-full bg-white px-5 pt-4 pb-1
+                    focus:outline-none focus:ring-2 focus:ring-mint
+                    ring-1 ring-black/10
+                    ${rightSlot ? "pr-12" : ""}`}
+            />
+
+            {/* label pływający */}
+            <label
+                htmlFor={inputId}
+                className="
+          pointer-events-none absolute left-5 top-1.5 z-10
+          text-xs font-semibold uppercase tracking-wide text-foreground/70 transition-all
+          peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2
+          peer-placeholder-shown:text-[15px] peer-placeholder-shown:font-extrabold
+          peer-placeholder-shown:text-black/80
+          peer-focus:top-1.5 peer-focus:translate-y-0 peer-focus:text-xs peer-focus:text-coral
+        "
+            >
+                {label}
+            </label>
+
+            {/* sufiks, np. € */}
+            {rightSlot && (
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-foreground/60">
+          {rightSlot}
+        </span>
+            )}
+        </div>
     );
 }
+
+
 
 function ConsentRow({ checked, onChange, label, error }: { checked: boolean; onChange: (v: boolean) => void; label: string; error?: string }) {
     const [open, setOpen] = React.useState(false);
