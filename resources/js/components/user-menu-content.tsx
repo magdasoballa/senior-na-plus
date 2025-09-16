@@ -36,11 +36,18 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-                <Link className="block w-full" href="/logout" as="button" onClick={handleLogout}>
+                <Link
+                    className="block w-full"
+                    href={'/logout'}      // lub '/logout', jeśli nie używasz Ziggy
+                    method="post"
+                    as="button"
+                    onClick={cleanup}           // zostaw sprzątanie z menu
+                >
                     <LogOut className="mr-2" />
                     Log out
                 </Link>
             </DropdownMenuItem>
+
         </>
     );
 }

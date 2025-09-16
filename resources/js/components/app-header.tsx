@@ -11,8 +11,7 @@ import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-react';
-import AppLogo from './app-logo';
+import {  Menu } from 'lucide-react';
 import AppLogoIcon from './app-logo-icon';
 import LogoMobile from '../../../public/icons/logoMobile';
 
@@ -33,6 +32,8 @@ interface AppHeaderProps {
 export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const page = usePage<SharedData>();
     const { auth } = page.props;
+    const user = page.props.auth?.user ?? null; // <= BEZPIECZNIE
+
     const getInitials = useInitials();
     return (
         <>
@@ -139,16 +140,32 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                 ))}
                             </div>
                         </div>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="size-10 rounded-full p-1">
-
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56" align="end">
-                                <UserMenuContent user={auth.user} />
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        {user ? (
+                            // === AVATAR i menu TYKO dla zalogowanego ===
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" className="size-10 rounded-full p-1">
+                                        <Avatar className="size-8 overflow-hidden rounded-full">
+                                            <AvatarImage src={user.avatar} alt={user.name ?? ''} />
+                                            <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                                                {getInitials(user.name ?? '')}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="w-56" align="end">
+                                    <UserMenuContent user={user} />
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        ) : (
+                            // === Dla niezalogowanego: np. przycisk "Zaloguj" ===
+                            <Link
+                                href="/login"
+                                className="rounded-full bg-coral px-4 py-2 text-sm font-semibold text-white shadow-md ring-1 ring-black/10 hover:opacity-95"
+                            >
+                                Zaloguj
+                            </Link>
+                        )}
                     </div>
                 </div>
             </div>
