@@ -41,13 +41,17 @@ export default function ContactFormCard() {
 
     return (
         <section className="mx-auto w-full max-w-lg px-2">
+            <div className="text-center">
+                <h2 className="text-4xl  tracking-tight text-slate-800 sm:text-6xl">Kontakt</h2>
+                <p className=" text-2xl text-sea sm:text-3xl">czekamy na Ciebie</p>
+            </div>
             <form
                 onSubmit={onSubmit}
-                className="rounded-[2.5rem] bg-card p-6 md:p-8 shadow-2xl shadow-black/30 border"
+                className="rounded-[2.5rem] bg-card p-6 md:p-8 shadow-2xl shadow-black/30 border mt-5"
             >
-                <h2 className={`text-center text-3xl md:text-4xl font-extrabold ${isDarkMode ? 'text-white' : 'text-black'}`}>
-                    Formularz <span className="">kontaktowy</span>
-                </h2>
+                <p className={`text-center text-3xl md:text-4xl font-semibold ${isDarkMode ? 'text-white' : 'text-black'}`}>
+                    Formularz <br/> <span className="">kontaktowy</span>
+                </p>
 
                 {/* komunikat sukcesu */}
                 {flash?.success && (

@@ -6,7 +6,9 @@ type Application = {
     name: string;
     email: string;
     phone: string;
-    offer?: { title?: string };
+    offer_id?: number | string;          // <—
+    offer_title?: string | null;         // <— (z kolumny applications)
+    offer?: { id?: number | string; title?: string | null } | null;
 };
 
 export default function Show() {
@@ -21,7 +23,22 @@ export default function Show() {
                 <h1 className="text-2xl font-bold">Aplikacja #{application.id}</h1>
 
                 <div className="space-y-1">
-                    <div className="font-medium">{application.name} — {application.offer?.title}</div>
+                    <div className="font-medium">
+                        {application.name} —{" "}
+                        { (application.offer?.id ?? application.offer_id) ? (
+                            <Link
+                                href={`/offers/${encodeURIComponent(String(application.offer?.id ?? application.offer_id))}`}
+                                className="text-coral underline-offset-2 hover:underline"
+                                prefetch
+                            >
+                                {application.offer?.title ?? application.offer_title ?? "Zobacz ofertę"}
+                            </Link>
+                        ) : (
+                            <span className="text-muted-foreground">
+      {application.offer?.title ?? application.offer_title ?? "—"}
+    </span>
+                        )}
+                    </div>
                     <div className="text-sm text-muted-foreground">
                         {application.email} · {application.phone}
                     </div>

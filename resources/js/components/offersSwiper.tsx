@@ -49,7 +49,7 @@ export default function OffersSwiper({ offers }: Props) {
         return (
             <section>
                 <header className="mb-6 text-center">
-                    <h2 className={`text-3xl font-semibold tracking-tight md:text-4xl`}>Oferty pracy</h2>
+                    <h2 className={`text-3xl  tracking-tight md:text-4xl`}>Oferty pracy</h2>
                     <p className="mt-2 text-lg text-sea md:text-xl">sprawdź nowości</p>
                 </header>
                 <p className="text-center text-foreground/70">Brak ofert do wyświetlenia.</p>
@@ -60,10 +60,10 @@ export default function OffersSwiper({ offers }: Props) {
     return (
         <section className="select-none">
             <header className="mb-6 text-center">
-                <h2 className={`text-3xl leading-tight font-semibold tracking-tight md:text-4xl dark:text-white ${isDarkMode ? 'text-white' : ''}`}>
+                <h2 className={`text-3xl leading-tight  tracking-tight md:text-6xl dark:text-white ${isDarkMode ? 'text-white' : ''}`}>
                     Oferty pracy
                 </h2>
-                <p className="mt-2 text-lg text-sea md:text-xl">sprawdź nowości</p>
+                <p className=" text-lg text-sea md:text-3xl">sprawdź nowości</p>
             </header>
 
             <div className="relative" role="region" aria-roledescription="carousel" aria-label="Slider ofert">

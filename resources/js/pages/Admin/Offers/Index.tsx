@@ -12,6 +12,8 @@ export default function Index({ offers }: { offers: any[] }) {
     return (
         <AppLayout>
         <div className="mx-auto max-w-5xl p-6">
+            <Link href="/dashboard" className="text-coral">&larr; Wróć</Link>
+
             <div className="mb-4 flex items-center justify-between">
                 <h1 className="text-2xl font-bold">Oferty</h1>
                 <Link

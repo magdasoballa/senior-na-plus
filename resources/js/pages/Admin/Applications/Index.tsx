@@ -22,6 +22,8 @@ export default function Index({ applications }: { applications?: ApplicationsPro
     return (
         <AppLayout>
             <div className="max-w-4xl mx-auto p-6">
+                <Link href="/" className="text-coral">&larr; Wróć</Link>
+
                 <h1 className="text-2xl font-bold mb-4">Aplikacje</h1>
 
                 {items.length === 0 ? (
@@ -41,7 +43,7 @@ export default function Index({ applications }: { applications?: ApplicationsPro
 
                                 <Link
                                     href={`/admin/applications/${encodeURIComponent(a.id)}`}
-                                    className="text-coral font-semibold"
+                                    className="text-coral font-semibold ml-4"
                                 >
                                     Szczegóły
                                 </Link>

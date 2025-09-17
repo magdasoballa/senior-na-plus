@@ -32,8 +32,8 @@ const AboutSection = () => {
             <div className="mx-auto max-w-3xl px-6 py-12 sm:py-16">
                 {/* Nagłówki */}
                 <div className="text-center">
-                    <h2 className="text-4xl font-semibold tracking-tight text-slate-800 sm:text-5xl">o nas</h2>
-                    <p className="mt-1 text-2xl text-emerald-700/70 sm:text-3xl">poznajmy się</p>
+                    <h2 className="text-4xl  tracking-tight text-slate-800 sm:text-6xl">O nas</h2>
+                    <p className=" text-2xl text-sea sm:text-3xl">poznajmy się</p>
                 </div>
 
                 {/* Hero obraz */}
