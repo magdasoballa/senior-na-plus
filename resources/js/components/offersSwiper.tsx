@@ -87,7 +87,7 @@ export default function OffersSwiper({ offers }: Props) {
                     <ChevronRight className="h-5 w-5" />
                 </button>
 
-                <div className=" rounded-[2rem]" aria-live="polite">
+                <div className="rounded-[2rem]" aria-live="polite">
                     <div className="flex transition-transform duration-500 ease-out" style={{ transform: `translateX(-${index * 100}%)` }}>
                         {slides.map((s) => (
                             <SlideCard key={s.id} slide={s} />
@@ -126,11 +126,12 @@ function SlideCard({
     };
 }) {
     const go = () => router.visit(slide.href);
+    const isDarkMode = typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
 
     return (
         <article className="w-full shrink-0 px-2 py-4 md:px-4">
             <div
-                className="relative mx-auto flex cursor-pointer flex-col rounded-[7rem] bg-white p-6 shadow-[0_12px_24px_-8px_rgb(0_0_0/0.18),0_40px_90px_-20px_rgb(0_0_0/0.28)] ring-1 ring-black/5 md:w-[70%] md:p-10 dark:bg-zinc-900 dark:shadow-[0_2px_6px_rgb(0_0_0/0.55),0_24px_70px_-12px_rgb(0_0_0/0.75)] dark:ring-white/10"
+                className="relative mx-auto flex cursor-pointer flex-col rounded-[7rem] bg-white p-6 shadow-[0_12px_24px_-8px_rgb(0_0_0/0.18),0_40px_90px_-20px_rgb(0_0_0/0.28)] ring-1 ring-black/10 md:w-[70%] md:p-10 dark:bg-white dark:text-black dark:shadow-[0_2px_6px_rgb(0_0_0/0.45),0_24px_70px_-12px_rgb(0_0_0/0.55)]"
                 onClick={go}
                 role="link"
                 tabIndex={0}
@@ -141,7 +142,7 @@ function SlideCard({
 
                 <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <ul className="space-y-3">
-                        <Li icon={Euro}>{slide.wage}€</Li>
+                        <Li icon={Euro}>{slide.wage}</Li>
                         <Li icon={CalendarCheck}>{slide.start_date}</Li>
                         <Li icon={MapPin}>{slide.city_line}</Li>
                     </ul>
@@ -174,7 +175,7 @@ function Li({
     return (
         <li className={`flex items-center gap-3 rounded-lg px-3 py-2 ${className}`}>
             <Icon className="h-5 w-5 text-blush" />
-            <span className="text-[15px] font-medium text-foreground">{children}</span>
+            <span className="text-[15px] font-medium ">{children}</span>
         </li>
     );
 }

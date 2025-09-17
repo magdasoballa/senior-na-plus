@@ -69,16 +69,15 @@ Route::middleware(['auth', 'admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
-        // Oferty
         Route::resource('offers', AdminOfferController::class)->except(['show']);
 
-        // Aplikacje
         Route::get('applications', [ApplicationController::class, 'index'])->name('applications.index');
-        Route::get('applications/{id}', [ApplicationController::class, 'show'])->name('applications.show');
-        Route::put('applications/{id}/status', [ApplicationController::class, 'updateStatus'])->name('applications.status');
-        Route::get('applications/{id}/download-references', [ApplicationController::class, 'downloadReferences'])->name('applications.download');
-        Route::delete('applications/{id}', [ApplicationController::class, 'destroy'])->name('applications.destroy');
+        Route::get('applications/{application}', [ApplicationController::class, 'show'])->name('applications.show');
+        Route::put('applications/{application}/status', [ApplicationController::class, 'updateStatus'])->name('applications.status');
+        Route::get('applications/{application}/download-references', [ApplicationController::class, 'downloadReferences'])->name('applications.download');
+        Route::delete('applications/{application}', [ApplicationController::class, 'destroy'])->name('applications.destroy');
     });
+
 
 /*
 |--------------------------------------------------------------------------

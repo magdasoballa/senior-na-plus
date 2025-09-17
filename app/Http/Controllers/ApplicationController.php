@@ -106,12 +106,26 @@ class ApplicationController extends Controller
     }
 
     /** Admin: szczegóły */
-    public function show(Application $application)
+    public function show(\App\Models\Application $application)
     {
-        $application->load('offer');
+        // Załaduj relację i wybierz konkretne kolumny (tu: to, co chcesz pokazać)
+        $application->load(['offer' => function ($q) {
+            $q->select('id','title','city','country','start_date','duration','language','wage');
+            // ->withoutGlobalScopes(); // odkomentuj, jeśli masz jakieś global scopes na Offer
+        }]);
 
-        return Inertia::render('Admin/Applications/Show', [
-            'application' => $application,
+        // Wyślij jawny kształt propsów
+        return \Inertia\Inertia::render('Admin/Applications/Show', [
+            'application' => [
+                'id'    => $application->id,
+                'name'  => $application->name,
+                'email' => $application->email,
+                'phone' => $application->phone,
+                'offer' => $application->offer
+                    ? $application->offer->only(['id','title','city','country','start_date','duration','language','wage'])
+                    : null,
+                'offer_title' => $application->offer_title, // fallback
+            ],
         ]);
     }
 

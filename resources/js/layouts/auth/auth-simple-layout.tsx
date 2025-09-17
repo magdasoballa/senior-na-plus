@@ -3,6 +3,7 @@ import { home } from '@/routes';
 import { Link } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
 import LogoMobile from '../../../../public/icons/logoMobile';
+import LogoMobileWhite from '../../../../public/icons/logoMobileWhite';
 
 interface AuthLayoutProps {
     name?: string;
@@ -11,6 +12,8 @@ interface AuthLayoutProps {
 }
 
 export default function AuthSimpleLayout({ children, title, description }: PropsWithChildren<AuthLayoutProps>) {
+    const isDarkMode = typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
     return (
         <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10">
             <div className="w-full max-w-sm">
@@ -18,7 +21,7 @@ export default function AuthSimpleLayout({ children, title, description }: Props
                     <div className="flex flex-col items-center gap-4">
                         <Link href={home()} className="flex flex-col items-center gap-2 font-medium">
                             <div className="mb-1 flex  items-center justify-center rounded-md">
-                                <LogoMobile className=" fill-current text-black dark:text-white" width='250px'/>
+                                {isDarkMode ? <LogoMobileWhite  width='250px'/> :  <LogoMobile className=" fill-current text-black dark:text-white" width='250px'/> }
                             </div>
                             <span className="sr-only">{title}</span>
                         </Link>
