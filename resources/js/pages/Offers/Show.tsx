@@ -107,24 +107,23 @@ export default function OfferDetails({ offer }: { offer: Offer }) {
     } = offer;
 
     const [quickOpen, setQuickOpen] = React.useState(false);
+    const isDarkMode = typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
 
     return (
         <AppLayout>
-            <section className="mx-auto w-full max-w-2xl px-3 mb-5 bg-[#FDFDFC]">
-                <article className="rounded-[1rem]  p-6 md:p-8">
-                    <a href="/" className="text-center text-xs tracking-widest text-foreground/60">
+            <section className="mx-auto mb-5 w-full max-w-2xl bg-[#FDFDFC] px-3">
+                <article className="rounded-[1rem] p-6 md:p-8">
+                    <a href="/" className="text-center dark:text-black text-xs ">
                         WSTECZ
                     </a>
 
-                    <h1 className="mt-2 text-center text-[28px] md:text-[34px] leading-snug font-semibold text-foreground/90 font-hand">
-                        {title}
-                    </h1>
+                    <h1 className={`font-hand mt-2 text-center text-[28px] leading-snug font-semibold  md:text-[34px] ${isDarkMode ? 'text-black' : ''}`}>{title}</h1>
 
                     {/* SZYBKA APLIKACJA -> otwiera modal */}
                     <div className="mt-3 flex justify-center">
                         <button
                             onClick={() => setQuickOpen(true)}
-                            className="rounded-full bg-mint px-6 py-2 text-sm font-extrabold text-foreground ring-1 cursor-pointer ring-black/10 shadow"
+                            className="cursor-pointer rounded-full bg-mint px-6 py-2 text-sm font-extrabold text-black shadow ring-1 ring-black/10"
                         >
                             SZYBKA APLIKACJA
                         </button>
@@ -145,13 +144,13 @@ export default function OfferDetails({ offer }: { offer: Offer }) {
                     </div>
 
                     {/* kafel wynagrodzenia */}
-                    <div className="mt-6 rounded-[28px] bg-blush px-6 py-5 flex items-center justify-between overflow-hidden">
-                        <div className="flex flex-col justify-center items-center">
-                            <div className="text-sm tracking-wider text-foreground/70">STAWKA:</div>
-                            <div className="text-3xl font-extrabold">{wage}</div>
+                    <div className="mt-6 flex items-center justify-between overflow-hidden rounded-[28px] bg-blush px-6 py-5">
+                        <div className="flex flex-col items-center justify-center">
+                            <div className="text-sm tracking-wider text-black">STAWKA:</div>
+                            <div className="text-3xl font-extrabold text-black">{wage}</div>
 
-                            <div className="mt-3 text-sm tracking-wider text-foreground/70">PREMIA:</div>
-                            <div className="text-2xl font-extrabold">{bonus}</div>
+                            <div className="mt-3 text-sm tracking-wider text-black">PREMIA:</div>
+                            <div className="text-2xl font-extrabold text-black">{bonus}</div>
                         </div>
 
                         <ONasBanner className="max-h-[150px]" width="300px" />
@@ -179,21 +178,16 @@ export default function OfferDetails({ offer }: { offer: Offer }) {
                         <Link
                             href={`/aplikacja/${offer.id}`}
                             preserveScroll={false}
-                            className="group inline-flex items-center rounded-full bg-mint px-8 py-3 text-base font-extrabold text-foreground ring-1 ring-black/10 shadow-md transition hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A7C8B6]"
+                            className="group inline-flex items-center rounded-full bg-mint px-8 py-3 text-base font-extrabold text-black shadow-md ring-1 ring-black/10 transition hover:opacity-95 focus-visible:ring-2 focus-visible:ring-[#A7C8B6] focus-visible:outline-none"
                         >
                             WYŚLIJ FORMULARZ
                         </Link>
                     </div>
-
                 </article>
             </section>
 
             {/* MODAL: szybka aplikacja */}
-            <QuickApplyModal
-                open={quickOpen}
-                onClose={() => setQuickOpen(false)}
-                offer={{ id: offer.id, title: offer.title }}
-            />
+            <QuickApplyModal open={quickOpen} onClose={() => setQuickOpen(false)} offer={{ id: offer.id, title: offer.title }} />
         </AppLayout>
     );
 }
@@ -642,10 +636,12 @@ function QuickApplyModal({ open, onClose, offer }: QuickApplyModalProps) {
 /* ---------- helpery ---------- */
 
 function InfoRow({ icon, text }: { icon: React.ReactNode; text: React.ReactNode }) {
+    const isDarkMode = typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
     return (
-        <div className="flex items-center gap-3 rounded-xl  px-3 py-2">
+        <div className="flex items-center gap-3 rounded-xl px-3 py-2">
             <span className="text-coral">{icon}</span>
-            <span className="text-[17px] text-foreground">{text}</span>
+            <span className={`text-[17px] ${isDarkMode ? 'text-black' : ''}`}>{text}</span>
         </div>
     );
 }
@@ -653,19 +649,19 @@ function InfoRow({ icon, text }: { icon: React.ReactNode; text: React.ReactNode 
 function Section({ heading, children }: React.PropsWithChildren<{ heading: string }>) {
     return (
         <section className="mt-6 p-6  rounded-lg ">
-            <h2 className="text-center text-foreground font-extrabold tracking-wide uppercase mb-4">
+            <h2 className="text-center text-black  font-extrabold uppercase mb-4">
                 {heading}
             </h2>
-            <div className="mt-3">{children}</div>
+            <div className="mt-3 text-black">{children}</div>
         </section>
     );
 }
 
 function BulletList({ items }: { items: string[] }) {
     return (
-        <ul className="list-disc pl-6 marker:text-foreground/70 space-y-1 text-foreground">
+        <ul className="list-disc pl-6 space-y-1 text-foreground">
             {items?.map((t, i) => (
-                <li key={i} className="leading-relaxed">
+                <li key={i} className="leading-relaxed text-black">
                     {t}
                 </li>
             ))}

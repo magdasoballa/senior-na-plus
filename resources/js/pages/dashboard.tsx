@@ -15,7 +15,7 @@ export default function Dashboard({ isAdmin, stats }: Props) {
                 </h1>
 
                 {isAdmin ? (
-                    <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3 text-black">
                         <Card
                             title="Oferty"
                             value={stats?.offers ?? 0}
@@ -35,7 +35,7 @@ export default function Dashboard({ isAdmin, stats }: Props) {
 
                         <Link
                             href="/"
-                            className="inline-flex rounded-full bg-coral px-5 py-2 font-bold text-white"
+                            className="inline-flex rounded-full bg-coral px-5 py-2 font-bold "
                         >
                             Przeglądaj oferty
                         </Link>
@@ -59,7 +59,7 @@ function Card({
 }) {
     return (
         <div className="rounded-xl border bg-white p-5 shadow-sm">
-            <div className="text-sm text-foreground/60">{title}</div>
+            <div className="text-sm ">{title}</div>
             <div className="mt-1 text-3xl font-extrabold">{value}</div>
             <Link
                 href={href}

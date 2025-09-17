@@ -37,6 +37,7 @@ export default function ContactFormCard() {
             },
         })
     }
+    const isDarkMode = typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
 
     return (
         <section className="mx-auto w-full max-w-lg px-2">
@@ -44,8 +45,8 @@ export default function ContactFormCard() {
                 onSubmit={onSubmit}
                 className="rounded-[2.5rem] bg-card p-6 md:p-8 shadow-2xl shadow-black/30 border"
             >
-                <h2 className="text-center text-3xl md:text-4xl font-extrabold tracking-tight">
-                    Formularz <span className="text-foreground">kontaktowy</span>
+                <h2 className={`text-center text-3xl md:text-4xl font-extrabold ${isDarkMode ? 'text-white' : 'text-black'}`}>
+                    Formularz <span className="">kontaktowy</span>
                 </h2>
 
                 {/* komunikat sukcesu */}
@@ -174,25 +175,38 @@ function FieldUnderline({
                             label,
                             value,
                             onChange,
-                            type = 'text',
+                            type = "text",
                             textarea = false,
                             placeholder,
                             error,
                         }: {
-    label?: string
-    value: string
-    onChange: (v: string) => void
-    type?: React.HTMLInputTypeAttribute
-    textarea?: boolean
-    placeholder?: string
-    error?: string
+    label?: string;
+    value: string;
+    onChange: (v: string) => void;
+    type?: React.HTMLInputTypeAttribute;
+    textarea?: boolean;
+    placeholder?: string;
+    error?: string;
 }) {
     const base =
-        'mt-1 block w-full bg-transparent pb-2 outline-none border-0 border-b-2 focus:border-coral'
-    const border = error ? 'border-red-500' : 'border-foreground/70'
+        "mt-1 block w-full bg-transparent pb-2 outline-none border-0 border-b-2 " +
+        "transition-colors duration-200 text-foreground caret-foreground " +
+        "placeholder:text-muted-foreground/70 dark:placeholder:text-muted-foreground/60 " +
+        "focus:outline-none";
+
+    const border = error
+        ? // błąd – czerwone w obu trybach
+        "border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400"
+        : // normalnie – delikatna linia, jaśniejsza w dark
+        "border-foreground/40 hover:border-foreground/60 focus:border-coral " +
+        "dark:border-white/30 dark:hover:border-white/50 dark:focus:border-coral";
+
     return (
         <label className="block">
-            <span className="text-[15px] text-muted-foreground">{label}</span>
+            {label && (
+                <span className="text-[15px] text-muted-foreground">{label}</span>
+            )}
+
             {textarea ? (
                 <textarea
                     rows={4}
@@ -204,16 +218,18 @@ function FieldUnderline({
             ) : (
                 <input
                     type={type}
-                    placeholder={placeholder}
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
+                    placeholder={placeholder}
                     className={`${base} ${border}`}
                 />
             )}
-            {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+
+            {error && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{error}</p>}
         </label>
-    )
+    );
 }
+
 
 function ConsentRow({
                         checked,

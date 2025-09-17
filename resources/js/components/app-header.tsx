@@ -14,6 +14,7 @@ import { Link, usePage } from '@inertiajs/react';
 import {  Menu } from 'lucide-react';
 import AppLogoIcon from './app-logo-icon';
 import LogoMobile from '../../../public/icons/logoMobile';
+import AppLogoIconWhite from '@/components/app-logo-icon-white';
 
 const mainNavItems: NavItem[] = [
 
@@ -32,9 +33,13 @@ interface AppHeaderProps {
 export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const page = usePage<SharedData>();
     const { auth } = page.props;
-    const user = page.props.auth?.user ?? null; // <= BEZPIECZNIE
+    const user = page.props.auth?.user ?? null;
 
     const getInitials = useInitials();
+
+    const isDarkMode = typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+
     return (
         <>
             <div className="">
@@ -85,7 +90,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                     </div>
 
                     <Link href='/' prefetch className="flex items-center space-x-2">
-                        <AppLogoIcon  width='400px'/>
+                        {isDarkMode ? <AppLogoIconWhite width='400px'/> : <AppLogoIcon width='400px'/>}
                     </Link>
 
                     {/* Desktop Navigation */}

@@ -26,21 +26,21 @@ export default function Index({ offers }: { offers: any[] }) {
                 <table className="w-full text-left">
                     <thead className="bg-gray-50">
                     <tr>
-                        <th className="px-4 py-3">Tytuł</th>
-                        <th className="px-4 py-3">Lokalizacja</th>
-                        <th className="px-4 py-3">Język</th>
-                        <th className="px-4 py-3">Stawka</th>
-                        <th className="px-4 py-3 w-40"></th>
+                        <th className="px-4 py-3 text-black">Tytuł</th>
+                        <th className="px-4 py-3 text-black">Lokalizacja</th>
+                        <th className="px-4 py-3 text-black">Język</th>
+                        <th className="px-4 py-3 text-black">Stawka</th>
+                        <th className="px-4 py-3 w-40 text-black"></th>
                     </tr>
                     </thead>
                     <tbody>
                     {offers.map((o) => (
                         <tr key={o.id} className="border-t">
-                            <td className="px-4 py-3">{o.title}</td>
-                            <td className="px-4 py-3">{[o.city, o.country].filter(Boolean).join(", ")}</td>
-                            <td className="px-4 py-3">{o.language}</td>
-                            <td className="px-4 py-3">{o.wage}</td>
-                            <td className="px-4 py-3">
+                            <td className="px-4 py-3 text-black">{o.title}</td>
+                            <td className="px-4 py-3 text-black">{[o.city, o.country].filter(Boolean).join(", ")}</td>
+                            <td className="px-4 py-3 text-black">{o.language}</td>
+                            <td className="px-4 py-3 text-black">{o.wage}</td>
+                            <td className="px-4 py-3 text-black">
                                 <div className="flex gap-2">
                                     <Link
                                         href={`/admin/offers/${encodeURIComponent(o.id)}/edit`}
