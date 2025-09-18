@@ -1,20 +1,23 @@
 import * as React from "react";
-import {
-    ChevronsRight,
-    MapPin,
-    CalendarDays,
-    CalendarClock,
-    MessageCircle,
-    ArrowLeft,
-} from "lucide-react";
-import { Link, useForm, usePage } from "@inertiajs/react";
+import { ChevronsRight, ArrowLeft } from "lucide-react";
+import { Link, useForm } from "@inertiajs/react";
 import AppLayout from "@/layouts/app-layout";
 import ONasBanner from "@/components/onas-banner";
+
+// Ikony jak w swiperze (custom z /public/icons/*)
+import Termin from "../../../../public/icons/termin";
+import Jezyk from "../../../../public/icons/jezyk";
+import Kalendarz from "../../../../public/icons/kalendarz";
+import Podopieczna from "../../../../public/icons/podopieczna";
+import Samotna from "../../../../public/icons/samotna";
+import Euro from "../../../../public/icons/euro";
+import Miasto from "../../../../public/icons/miasto";
+import Mobilna from "../../../../public/icons/mobilna";
 
 /* ---------- typy ---------- */
 
 export type Offer = {
-    id: string|number;
+    id: string | number;
     title: string;
     description: string;
     duties: string[];
@@ -28,13 +31,18 @@ export type Offer = {
     language?: string;
     wage?: string;
     bonus?: string;
-    hero_image?: string|null;
+    hero_image?: string | null;
+
+    // nowe pola jak w swiperze
+    care_recipient_gender?: "female" | "male" | null;
+    mobility?: "mobile" | "limited" | "immobile" | null;
+    lives_alone?: boolean | "yes" | "no" | null;
 };
 
 type QuickApplyModalProps = {
     open: boolean;
     onClose: () => void;
-    offer?: { id?: string; title?: string };
+    offer?: { id?: string | number; title?: string }; // <- dopuszczamy number
 };
 
 type QuickFormData = {
@@ -44,7 +52,7 @@ type QuickFormData = {
     consent1: boolean;
     consent2: boolean;
     consent3: boolean;
-    offer_id?: string;
+    offer_id?: string | number; // <- dopuszczamy number
     offer_title?: string;
 };
 
@@ -82,7 +90,7 @@ type ApplicationFormData = {
     consent3: boolean;
 
     // ID oferty
-    offer_id?: string;
+    offer_id?: string | number;
     offer_title?: string;
 };
 
@@ -95,19 +103,49 @@ export default function OfferDetails({ offer }: { offer: Offer }) {
         duties,
         requirements,
         benefits,
-        country = "Niemcy",
-        city = "Berlin",
-        postal_code = "654833 Berlin",
-        start_date = "15.03.2025",
-        duration = "2 tygodnie",
-        language = "niemiecki dobry",
-        wage = "2000€",
-        bonus = "100€",
-        hero_image = null,
+        country,
+        city,
+        start_date,
+        duration,
+        language,
+        wage,
+        bonus,
+        // hero_image, postal_code — jeśli użyjesz, dodaj tu
+        care_recipient_gender,
+        mobility,
+        lives_alone,
     } = offer;
 
+    // WYLICZANE etykiety jak w swiperze:
+    const cityLine = [city, country].filter(Boolean).join(", ") || "—";
+
+    const genderLabel =
+        care_recipient_gender === "female"
+            ? "podopieczna"
+            : care_recipient_gender === "male"
+                ? "podopieczny"
+                : "—";
+
+    const mobilityLabel =
+        mobility === "mobile"
+            ? "mobilna"
+            : mobility === "limited"
+                ? "częściowo mobilna"
+                : mobility === "immobile"
+                    ? "niemobilna"
+                    : "—";
+
+    const livingLabel =
+        lives_alone === true || lives_alone === "yes"
+            ? "samotna"
+            : lives_alone === false || lives_alone === "no"
+                ? "nie samotna"
+                : "—";
+
     const [quickOpen, setQuickOpen] = React.useState(false);
-    const isDarkMode = typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const isDarkMode =
+        typeof window !== "undefined" &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches;
 
     return (
         <AppLayout>
@@ -117,7 +155,13 @@ export default function OfferDetails({ offer }: { offer: Offer }) {
                         WSTECZ
                     </a>
 
-                    <h1 className={`font-hand mt-2 text-center text-[28px] leading-snug   md:text-[34px] ${isDarkMode ? 'text-black' : ''}`}>{title}</h1>
+                    <h1
+                        className={`font-hand mt-2 text-center text-[28px] leading-snug md:text-[34px] ${
+                            isDarkMode ? "text-black" : ""
+                        }`}
+                    >
+                        {title}
+                    </h1>
 
                     {/* SZYBKA APLIKACJA -> otwiera modal */}
                     <div className="mt-3 flex justify-center">
@@ -129,28 +173,36 @@ export default function OfferDetails({ offer }: { offer: Offer }) {
                         </button>
                     </div>
 
-                    {/* info: lewa / prawa */}
-                    <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div className="space-y-2">
-                            <InfoRow icon={<MapPin className="h-5 w-5" />} text={country} />
-                            <InfoRow icon={<MapPin className="h-5 w-5" />} text={city} />
-                            <InfoRow icon={<MapPin className="h-5 w-5" />} text={postal_code} />
-                        </div>
-                        <div className="space-y-2">
-                            <InfoRow icon={<CalendarDays className="h-5 w-5" />} text={start_date} />
-                            <InfoRow icon={<CalendarClock className="h-5 w-5" />} text={duration} />
-                            <InfoRow icon={<MessageCircle className="h-5 w-5" />} text={language} />
-                        </div>
+                    {/* info: lewa / prawa (ikonki jak w swiperze) */}
+                    <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <ul className="space-y-2 sm:space-y-3">
+                            <Li icon={Euro}>{wage ?? "—"}</Li>
+                            <Li icon={Termin}>{start_date ?? "do ustalenia"}</Li>
+                            <Li icon={Miasto}>{cityLine}</Li>
+                            <Li icon={Jezyk}>{language ?? "—"}</Li>
+                        </ul>
+                        <ul className="space-y-2 sm:space-y-3">
+                            <Li icon={Kalendarz}>{duration ?? "—"}</Li>
+                            <Li icon={Podopieczna}>{genderLabel}</Li>
+                            <Li icon={Mobilna}>{mobilityLabel}</Li>
+                            <Li icon={Samotna}>{livingLabel}</Li>
+                        </ul>
                     </div>
 
                     {/* kafel wynagrodzenia */}
                     <div className="mt-6 flex items-center justify-between overflow-hidden rounded-[28px] bg-blush px-6 py-5">
                         <div className="flex flex-col items-center justify-center">
                             <div className="text-sm tracking-wider text-black">STAWKA:</div>
-                            <div className="text-3xl font-extrabold text-black">{wage}</div>
+                            <div className="text-3xl font-extrabold text-black">
+                                {wage ?? "—"}
+                            </div>
 
-                            <div className="mt-3 text-sm tracking-wider text-black">PREMIA:</div>
-                            <div className="text-2xl font-extrabold text-black">{bonus}</div>
+                            <div className="mt-3 text-sm tracking-wider text-black">
+                                PREMIA:
+                            </div>
+                            <div className="text-2xl font-extrabold text-black">
+                                {bonus ?? "—"}
+                            </div>
                         </div>
 
                         <ONasBanner className="max-h-[150px]" width="300px" />
@@ -187,7 +239,11 @@ export default function OfferDetails({ offer }: { offer: Offer }) {
             </section>
 
             {/* MODAL: szybka aplikacja */}
-            <QuickApplyModal open={quickOpen} onClose={() => setQuickOpen(false)} offer={{ id: offer.id, title: offer.title }} />
+            <QuickApplyModal
+                open={quickOpen}
+                onClose={() => setQuickOpen(false)}
+                offer={{ id: offer.id, title: offer.title }}
+            />
         </AppLayout>
     );
 }
@@ -195,43 +251,44 @@ export default function OfferDetails({ offer }: { offer: Offer }) {
 /* ---------- Strona formularza aplikacyjnego ---------- */
 
 export function ApplicationForm({ offer }: { offer?: Offer }) {
-    const { data, setData, post, processing, errors, reset } = useForm<ApplicationFormData>({
-        // Podstawowe informacje
-        name: "",
-        email: "",
-        phone: "",
-        language_level: "",
+    const { data, setData, post, processing, errors, reset } =
+        useForm<ApplicationFormData>({
+            // Podstawowe informacje
+            name: "",
+            email: "",
+            phone: "",
+            language_level: "",
 
-        // Dodatkowe informacje
-        additional_language: "",
-        learned_profession: "",
-        current_profession: "",
+            // Dodatkowe informacje
+            additional_language: "",
+            learned_profession: "",
+            current_profession: "",
 
-        // Doświadczenie zawodowe
-        experience: "",
-        first_aid_course: false,
-        medical_caregiver_course: false,
-        care_experience: false,
-        housekeeping_experience: false,
-        cooking_experience: false,
-        driving_license: false,
-        smoker: false,
+            // Doświadczenie zawodowe
+            experience: "",
+            first_aid_course: false,
+            medical_caregiver_course: false,
+            care_experience: false,
+            housekeeping_experience: false,
+            cooking_experience: false,
+            driving_license: false,
+            smoker: false,
 
-        // Oczekiwania finansowe
-        salary_expectations: "",
+            // Oczekiwania finansowe
+            salary_expectations: "",
 
-        // Referencje
-        references: null,
+            // Referencje
+            references: null,
 
-        // Zgody
-        consent1: false,
-        consent2: false,
-        consent3: false,
+            // Zgody
+            consent1: false,
+            consent2: false,
+            consent3: false,
 
-        // ID oferty
-        offer_id: offer?.id,
-        offer_title: offer?.title,
-    });
+            // ID oferty
+            offer_id: offer?.id,
+            offer_title: offer?.title,
+        });
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -263,7 +320,9 @@ export function ApplicationForm({ offer }: { offer?: Offer }) {
                     WSTECZ
                 </Link>
 
-                <h1 className="text-3xl font-bold text-center mb-8">WYPEŁNIJ FORMULARZ</h1>
+                <h1 className="text-3xl font-bold text-center mb-8">
+                    WYPEŁNIJ FORMULARZ
+                </h1>
 
                 <form onSubmit={submit} className="space-y-8">
                     {/* PODSTAWOWE INFORMACJE */}
@@ -280,13 +339,13 @@ export function ApplicationForm({ offer }: { offer?: Offer }) {
                                     className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-mint focus:border-transparent"
                                     required
                                 />
-                                {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+                                {errors.name && (
+                                    <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+                                )}
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium mb-1">
-                                    E-MAIL*
-                                </label>
+                                <label className="block text-sm font-medium mb-1">E-MAIL*</label>
                                 <input
                                     type="email"
                                     value={data.email}
@@ -294,7 +353,9 @@ export function ApplicationForm({ offer }: { offer?: Offer }) {
                                     className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-mint focus:border-transparent"
                                     required
                                 />
-                                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                                {errors.email && (
+                                    <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                                )}
                             </div>
 
                             <div>
@@ -308,7 +369,9 @@ export function ApplicationForm({ offer }: { offer?: Offer }) {
                                     className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-mint focus:border-transparent"
                                     required
                                 />
-                                {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
+                                {errors.phone && (
+                                    <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+                                )}
                             </div>
 
                             <div>
@@ -327,7 +390,11 @@ export function ApplicationForm({ offer }: { offer?: Offer }) {
                                     <option value="zaawansowany">Zaawansowany</option>
                                     <option value="biegły">Biegły</option>
                                 </select>
-                                {errors.language_level && <p className="text-red-500 text-sm mt-1">{errors.language_level}</p>}
+                                {errors.language_level && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                        {errors.language_level}
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </Section>
@@ -354,7 +421,9 @@ export function ApplicationForm({ offer }: { offer?: Offer }) {
                                 <input
                                     type="text"
                                     value={data.learned_profession}
-                                    onChange={(e) => setData("learned_profession", e.target.value)}
+                                    onChange={(e) =>
+                                        setData("learned_profession", e.target.value)
+                                    }
                                     className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-mint focus:border-transparent"
                                 />
                             </div>
@@ -366,7 +435,9 @@ export function ApplicationForm({ offer }: { offer?: Offer }) {
                                 <input
                                     type="text"
                                     value={data.current_profession}
-                                    onChange={(e) => setData("current_profession", e.target.value)}
+                                    onChange={(e) =>
+                                        setData("current_profession", e.target.value)
+                                    }
                                     className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-mint focus:border-transparent"
                                 />
                             </div>
@@ -377,23 +448,31 @@ export function ApplicationForm({ offer }: { offer?: Offer }) {
                     <Section heading="DOŚWIADCZENIE ZAWODOWE">
                         <div className="space-y-6">
                             <div>
-                                <h3 className="font-semibold mb-3">DOŚWIADCZENIE JAKO OPIEKUN OSÓB STARSZYCH</h3>
+                                <h3 className="font-semibold mb-3">
+                                    DOŚWIADCZENIE JAKO OPIEKUN OSÓB STARSZYCH
+                                </h3>
                                 <div className="space-y-2">
-                                    {["brak", "od 1 roku", "od 1 do 3 lat", "powyżej 3 lat"].map((option) => (
-                                        <label key={option} className="flex items-center">
-                                            <input
-                                                type="radio"
-                                                name="experience"
-                                                value={option}
-                                                checked={data.experience === option}
-                                                onChange={(e) => setData("experience", e.target.value)}
-                                                className="mr-2"
-                                            />
-                                            {option}
-                                        </label>
-                                    ))}
+                                    {["brak", "od 1 roku", "od 1 do 3 lat", "powyżej 3 lat"].map(
+                                        (option) => (
+                                            <label key={option} className="flex items-center">
+                                                <input
+                                                    type="radio"
+                                                    name="experience"
+                                                    value={option}
+                                                    checked={data.experience === option}
+                                                    onChange={(e) => setData("experience", e.target.value)}
+                                                    className="mr-2"
+                                                />
+                                                {option}
+                                            </label>
+                                        )
+                                    )}
                                 </div>
-                                {errors.experience && <p className="text-red-500 text-sm mt-1">{errors.experience}</p>}
+                                {errors.experience && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                        {errors.experience}
+                                    </p>
+                                )}
                             </div>
 
                             <div>
@@ -401,18 +480,34 @@ export function ApplicationForm({ offer }: { offer?: Offer }) {
                                 <div className="space-y-2">
                                     {[
                                         { key: "first_aid_course", label: "kurs pierwszej pomocy" },
-                                        { key: "medical_caregiver_course", label: "kurs opiekuna medycznego" },
-                                        { key: "care_experience", label: "doświadczenie w wykonywaniu czynności opiekuńczych" },
-                                        { key: "housekeeping_experience", label: "doświadczenie w porządkach domowych" },
-                                        { key: "cooking_experience", label: "doświadczenie w przygotowywaniu posiłków" },
+                                        {
+                                            key: "medical_caregiver_course",
+                                            label: "kurs opiekuna medycznego",
+                                        },
+                                        {
+                                            key: "care_experience",
+                                            label: "doświadczenie w wykonywaniu czynności opiekuńczych",
+                                        },
+                                        {
+                                            key: "housekeeping_experience",
+                                            label: "doświadczenie w porządkach domowych",
+                                        },
+                                        {
+                                            key: "cooking_experience",
+                                            label: "doświadczenie w przygotowywaniu posiłków",
+                                        },
                                         { key: "driving_license", label: "prawo jazdy" },
                                         { key: "smoker", label: "osoba paląca" },
                                     ].map((item) => (
                                         <label key={item.key} className="flex items-center">
                                             <input
                                                 type="checkbox"
-                                                checked={data[item.key as keyof ApplicationFormData] as boolean}
-                                                onChange={(e) => setData(item.key as any, e.target.checked)}
+                                                checked={
+                                                    data[item.key as keyof ApplicationFormData] as boolean
+                                                }
+                                                onChange={(e) =>
+                                                    setData(item.key as any, e.target.checked)
+                                                }
                                                 className="mr-2"
                                             />
                                             {item.label}
@@ -428,11 +523,17 @@ export function ApplicationForm({ offer }: { offer?: Offer }) {
                                 <input
                                     type="text"
                                     value={data.salary_expectations}
-                                    onChange={(e) => setData("salary_expectations", e.target.value)}
+                                    onChange={(e) =>
+                                        setData("salary_expectations", e.target.value)
+                                    }
                                     placeholder="np. 2000€"
                                     className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-mint focus:border-transparent"
                                 />
-                                {errors.salary_expectations && <p className="text-red-500 text-sm mt-1">{errors.salary_expectations}</p>}
+                                {errors.salary_expectations && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                        {errors.salary_expectations}
+                                    </p>
+                                )}
                             </div>
 
                             <div>
@@ -445,7 +546,11 @@ export function ApplicationForm({ offer }: { offer?: Offer }) {
                                     className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-mint focus:border-transparent"
                                     accept=".pdf,.doc,.docx,image/*"
                                 />
-                                {errors.references && <p className="text-red-500 text-sm mt-1">{errors.references}</p>}
+                                {errors.references && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                        {errors.references}
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </Section>
@@ -501,16 +606,17 @@ export function ApplicationForm({ offer }: { offer?: Offer }) {
 /* ---------- modal ---------- */
 
 function QuickApplyModal({ open, onClose, offer }: QuickApplyModalProps) {
-    const { data, setData, post, processing, errors, reset } = useForm<QuickFormData>({
-        name: "",
-        email: "",
-        phone: "",
-        consent1: false,
-        consent2: false,
-        consent3: false,
-        offer_id: offer?.id,
-        offer_title: offer?.title,
-    });
+    const { data, setData, post, processing, errors, reset } =
+        useForm<QuickFormData>({
+            name: "",
+            email: "",
+            phone: "",
+            consent1: false,
+            consent2: false,
+            consent3: false,
+            offer_id: offer?.id,
+            offer_title: offer?.title,
+        });
 
     // Esc + blokada scrolla w tle
     React.useEffect(() => {
@@ -561,7 +667,9 @@ function QuickApplyModal({ open, onClose, offer }: QuickApplyModalProps) {
                     ×
                 </button>
 
-                <h3 className="text-center text-3xl font-extrabold text-[#2b4a44]">Zgłoś się do nas</h3>
+                <h3 className="text-center text-3xl font-extrabold text-[#2b4a44]">
+                    Zgłoś się do nas
+                </h3>
                 <p className="mt-1 text-center text-xl text-[#2b4a44]/80">Oddzwonimy</p>
 
                 <div className="mt-6 space-y-5">
@@ -635,18 +743,10 @@ function QuickApplyModal({ open, onClose, offer }: QuickApplyModalProps) {
 
 /* ---------- helpery ---------- */
 
-function InfoRow({ icon, text }: { icon: React.ReactNode; text: React.ReactNode }) {
-    const isDarkMode = typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-    return (
-        <div className="flex items-center gap-3 rounded-xl px-3 py-2">
-            <span className="text-coral">{icon}</span>
-            <span className={`text-[17px] ${isDarkMode ? 'text-black' : ''}`}>{text}</span>
-        </div>
-    );
-}
-
-function Section({ heading, children }: React.PropsWithChildren<{ heading: string }>) {
+function Section({
+                     heading,
+                     children,
+                 }: React.PropsWithChildren<{ heading: string }>) {
     return (
         <section className="mt-6 p-6  rounded-lg ">
             <p className="text-center text-black  font-extrabold text-[25px] uppercase mb-4">
@@ -751,12 +851,30 @@ function ConsentRow({
 
             {open && (
                 <p className="mt-1 ml-6 text-xs text-muted-foreground">
-                    Tu wstaw treść zgody/klauzuli informacyjnej RODO. Możesz zalinkować do pełnej polityki
-                    prywatności lub pokazać dłuższy opis.
+                    Tu wstaw treść zgody/klauzuli informacyjnej RODO. Możesz zalinkować do
+                    pełnej polityki prywatności lub pokazać dłuższy opis.
                 </p>
             )}
 
             {error && <p className="mt-1 ml-6 text-xs text-red-600">{error}</p>}
         </div>
+    );
+}
+
+function Li({
+                icon: Icon,
+                className = "",
+                children,
+            }: React.PropsWithChildren<{
+    icon: (p: { className?: string }) => JSX.Element;
+    className?: string;
+}>) {
+    return (
+        <li
+            className={`flex items-center gap-2 sm:gap-3 rounded-lg px-2.5 sm:px-3 py-2 ${className}`}
+        >
+            <Icon className="h-5 w-5 text-blush" />
+            <span className="text-[14px] sm:text-[15px] font-medium">{children}</span>
+        </li>
     );
 }
