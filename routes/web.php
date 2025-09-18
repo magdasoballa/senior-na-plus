@@ -18,8 +18,10 @@ use Inertia\Inertia;
 Route::get('/', function () {
     $offers = Offer::latest()
         ->take(8)
-        ->get(['id','title','city','country','start_date','duration','language','wage',         'care_recipient_gender','mobility','lives_alone'
-        ]); // bez mapowania (snake_case)
+        ->get([
+            'id','title','city','country','start_date','duration','language','wage',
+            'care_recipient_gender','mobility','lives_alone',
+        ]);
 
     return Inertia::render('welcome', [
         'offers' => $offers,
@@ -37,19 +39,31 @@ Route::get('/offers/{offer}', function (Offer $offer) {
 Route::post('/kontakt', [ContactMessageController::class, 'store'])->name('contact.store');
 Route::post('/szybka-aplikacja', [QuickApplicationController::class, 'store'])->name('quick.apply.store');
 
-/** Aplikacje (pełny formularz) */
-Route::get('/aplikacja/{offer}', [ApplicationController::class, 'create'])->name('application.create');
-Route::post('/aplikuj', [ApplicationController::class, 'store'])->name('application.store');
+/** Lista ofert (/offers) */
 Route::get('/offers', function () {
-    // prosto: najnowsze z paginacją; wybieramy tylko potrzebne pola
-    $offers = \App\Models\Offer::latest()
-        ->select(['id','title','city','country','start_date','duration','language','wage'])
-        ->paginate(12); // lub ->get() jeśli bez paginacji
+    // najnowsze z paginacją — FRONT potrzebuje zwykłej tablicy ->items()
+    $paginator = Offer::latest()
+        ->select([
+            'id','title','city','country','start_date','duration','language','wage',
+            'care_recipient_gender','mobility','lives_alone',
+        ])
+        ->paginate(12);
 
     return Inertia::render('Offers/Index', [
-        'offers' => $offers,
+        // jeżeli w komponencie robisz (offers ?? []).map(...), wyślij same pozycje:
+        'offers' => $paginator->items(),
+        // jeśli kiedyś dodasz paginację na froncie, doślij też proste meta:
+        'pagination' => [
+            'current_page' => $paginator->currentPage(),
+            'last_page'    => $paginator->lastPage(),
+            'per_page'     => $paginator->perPage(),
+            'total'        => $paginator->total(),
+            'prev_page_url'=> $paginator->previousPageUrl(),
+            'next_page_url'=> $paginator->nextPageUrl(),
+        ],
     ]);
 })->name('offers.index');
+
 /*
 |--------------------------------------------------------------------------
 | Dashboard (wspólny dla zalogowanych; UI rozdzielasz po isAdmin)
@@ -87,7 +101,6 @@ Route::middleware(['auth', 'admin'])
         Route::get('applications/{application}/download-references', [ApplicationController::class, 'downloadReferences'])->name('applications.download');
         Route::delete('applications/{application}', [ApplicationController::class, 'destroy'])->name('applications.destroy');
     });
-
 
 /*
 |--------------------------------------------------------------------------

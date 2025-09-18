@@ -656,7 +656,7 @@ function QuickApplyModal({ open, onClose, offer }: QuickApplyModalProps) {
         >
             <form
                 onSubmit={submit}
-                className="mt-8 sm:mt-16 w-[92%] max-w-md rounded-[2rem] p-6 sm:p-8  relative"
+                className="mt-8 sm:mt-16 w-[92%] max-w-md rounded-[2rem] p-6 sm:p-8 bg-white relative"
             >
                 <button
                     type="button"
