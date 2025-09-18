@@ -1,11 +1,18 @@
 import { Link, router } from '@inertiajs/react';
 import {
-    CalendarCheck, CalendarDays, ChevronLeft, ChevronRight,
-    ChevronsRight, Euro, MapPin, MessageCircle
+     ChevronLeft, ChevronRight,
+    ChevronsRight,
 } from 'lucide-react';
 import * as React from 'react';
+import Euro from '../../../public/icons/euro';
+import Termin from '../../../public/icons/termin';
+import Miasto from '../../../public/icons/miasto';
+import Jezyk from '../../../public/icons/jezyk';
+import Kalendarz from '../../../public/icons/kalendarz';
+import Podopieczna from '../../../public/icons/podopieczna';
+import Mobilna from '../../../public/icons/mobilna';
+import Samotna from '../../../public/icons/samotna';
 
-// to co dostajemy z backendu (snake_case)
 type OfferApi = {
     id: number | string;
     title: string;
@@ -15,7 +22,11 @@ type OfferApi = {
     duration?: string | null;
     language?: string | null;
     wage?: string | null;
+    care_recipient_gender?: 'female' | 'male' | null;
+    mobility?: 'mobile' | 'limited' | 'immobile' | null;
+    lives_alone?: boolean | 'yes' | 'no' | null;
 };
+
 
 type Props = { offers: OfferApi[] };
 
@@ -30,12 +41,38 @@ export default function OffersSwiper({ offers }: Props) {
         language: o.language ?? '—',
         duration: o.duration ?? '—',
         href: `/offers/${o.id}`,
+
+        // WYLICZONE ETYKIETY NA KARTĘ:
+        gender_label:
+            o.care_recipient_gender === 'female'
+                ? 'podopieczna'
+                : o.care_recipient_gender === 'male'
+                    ? 'podopieczny'
+                    : '—',
+
+        mobility_label:
+            o.mobility === 'mobile'
+                ? 'mobilna'
+                : o.mobility === 'limited'
+                    ? 'częściowo mobilna'
+                    : o.mobility === 'immobile'
+                        ? 'niemobilna'
+                        : '—',
+
+        living_label:
+            o.lives_alone === true || o.lives_alone === 'yes'
+                ? 'samotna'
+                : o.lives_alone === false || o.lives_alone === 'no'
+                    ? 'nie samotna'
+                    : '—',
     }));
 
+console.log(slides, 'test')
     const [index, setIndex] = React.useState(0);
     const clamp = (n: number) => Math.max(0, Math.min(n, Math.max(slides.length - 1, 0)));
     const prev = () => setIndex((i) => clamp(i - 1));
     const next = () => setIndex((i) => clamp(i + 1));
+    const isDarkMode = typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
 
     // klawiatura
     React.useEffect(() => {
@@ -80,7 +117,7 @@ export default function OffersSwiper({ offers }: Props) {
     return (
         <section className="select-none px-3 sm:px-4">
             <header className="mb-4 sm:mb-6 text-center">
-                <h2 className="text-3xl md:text-6xl leading-tight tracking-tight">Oferty pracy</h2>
+                <h2 className={`text-3xl md:text-6xl leading-tight tracking-tight ${isDarkMode ? 'text-white' : ''}`}>Oferty pracy</h2>
                 <p className="mt-1 text-lg md:text-3xl text-sea">sprawdź nowości</p>
             </header>
 
@@ -98,7 +135,7 @@ export default function OffersSwiper({ offers }: Props) {
                     aria-label="Poprzednia oferta"
                     onClick={prev}
                     disabled={index === 0}
-                    className="hidden sm:flex absolute top-1/2 left-2 -translate-y-1/2 z-10 rounded-full bg-coral p-3 text-white shadow-md ring-1 ring-black/10 disabled:pointer-events-none disabled:opacity-40"
+                    className="hidden sm:flex absolute top-1/2 left-2 -translate-y-1/2 z-10 rounded-full bg-coral p-3 text-white shadow-sm ring-1 ring-black/10 disabled:pointer-events-none disabled:opacity-40"
                     type="button"
                 >
                     <ChevronLeft className="h-5 w-5" />
@@ -141,6 +178,19 @@ export default function OffersSwiper({ offers }: Props) {
                         />
                     ))}
                 </div>
+                <div className="mt-6 sm:mt-8 flex justify-center">
+                    <Link
+                        href="/offers"
+                        className="inline-flex items-center justify-center rounded-full
+               bg-coral px-6 sm:px-6 py-1 sm:py-2
+               text-xl sm:text-2xl md:text-3xl font-extrabold tracking-wide text-white
+               shadow-md ring-1 ring-black/10 transition hover:opacity-95
+               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral"
+                        aria-label="Zobacz wszystkie zlecenia"
+                    >
+                        WSZYSTKIE ZLECENIA
+                    </Link>
+                </div>
             </div>
         </section>
     );
@@ -158,7 +208,11 @@ function SlideCard({
         language: string;
         duration: string;
         href: string;
+        gender_label: string;
+        mobility_label: string;
+        living_label: string;
     };
+
 }) {
     const go = () => router.visit(slide.href);
 
@@ -167,12 +221,12 @@ function SlideCard({
         <article className="basis-full flex-none py-3 sm:py-4">
             <div
                 className="relative mx-auto w-full md:w-[70%] cursor-pointer flex flex-col
-                   rounded-3xl md:rounded-[7rem]
-                   bg-white dark:bg-white dark:text-black
-                   px-3 sm:px-4 md:px-10 py-4 sm:py-6 md:py-10
-                   shadow-[0_8px_18px_-8px_rgb(0_0_0/0.18),0_24px_60px_-20px_rgb(0_0_0/0.25)]
-                   md:shadow-[0_12px_24px_-8px_rgb(0_0_0/0.18),0_40px_90px_-20px_rgb(0_0_0/0.28)]
-                   ring-1 ring-black/10"
+             rounded-3xl md:rounded-[7rem]
+             bg-white dark:bg-white dark:text-black
+             px-3 sm:px-4 md:px-10 py-4 sm:py-6 md:py-10
+             shadow-[0_14px_28px_-10px_rgb(0_0_0/0.18),0_48px_80px_-24px_rgb(0_0_0/0.26)]
+             md:shadow-[0_10px_36px_-12px_rgb(0_0_0/0.18),0_72px_120px_-28px_rgb(0_0_0/0.28)]
+             ring-1 ring-black/10 md:ring-black/5"
                 onClick={go}
                 role="link"
                 tabIndex={0}
@@ -186,12 +240,16 @@ function SlideCard({
                 <div className="mt-5 grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2">
                     <ul className="space-y-2 sm:space-y-3">
                         <Li icon={Euro}>{slide.wage}</Li>
-                        <Li icon={CalendarCheck}>{slide.start_date}</Li>
-                        <Li icon={MapPin}>{slide.city_line}</Li>
+                        <Li icon={Termin}>{slide.start_date}</Li>
+                        <Li icon={Miasto}>{slide.city_line}</Li>
+                        <Li icon={Jezyk}>{slide.language}</Li>
+
                     </ul>
                     <ul className="space-y-2 sm:space-y-3">
-                        <Li icon={CalendarDays}>{slide.duration}</Li>
-                        <Li icon={MessageCircle}>{slide.language}</Li>
+                        <Li icon={Kalendarz}>{slide.duration}</Li>
+                        <Li icon={Podopieczna}>{slide.gender_label}</Li>
+                        <Li icon={Mobilna}>{slide.mobility_label}</Li>
+                        <Li icon={Samotna}>{slide.living_label}</Li>
                     </ul>
                 </div>
 

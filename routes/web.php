@@ -18,7 +18,8 @@ use Inertia\Inertia;
 Route::get('/', function () {
     $offers = Offer::latest()
         ->take(8)
-        ->get(['id','title','city','country','start_date','duration','language','wage']); // bez mapowania (snake_case)
+        ->get(['id','title','city','country','start_date','duration','language','wage',         'care_recipient_gender','mobility','lives_alone'
+        ]); // bez mapowania (snake_case)
 
     return Inertia::render('welcome', [
         'offers' => $offers,
@@ -39,7 +40,16 @@ Route::post('/szybka-aplikacja', [QuickApplicationController::class, 'store'])->
 /** Aplikacje (pełny formularz) */
 Route::get('/aplikacja/{offer}', [ApplicationController::class, 'create'])->name('application.create');
 Route::post('/aplikuj', [ApplicationController::class, 'store'])->name('application.store');
+Route::get('/offers', function () {
+    // prosto: najnowsze z paginacją; wybieramy tylko potrzebne pola
+    $offers = \App\Models\Offer::latest()
+        ->select(['id','title','city','country','start_date','duration','language','wage'])
+        ->paginate(12); // lub ->get() jeśli bez paginacji
 
+    return Inertia::render('Offers/Index', [
+        'offers' => $offers,
+    ]);
+})->name('offers.index');
 /*
 |--------------------------------------------------------------------------
 | Dashboard (wspólny dla zalogowanych; UI rozdzielasz po isAdmin)

@@ -46,6 +46,10 @@ class OfferController extends Controller
             'bonus'       => 'nullable|string|max:50',
 
             'hero_image'  => 'nullable|file|image|max:4096', // jpg/png/webp itp.
+            'care_recipient_gender' => 'nullable|in:female,male',
+            'mobility'              => 'nullable|in:mobile,limited,immobile',
+            'lives_alone'           => 'nullable|boolean', // albo 'nullable|in:yes,no'
+
         ]);
 
         $payload = [
@@ -64,6 +68,10 @@ class OfferController extends Controller
             'language'    => $validated['language']    ?? null,
             'wage'        => $validated['wage']        ?? null,
             'bonus'       => $validated['bonus']       ?? null,
+            'care_recipient_gender' => $validated['care_recipient_gender'] ?? null,
+            'mobility'              => $validated['mobility'] ?? null,
+            'lives_alone'           => $validated['lives_alone'] ?? null,
+
         ];
 
         if ($file = $request->file('hero_image')) {
@@ -109,6 +117,10 @@ class OfferController extends Controller
             'bonus'       => 'nullable|string|max:50',
 
             'hero_image'  => 'nullable|file|image|max:4096',
+            'care_recipient_gender' => 'nullable|in:female,male',
+            'mobility'              => 'nullable|in:mobile,limited,immobile',
+            'lives_alone'           => 'nullable|boolean', // albo 'nullable|in:yes,no'
+
         ]);
 
         $payload = [
@@ -127,6 +139,10 @@ class OfferController extends Controller
             'language'    => $validated['language']    ?? null,
             'wage'        => $validated['wage']        ?? null,
             'bonus'       => $validated['bonus']       ?? null,
+            'care_recipient_gender' => $validated['care_recipient_gender'] ?? null,
+            'mobility'              => $validated['mobility'] ?? null,
+            'lives_alone'           => $validated['lives_alone'] ?? null,
+
         ];
 
         if ($file = $request->file('hero_image')) {

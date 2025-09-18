@@ -23,13 +23,16 @@ class Offer extends Model
         'language',
         'wage',
         'bonus',
-        'hero_image'
+        'hero_image',
+        'care_recipient_gender','mobility','lives_alone',
+
     ];
 
     protected $casts = [
         'duties' => 'array',
         'requirements' => 'array',
         'benefits' => 'array',
+        'lives_alone' => 'boolean',
     ];
 
     public function applications()

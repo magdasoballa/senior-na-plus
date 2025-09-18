@@ -9,8 +9,8 @@ type Props = {
 export default function Dashboard({ isAdmin, stats }: Props) {
     return (
         <AppLayout>
-            <div className="mx-auto max-w-5xl p-6">
-                <h1 className="text-2xl font-bold">
+            <div className="mt-5 max-w-5xl p-6">
+                <h1 className="text-4xl font-bold">
                     {isAdmin ? 'Panel administracyjny' : 'Twoje konto'}
                 </h1>
 

@@ -117,7 +117,7 @@ export default function OfferDetails({ offer }: { offer: Offer }) {
                         WSTECZ
                     </a>
 
-                    <h1 className={`font-hand mt-2 text-center text-[28px] leading-snug font-semibold  md:text-[34px] ${isDarkMode ? 'text-black' : ''}`}>{title}</h1>
+                    <h1 className={`font-hand mt-2 text-center text-[28px] leading-snug   md:text-[34px] ${isDarkMode ? 'text-black' : ''}`}>{title}</h1>
 
                     {/* SZYBKA APLIKACJA -> otwiera modal */}
                     <div className="mt-3 flex justify-center">
@@ -649,9 +649,9 @@ function InfoRow({ icon, text }: { icon: React.ReactNode; text: React.ReactNode 
 function Section({ heading, children }: React.PropsWithChildren<{ heading: string }>) {
     return (
         <section className="mt-6 p-6  rounded-lg ">
-            <h2 className="text-center text-black  font-extrabold uppercase mb-4">
+            <p className="text-center text-black  font-extrabold text-[25px] uppercase mb-4">
                 {heading}
-            </h2>
+            </p>
             <div className="mt-3 text-black">{children}</div>
         </section>
     );

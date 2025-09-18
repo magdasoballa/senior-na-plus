@@ -28,6 +28,7 @@ export default function ContactFormCard() {
 
     const acceptAll = () => setData(prev => ({ ...prev, consent1: true, consent2: true, consent3: true }))
 
+
     const onSubmit = (e: React.FormEvent) => {
         e.preventDefault()
         post('/kontakt', {
@@ -42,7 +43,7 @@ export default function ContactFormCard() {
     return (
         <section className="mx-auto w-full max-w-lg px-2">
             <div className="text-center">
-                <h2 className="text-4xl  tracking-tight text-slate-800 sm:text-6xl">Kontakt</h2>
+                <h2 className={`text-4xl  tracking-tight text-slate-800 sm:text-6xl ${isDarkMode ? 'text-white' : ''}`}>Kontakt</h2>
                 <p className=" text-2xl text-sea sm:text-3xl">czekamy na Ciebie</p>
             </div>
             <form
