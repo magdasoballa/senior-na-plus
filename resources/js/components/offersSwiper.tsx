@@ -1,6 +1,7 @@
 import { Link, router } from '@inertiajs/react';
 import {
-     ChevronLeft, ChevronRight,
+    ChevronLeft,
+    ChevronRight,
     ChevronsRight,
 } from 'lucide-react';
 import * as React from 'react';
@@ -26,7 +27,6 @@ type OfferApi = {
     mobility?: 'mobile' | 'limited' | 'immobile' | null;
     lives_alone?: boolean | 'yes' | 'no' | null;
 };
-
 
 type Props = { offers: OfferApi[] };
 
@@ -67,18 +67,54 @@ export default function OffersSwiper({ offers }: Props) {
                     : '—',
     }));
 
-console.log(slides, 'test')
     const [index, setIndex] = React.useState(0);
-    const clamp = (n: number) => Math.max(0, Math.min(n, Math.max(slides.length - 1, 0)));
+    const clamp = (n: number) => ((n % slides.length) + slides.length) % slides.length; // Zapętlanie indeksu
     const prev = () => setIndex((i) => clamp(i - 1));
     const next = () => setIndex((i) => clamp(i + 1));
     const isDarkMode = typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
 
+    // Stan automatycznego przesuwania
+    const [isInteracting, setIsInteracting] = React.useState(false);
+    const intervalRef = React.useRef<NodeJS.Timeout | null>(null);
+
+    // Uruchomienie automatycznego przesuwania
+    React.useEffect(() => {
+        if (slides.length > 1 && !isInteracting) {
+            intervalRef.current = setInterval(() => {
+                setIndex((i) => clamp(i + 1));
+            }, 5000); // Przesuwanie co 5 sekund
+        }
+        return () => {
+            if (intervalRef.current) clearInterval(intervalRef.current);
+        };
+    }, [slides.length, isInteracting]);
+
+    // Zatrzymanie automatycznego przesuwania podczas interakcji
+    const handleInteractionStart = () => {
+        setIsInteracting(true);
+        if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+
+    // Wznowienie automatycznego przesuwania po krótkim czasie bez interakcji
+    const handleInteractionEnd = () => {
+        setIsInteracting(false);
+        // Poczekaj 2 sekundy przed wznowieniem
+        setTimeout(() => {
+            if (!isInteracting && slides.length > 1) {
+                intervalRef.current = setInterval(() => {
+                    setIndex((i) => clamp(i + 1));
+                }, 5000);
+            }
+        }, 2000);
+    };
+
     // klawiatura
     React.useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
+            handleInteractionStart();
             if (e.key === 'ArrowLeft') prev();
             if (e.key === 'ArrowRight') next();
+            handleInteractionEnd();
         };
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
@@ -86,8 +122,11 @@ console.log(slides, 'test')
 
     // swipe na mobile
     const startRef = React.useRef<number | null>(null);
-    const onTouchStart = (e: React.TouchEvent) => { startRef.current = e.touches[0].clientX; };
-    const onTouchMove  = (e: React.TouchEvent) => {
+    const onTouchStart = (e: React.TouchEvent) => {
+        handleInteractionStart();
+        startRef.current = e.touches[0].clientX;
+    };
+    const onTouchMove = (e: React.TouchEvent) => {
         if (startRef.current == null) return;
         const dx = e.touches[0].clientX - startRef.current;
         // jeśli przesuwamy poziomo bardziej niż pionowo, blokuj scroll strony
@@ -100,6 +139,13 @@ console.log(slides, 'test')
         if (dx < -threshold) next();
         if (dx > threshold) prev();
         startRef.current = null;
+        handleInteractionEnd();
+    };
+
+    // Kliknięcia na strzałki i kropki
+    const handleClick = () => {
+        handleInteractionStart();
+        handleInteractionEnd();
     };
 
     if (slides.length === 0) {
@@ -130,29 +176,27 @@ console.log(slides, 'test')
                 onTouchMove={onTouchMove}
                 onTouchEnd={onTouchEnd}
             >
-                {/* Strzałki – ukryte na mobile */}
+                {/* Strzałki – ukryte na mobile poniżej 640px */}
                 <button
                     aria-label="Poprzednia oferta"
-                    onClick={prev}
-                    disabled={index === 0}
-                    className="hidden sm:flex absolute top-1/2 left-2 -translate-y-1/2 z-10 rounded-full bg-coral p-3 text-white shadow-sm ring-1 ring-black/10 disabled:pointer-events-none disabled:opacity-40"
+                    onClick={() => { handleClick(); prev(); }}
+                    className="hidden sm:flex absolute top-1/2 left-2 -translate-y-1/2 z-10 rounded-full bg-coral p-2 text-white shadow-sm ring-1 ring-black/10 disabled:pointer-events-none disabled:opacity-40 md:p-3"
                     type="button"
                 >
-                    <ChevronLeft className="h-5 w-5" />
+                    <ChevronLeft className="h-4 w-4 md:h-5 md:w-5" />
                 </button>
 
                 <button
                     aria-label="Następna oferta"
-                    onClick={next}
-                    disabled={index === slides.length - 1}
-                    className="hidden sm:flex absolute top-1/2 right-2 -translate-y-1/2 z-10 rounded-full bg-coral p-3 text-white shadow-md ring-1 ring-black/10 disabled:pointer-events-none disabled:opacity-40"
+                    onClick={() => { handleClick(); next(); }}
+                    className="hidden sm:flex absolute top-1/2 right-2 -translate-y-1/2 z-10 rounded-full bg-coral p-2 text-white shadow-md ring-1 ring-black/10 disabled:pointer-events-none disabled:opacity-40 md:p-3"
                     type="button"
                 >
-                    <ChevronRight className="h-5 w-5" />
+                    <ChevronRight className="h-4 w-4 md:h-5 md:w-5" />
                 </button>
 
                 {/* Tor slajdów: pełne 100% + overflow-hidden -> nic nie wystaje */}
-                <div className="overflow-hidden rounded-2xl md:rounded-[2rem]" aria-live="polite">
+                <div className="overflow-hidden rounded-xl sm:rounded-2xl md:rounded-[2rem]" aria-live="polite">
                     <div
                         className="flex transition-transform duration-300 ease-out"
                         style={{ transform: `translateX(-${index * 100}%)` }}
@@ -164,26 +208,26 @@ console.log(slides, 'test')
                 </div>
 
                 {/* Kropki */}
-                <div className="mt-3 flex items-center justify-center gap-2">
+                <div className="mt-2 sm:mt-3 flex items-center justify-center gap-1 sm:gap-2">
                     {slides.map((_, i) => (
                         <button
                             key={i}
-                            onClick={() => setIndex(i)}
+                            onClick={() => { handleClick(); setIndex(i); }}
                             aria-label={`Przejdź do slajdu ${i + 1}`}
                             aria-current={i === index ? 'true' : undefined}
                             className={[
-                                'h-2.5 w-2.5 rounded-full ring-1 ring-black/10 transition',
+                                'h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full ring-1 ring-black/10 transition',
                                 i === index ? 'bg-coral scale-110' : 'bg-blush'
                             ].join(' ')}
                         />
                     ))}
                 </div>
-                <div className="mt-6 sm:mt-8 flex justify-center">
+                <div className="mt-4 sm:mt-6 flex justify-center">
                     <Link
                         href="/offers"
                         className="inline-flex items-center justify-center rounded-full
-               bg-coral px-6 sm:px-6 py-1 sm:py-2
-               text-xl sm:text-2xl md:text-3xl font-extrabold tracking-wide text-white
+               bg-coral px-4 sm:px-6 py-1 sm:py-2
+               text-lg sm:text-xl md:text-3xl font-extrabold tracking-wide text-white
                shadow-md ring-1 ring-black/10 transition hover:opacity-95
                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral"
                         aria-label="Zobacz wszystkie zlecenia"
@@ -212,40 +256,38 @@ function SlideCard({
         mobility_label: string;
         living_label: string;
     };
-
 }) {
     const go = () => router.visit(slide.href);
 
     return (
         // Slajd MA dokładnie 100% szerokości toru; zero poziomego paddingu tutaj
-        <article className="basis-full flex-none py-3 sm:py-4">
+        <article className="basis-full flex-none py-2 sm:py-3">
             <div
                 className="relative mx-auto w-full md:w-[70%] cursor-pointer flex flex-col
-             rounded-3xl md:rounded-[7rem]
+             rounded-xl sm:rounded-3xl md:rounded-[7rem]
              bg-white dark:bg-white dark:text-black
-             px-3 sm:px-4 md:px-10 py-4 sm:py-6 md:py-10
-             shadow-[0_14px_28px_-10px_rgb(0_0_0/0.18),0_48px_80px_-24px_rgb(0_0_0/0.26)]
-             md:shadow-[0_10px_36px_-12px_rgb(0_0_0/0.18),0_72px_120px_-28px_rgb(0_0_0/0.28)]
-             ring-1 ring-black/10 md:ring-black/5"
+             px-2 sm:px-3 md:px-10 py-3 sm:py-4 md:py-10
+             shadow-[0_4px_12px_-2px_rgb(0_0_0/0.1),0_12px_24px_-6px_rgb(0_0_0/0.12)] sm:shadow-[0_8px_16px_-4px_rgb(0_0_0/0.12),0_24px_48px_-12px_rgb(0_0_0/0.14)] md:shadow-[0_10px_36px_-12px_rgb(0_0_0/0.18),0_72px_120px_-28px_rgb(0_0_0/0.28)]
+             ring-1 ring-black/5 sm:ring-black/10 md:ring-black/5
+             transition-all duration-200 hover:shadow-[0_8px_24px_-4px_rgb(0_0_0/0.15)]"
                 onClick={go}
                 role="link"
                 tabIndex={0}
                 onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && go()}
                 aria-label={`Zobacz ofertę: ${slide.title}`}
             >
-                <h3 className="text-center uppercase tracking-wide text-coral text-lg sm:text-xl md:text-2xl font-extrabold">
+                <h3 className="text-center uppercase tracking-wide text-coral text-base sm:text-lg md:text-2xl font-extrabold">
                     {slide.title}
                 </h3>
 
-                <div className="mt-5 grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2">
-                    <ul className="space-y-2 sm:space-y-3">
+                <div className="mt-3 sm:mt-5 grid grid-cols-1 gap-2 sm:gap-3 sm:grid-cols-2">
+                    <ul className="space-y-1 sm:space-y-2">
                         <Li icon={Euro}>{slide.wage}</Li>
                         <Li icon={Termin}>{slide.start_date}</Li>
                         <Li icon={Miasto}>{slide.city_line}</Li>
                         <Li icon={Jezyk}>{slide.language}</Li>
-
                     </ul>
-                    <ul className="space-y-2 sm:space-y-3">
+                    <ul className="space-y-1 sm:space-y-2">
                         <Li icon={Kalendarz}>{slide.duration}</Li>
                         <Li icon={Podopieczna}>{slide.gender_label}</Li>
                         <Li icon={Mobilna}>{slide.mobility_label}</Li>
@@ -256,16 +298,16 @@ function SlideCard({
                 <Link
                     href={slide.href}
                     onClick={(e) => e.stopPropagation()}
-                    className="group mx-auto mt-6 sm:mt-8 inline-flex items-center rounded-full
-                     bg-coral px-4 py-2 sm:px-5 sm:py-2.5
-                     text-sm sm:text-base font-semibold text-white shadow-md
+                    className="group mx-auto mt-4 sm:mt-6 inline-flex items-center rounded-full
+                     bg-coral px-3 sm:px-4 py-1.5 sm:py-2
+                     text-sm font-semibold text-white shadow-md
                      ring-1 ring-black/10 transition hover:opacity-95
                      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral"
                 >
-                    <span className="text-base sm:text-lg md:text-xl font-extrabold tracking-wide text-white">SPRAWDŹ</span>
-                    <span className="ml-3 grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-full bg-black/10 ring-1 ring-black/10 transition-transform group-hover:translate-x-0.5">
-            <ChevronsRight className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
-          </span>
+                    <span className="text-base font-extrabold tracking-wide text-white">SPRAWDŹ</span>
+                    <span className="ml-2 grid h-6 w-6 sm:h-8 sm:w-8 place-items-center rounded-full bg-black/10 ring-1 ring-black/10 transition-transform group-hover:translate-x-0.5">
+                        <ChevronsRight className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                    </span>
                 </Link>
             </div>
         </article>
@@ -278,9 +320,9 @@ function Li({
                 children,
             }: React.PropsWithChildren<{ icon: (p: { className?: string }) => JSX.Element; className?: string }>) {
     return (
-        <li className={`flex items-center gap-2 sm:gap-3 rounded-lg px-2.5 sm:px-3 py-2 ${className}`}>
-            <Icon className="h-5 w-5 text-blush" />
-            <span className="text-[14px] sm:text-[15px] font-medium">{children}</span>
+        <li className={`flex items-center gap-1 sm:gap-2 rounded-lg px-2 sm:px-2.5 py-1.5 sm:py-2 ${className}`}>
+            <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-blush" />
+            <span className="text-xs sm:text-[14px] md:text-[15px] font-medium">{children}</span>
         </li>
     );
 }
