@@ -17,4 +17,9 @@ class QuickApplication extends Model
         'consent2' => 'bool',
         'consent3' => 'bool',
     ];
+
+    public function offer()
+    {
+        return $this->belongsTo(Offer::class, 'offer_id');
+    }
 }

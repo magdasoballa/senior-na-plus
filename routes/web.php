@@ -9,13 +9,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-
 Route::get('/', function () {
     $offers = Offer::latest()
         ->take(8)
         ->get([
-            'id','title','city','country','start_date','duration','language','wage',
-            'care_recipient_gender','mobility','lives_alone',
+            'id', 'title', 'city', 'country', 'start_date', 'duration', 'language', 'wage',
+            'care_recipient_gender', 'mobility', 'lives_alone',
         ]);
 
     return Inertia::render('welcome', [
@@ -39,8 +38,8 @@ Route::get('/offers', function () {
     // najnowsze z paginacją — FRONT potrzebuje zwykłej tablicy ->items()
     $paginator = Offer::latest()
         ->select([
-            'id','title','city','country','start_date','duration','language','wage',
-            'care_recipient_gender','mobility','lives_alone',
+            'id', 'title', 'city', 'country', 'start_date', 'duration', 'language', 'wage',
+            'care_recipient_gender', 'mobility', 'lives_alone',
         ])
         ->paginate(12);
 
@@ -51,8 +50,8 @@ Route::get('/offers', function () {
             'last_page'    => $paginator->lastPage(),
             'per_page'     => $paginator->perPage(),
             'total'        => $paginator->total(),
-            'prev_page_url'=> $paginator->previousPageUrl(),
-            'next_page_url'=> $paginator->nextPageUrl(),
+            'prev_page_url' => $paginator->previousPageUrl(),
+            'next_page_url' => $paginator->nextPageUrl(),
         ],
     ]);
 })->name('offers.index');
@@ -85,11 +84,17 @@ Route::middleware(['auth', 'admin'])
     ->group(function () {
         Route::resource('offers', AdminOfferController::class)->except(['show']);
 
+        // Trasy dla zwykłych aplikacji
         Route::get('applications', [ApplicationController::class, 'index'])->name('applications.index');
-        Route::get('applications/{application}', [ApplicationController::class, 'show'])->name('applications.show');
-        Route::put('applications/{application}/status', [ApplicationController::class, 'updateStatus'])->name('applications.status');
+        Route::get('applications/{application}', [ApplicationController::class, 'showApplication'])->name('applications.show');
+        Route::put('applications/{application}/status', [ApplicationController::class, 'updateStatusApplication'])->name('applications.status');
         Route::get('applications/{application}/download-references', [ApplicationController::class, 'downloadReferences'])->name('applications.download');
-        Route::delete('applications/{application}', [ApplicationController::class, 'destroy'])->name('applications.destroy');
+        Route::delete('applications/{application}', [ApplicationController::class, 'destroyApplication'])->name('applications.destroy');
+
+        // Trasy dla szybkich aplikacji
+        Route::get('quick-applications/{quickApplication}', [ApplicationController::class, 'showQuickApplication'])->name('quick-applications.show');
+        Route::put('quick-applications/{quickApplication}/status', [ApplicationController::class, 'updateStatusQuickApplication'])->name('quick-applications.status');
+        Route::delete('quick-applications/{quickApplication}', [ApplicationController::class, 'destroyQuickApplication'])->name('quick-applications.destroy');
     });
 
 /*
