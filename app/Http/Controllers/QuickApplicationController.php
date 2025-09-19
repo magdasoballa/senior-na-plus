@@ -9,23 +9,41 @@ class QuickApplicationController extends Controller
 {
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'name'     => ['required','string','max:255'],
-            'email'    => ['required','email','max:255'],
-            'phone'    => ['nullable','string','max:50'],
-            'consent1' => ['accepted'],
-            'consent2' => ['boolean'],
-            'consent3' => ['boolean'],
-            'offer_id'    => ['nullable','string','max:255'],
-            'offer_title' => ['nullable','string','max:255'],
-        ]);
+        try {
+            \Log::info('QuickApplication store hit', $request->all());
 
-        $data['ip'] = $request->ip();
-        $data['user_agent'] = $request->userAgent();
-        $data['url'] = url()->previous();
+            $data = $request->validate([
+                'name'     => ['required','string','max:255'],
+                'email'    => ['required','email','max:255'],
+                'phone'    => ['nullable','string','max:50'],
+                'consent1' => ['accepted'],
+                'consent2' => ['sometimes', 'boolean'],
+                'consent3' => ['sometimes', 'boolean'],
+                'offer_id'    => ['nullable', 'integer'],
+                'offer_title' => ['nullable','string','max:255'],
+            ]);
 
-        QuickApplication::create($data);
+            $data['consent2'] = $data['consent2'] ?? false;
+            $data['consent3'] = $data['consent3'] ?? false;
+            $data['ip'] = $request->ip();
+            $data['user_agent'] = $request->userAgent();
+            $data['url'] = url()->previous();
 
-        return back()->with('success', 'Dziękujemy! Zgłoszenie z „Szybkiej aplikacji” zostało wysłane.');
+            \Log::info('QuickApplication data validated', $data);
+
+            $application = QuickApplication::create($data);
+
+            \Log::info('QuickApplication created with ID: ' . $application->id);
+
+            return back()->with('success', 'Dziękujemy! Zgłoszenie z „Szybkiej aplikacji” zostało wysłane.');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('QuickApplication validation failed: ' . json_encode($e->errors()));
+            return back()->withErrors($e->errors())->withInput();
+
+        } catch (\Exception $e) {
+            \Log::error('QuickApplication error: ' . $e->getMessage());
+            return back()->with('error', 'Wystąpił błąd: ' . $e->getMessage());
+        }
     }
 }

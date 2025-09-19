@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Application;
 use App\Models\Offer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rules\File as FileRule;
 use Inertia\Inertia;
 
 class ApplicationController extends Controller
@@ -13,7 +15,6 @@ class ApplicationController extends Controller
     /** Public: formularz aplikacyjny dla oferty */
     public function create(Offer $offer)
     {
-        // Do frontu zwykle wystarczy id + title
         return Inertia::render('ApplicationPage', [
             'offer' => [
                 'id' => $offer->id,
@@ -25,10 +26,11 @@ class ApplicationController extends Controller
     /** Public: zapis pełnej aplikacji */
     public function store(Request $request)
     {
+        // Walidacja — max w KB (5 MB = 5120 KB)
         $validated = $request->validate([
             // podstawowe
             'name'  => 'required|string|max:255',
-            'email' => 'required|email|max:255',
+            'email' => 'required|email:rfc,dns|max:255',
             'phone' => 'required|string|max:20',
             'language_level' => 'required|string|max:50',
 
@@ -40,8 +42,15 @@ class ApplicationController extends Controller
             // doświadczenie
             'experience' => 'required|string|in:brak,od 1 roku,od 1 do 3 lat,powyżej 3 lat',
 
-            // plik
-            'references' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',
+            // plik — dopuszczalne typy i 5 MB limit
+            'references' => [
+                'nullable',
+                FileRule::types(['pdf','doc','docx','jpg','jpeg','png'])
+                    ->max(5 * 1024), // 5 MB w KB
+            ],
+
+            // kwota (jeśli wysyłasz liczbowo)
+            'salary_expectations' => 'nullable|numeric|min:0|max:1000000',
 
             // zgody
             'consent1' => 'required|accepted',
@@ -50,7 +59,10 @@ class ApplicationController extends Controller
 
             // oferta
             'offer_id' => 'required|exists:offers,id',
-            // UWAGA: nie przyjmujemy offer_title z frontu
+        ], [
+            // krótkie komunikaty (opcjonalnie)
+            'references.max'   => 'Plik z referencjami jest za duży (max 5 MB).',
+            'references.types' => 'Nieobsługiwany format. Dozwolone: PDF, DOC, DOCX, JPG, JPEG, PNG.',
         ]);
 
         $offer = Offer::findOrFail($validated['offer_id']);
@@ -72,17 +84,39 @@ class ApplicationController extends Controller
             'cooking_experience'      => $request->boolean('cooking_experience'),
             'driving_license'         => $request->boolean('driving_license'),
             'smoker'                  => $request->boolean('smoker'),
-            'salary_expectations' => $request->input('salary_expectations'),
+            'salary_expectations'     => $request->input('salary_expectations'),
             'offer_id'   => $offer->id,
-            'offer_title'=> $offer->title,  // ← z bazy, nie z requestu
+            'offer_title'=> $offer->title,  // z bazy
             'consent1'   => $request->boolean('consent1'),
             'consent2'   => $request->boolean('consent2'),
             'consent3'   => $request->boolean('consent3'),
             'status'     => 'new',
         ]);
 
-        if ($file = $request->file('references')) {
-            // np. references/abc123.pdf
+        // Upload (jeśli jest plik) — dodatkowe, defensywne sprawdzenie
+        if ($request->hasFile('references')) {
+            $file = $request->file('references');
+
+            // Sprawdź błąd uploadu po stronie PHP (np. ini_size)
+            if (!$file->isValid()) {
+                // Zaloguj szczegóły i zwróć błąd walidacji dla spójności z Inertia
+                Log::warning('Upload invalid', [
+                    'error' => $file->getError(),
+                    'error_message' => $file->getErrorMessage(),
+                ]);
+                return back()
+                    ->withErrors(['references' => 'Nie udało się wgrać pliku. Spróbuj ponownie lub wybierz mniejszy plik.'])
+                    ->withInput();
+            }
+
+            // (opcjonalnie) sprawdzenie rozmiaru w runtime — jeśli chcesz podwójny bezpiecznik
+            if ($file->getSize() > 5 * 1024 * 1024) {
+                return back()
+                    ->withErrors(['references' => 'Plik jest za duży (max 5 MB).'])
+                    ->withInput();
+            }
+
+            // Zapis do storage/public/references z bezpieczną, haszowaną nazwą
             $path = $file->store('references', 'public');
             $application->references_path = $path;
         }
@@ -97,7 +131,7 @@ class ApplicationController extends Controller
     {
         $applications = Application::with('offer')
             ->latest()
-            ->paginate(20) // lepiej niż get()
+            ->paginate(20)
             ->withQueryString();
 
         return Inertia::render('Admin/Applications/Index', [
@@ -108,13 +142,10 @@ class ApplicationController extends Controller
     /** Admin: szczegóły */
     public function show(\App\Models\Application $application)
     {
-        // Załaduj relację i wybierz konkretne kolumny (tu: to, co chcesz pokazać)
         $application->load(['offer' => function ($q) {
             $q->select('id','title','city','country','start_date','duration','language','wage');
-            // ->withoutGlobalScopes(); // odkomentuj, jeśli masz jakieś global scopes na Offer
         }]);
 
-        // Wyślij jawny kształt propsów
         return \Inertia\Inertia::render('Admin/Applications/Show', [
             'application' => [
                 'id'    => $application->id,
@@ -124,7 +155,7 @@ class ApplicationController extends Controller
                 'offer' => $application->offer
                     ? $application->offer->only(['id','title','city','country','start_date','duration','language','wage'])
                     : null,
-                'offer_title' => $application->offer_title, // fallback
+                'offer_title' => $application->offer_title,
             ],
         ]);
     }
@@ -133,7 +164,6 @@ class ApplicationController extends Controller
     public function downloadReferences(Application $application)
     {
         abort_if(!$application->references_path, 404, 'Plik nie istnieje');
-
         return Storage::disk('public')->download($application->references_path);
     }
 

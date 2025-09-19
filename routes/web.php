@@ -9,11 +9,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-/*
-|--------------------------------------------------------------------------
-| Public
-|--------------------------------------------------------------------------
-*/
 
 Route::get('/', function () {
     $offers = Offer::latest()
@@ -50,9 +45,7 @@ Route::get('/offers', function () {
         ->paginate(12);
 
     return Inertia::render('Offers/Index', [
-        // jeżeli w komponencie robisz (offers ?? []).map(...), wyślij same pozycje:
         'offers' => $paginator->items(),
-        // jeśli kiedyś dodasz paginację na froncie, doślij też proste meta:
         'pagination' => [
             'current_page' => $paginator->currentPage(),
             'last_page'    => $paginator->lastPage(),
@@ -64,11 +57,8 @@ Route::get('/offers', function () {
     ]);
 })->name('offers.index');
 
-/*
-|--------------------------------------------------------------------------
-| Dashboard (wspólny dla zalogowanych; UI rozdzielasz po isAdmin)
-|--------------------------------------------------------------------------
-*/
+Route::get('/aplikacja/{offer}', [ApplicationController::class, 'create'])->name('application.create');
+Route::post('/aplikuj', [ApplicationController::class, 'store'])->name('application.store');
 
 Route::middleware(['auth', 'verified'])->get('/dashboard', function () {
     $user = Auth::user();

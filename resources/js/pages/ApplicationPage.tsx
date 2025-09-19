@@ -3,6 +3,18 @@ import { Link, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, ChevronsRight } from 'lucide-react';
 import * as React from 'react';
 
+// --- file validation ---
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+const ALLOWED_EXTS = ['png', 'jpg', 'jpeg', 'pdf', 'doc', 'docx'];
+
+function formatBytes(bytes: number) {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${(bytes / Math.pow(k, i)).toFixed(i ? 1 : 0)} ${sizes[i]}`;
+}
+
 type ApplicationFormData = {
     name: string;
     email: string;
@@ -55,23 +67,45 @@ export default function ApplicationPage() {
         offer_id: offer?.id,
         offer_title: offer?.title,
     });
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
+    const [fileError, setFileError] = React.useState<string | undefined>(undefined);
 
     const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const form = e.currentTarget;
 
-        // znajdź pierwszy nieprawidłowy element w formularzu
+        // HTML5: focus na pierwszym :invalid
         const firstInvalid = form.querySelector<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(':invalid');
-
         if (firstInvalid) {
-            firstInvalid.focus(); // pokaże ramkę/fokus
+            firstInvalid.focus();
             firstInvalid.reportValidity?.();
-            return; // przerwij wysyłkę
+            return;
+        }
+
+        // dodatkowy check pliku tuż przed wysyłką
+        if (data.references) {
+            const ext = data.references.name.split('.').pop()?.toLowerCase() || '';
+            if (!ALLOWED_EXTS.includes(ext)) {
+                setFileError('Nieobsługiwany format. Dozwolone: PNG, JPG, PDF, DOC, DOCX.');
+                fileInputRef.current?.focus();
+                return;
+            }
+            if (data.references.size > MAX_FILE_SIZE) {
+                setFileError('Plik jest za duży (max 5 MB).');
+                fileInputRef.current?.focus();
+                return;
+            }
         }
 
         post('/aplikuj', {
             preserveScroll: true,
-            onSuccess: () => reset(),
+            forceFormData: true,
+            onSuccess: () => {
+                setFileError(undefined);
+                // wyczyść input file fizycznie
+                if (fileInputRef.current) fileInputRef.current.value = '';
+                reset();
+            },
         });
     };
 
@@ -79,12 +113,36 @@ export default function ApplicationPage() {
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] || null;
+
+        // reset poprzedniego błędu
+        setFileError(undefined);
+
+        if (!file) {
+            setData('references', null);
+            return;
+        }
+
+        const ext = file.name.split('.').pop()?.toLowerCase() || '';
+        if (!ALLOWED_EXTS.includes(ext)) {
+            setFileError('Nieobsługiwany format. Dozwolone: PNG, JPG, PDF, DOC, DOCX.');
+            setData('references', null);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            return;
+        }
+
+        if (file.size > MAX_FILE_SIZE) {
+            setFileError('Plik jest za duży (max 5 MB).');
+            setData('references', null);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            return;
+        }
+
         setData('references', file);
     };
 
     return (
         <AppLayout>
-            <div className="mx-auto max-w-2xl bg-[#F5F5F4] px-4 pt-4 pb-12 ">
+            <div className="mx-auto max-w-2xl bg-[#F5F5F4] px-4 pt-4 pb-12">
                 {/* powrót */}
                 <Link href="/" className="inline-flex items-center text-sm text-foreground/60 hover:text-foreground">
                     <ArrowLeft className="mr-2 h-4 w-4" />
@@ -92,20 +150,14 @@ export default function ApplicationPage() {
                 </Link>
 
                 {/* tytuł */}
-                <h1 className="mt-2 text-center text-[40px] leading-tight font-extrabold tracking-[0.02em] text-[#2b4a44]">WYPEŁNIJ FORMULARZ</h1>
+                <p className="mt-2 text-center text-[40px] leading-tight font-extrabold tracking-[0.02em] text-[#2b4a44]">WYPEŁNIJ FORMULARZ</p>
 
                 <form onSubmit={submit} className="mt-6 space-y-8">
                     {/* PODSTAWOWE INFORMACJE */}
                     <Section title="PODSTAWOWE INFORMACJE">
                         <div className="space-y-4">
                             <Field>
-                                <InputFloat
-                                    name="name"
-                                    label="IMIĘ I NAZWISKO*"
-                                    required
-                                    value={data.name}
-                                    onChange={(v) => setData("name", v)}
-                                />
+                                <InputFloat name="name" label="IMIĘ I NAZWISKO*" required value={data.name} onChange={(v) => setData('name', v)} />
                             </Field>
 
                             <Field label="E-MAIL*">
@@ -115,7 +167,7 @@ export default function ApplicationPage() {
                                     type="email"
                                     required
                                     value={data.email}
-                                    onChange={(v) => setData("email", v)}
+                                    onChange={(v) => setData('email', v)}
                                 />
                             </Field>
 
@@ -126,7 +178,7 @@ export default function ApplicationPage() {
                                     type="tel"
                                     required
                                     value={data.phone}
-                                    onChange={(v) => setData("phone", v)}
+                                    onChange={(v) => setData('phone', v)}
                                 />
                             </Field>
 
@@ -136,7 +188,7 @@ export default function ApplicationPage() {
                                     label="ZNAJOMOŚĆ JĘZYKA*"
                                     required
                                     value={data.language_level}
-                                    onChange={(v) => setData("language_level", v)}
+                                    onChange={(v) => setData('language_level', v)}
                                 />
                             </Field>
                         </div>
@@ -236,14 +288,12 @@ export default function ApplicationPage() {
                                     name="salary_expectations"
                                     label="OCZEKIWANIA FINANSOWE W EURO"
                                     value={data.salary_expectations}
-                                    onChange={(v) => setData("salary_expectations", v)}
+                                    onChange={(v) => setData('salary_expectations', v)}
                                     inputMode="numeric"
                                     pattern="[0-9]+([,.][0-9]+)?"
                                     rightSlot="€"
                                 />
                             </Field>
-
-
 
                             {/* DODAJ REFERENCJE – wygląd jak na screenie */}
                             <div className="mt-2">
@@ -258,6 +308,7 @@ export default function ApplicationPage() {
                                         {/* prawy przycisk zajmuje CAŁĄ wysokość pigułki */}
                                         <label className="absolute top-0 right-0 h-full w-[150px]">
                                             <input
+                                                ref={fileInputRef}
                                                 type="file"
                                                 onChange={handleFileChange}
                                                 accept=".png,.jpg,.jpeg,.pdf,.doc,.docx"
@@ -272,24 +323,24 @@ export default function ApplicationPage() {
                                         {/* mała rezerwa z prawej, żeby tekst nie wchodził pod przycisk */}
                                         <span className="invisible pr-[150px]">.</span>
                                     </div>
-
-
                                 </div>
 
                                 {/* nazwa pliku + opis formatów */}
                                 <div className="mt-1 flex items-center justify-between gap-3">
-                                    <span className="max-w-[60%] truncate text-sm text-foreground/80">{data.references?.name}</span>
-                                    <p className="text-right text-[11px] text-foreground/60">PNG, JPG, PDF, DOC, DOCX (MAX 5mb).</p>
+                                    <span className="max-w-[60%] truncate text-sm text-foreground/80">
+                                        {data.references ? `${data.references.name} (${formatBytes(data.references.size)})` : ''}
+                                    </span>
+                                    <p className="text-right text-[11px] text-foreground/60">PNG, JPG, PDF, DOC, DOCX (MAX 5 MB).</p>
                                 </div>
 
-                                <ErrorText msg={errors.references} />
+                                <ErrorText msg={fileError || errors.references} />
                             </div>
                         </div>
                     </Section>
 
                     {/* ZGODY */}
-                    <Section >
-                        <h3 className="font-semibold mb-3">ZAAKCEPTUJ ZGODY</h3>
+                    <Section>
+                        <h3 className="mb-3 font-semibold">ZAAKCEPTUJ ZGODY</h3>
 
                         <div className="space-y-3">
                             <ConsentRow
@@ -352,19 +403,19 @@ function Field({ children }: React.PropsWithChildren<{ label?: string }>) {
 }
 
 function InputFloat({
-                        id,
-                        name,
-                        label,
-                        value,
-                        onChange,
-                        type = "text",
-                        required,
-                        inputMode,
-                        pattern,
-                        autoComplete,
-                        rightSlot,
-                        maxLength,
-                    }: {
+    id,
+    name,
+    label,
+    value,
+    onChange,
+    type = 'text',
+    required,
+    inputMode,
+    pattern,
+    autoComplete,
+    rightSlot,
+    maxLength,
+}: {
     id?: string;
     name: string;
     label: string;
@@ -372,7 +423,7 @@ function InputFloat({
     onChange: (v: string) => void;
     type?: React.HTMLInputTypeAttribute;
     required?: boolean;
-    inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
+    inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
     pattern?: string;
     autoComplete?: string;
     rightSlot?: React.ReactNode;
@@ -389,43 +440,27 @@ function InputFloat({
                 required={required}
                 value={value}
                 onChange={(e) => onChange(e.currentTarget.value)}
-                placeholder=" "                              // ważne dla :placeholder-shown
+                placeholder=" " // ważne dla :placeholder-shown
                 inputMode={inputMode}
                 pattern={pattern}
                 autoComplete={autoComplete}
                 maxLength={maxLength}
-                className={`peer h-12 w-full rounded-full bg-white px-5 pt-4 pb-1
-                    focus:outline-none focus:ring-2 focus:ring-mint
-
-                    ${rightSlot ? "pr-12" : ""}`}
+                className={`peer h-12 w-full rounded-full bg-white px-5 pt-4 pb-1 focus:ring-2 focus:ring-mint focus:outline-none ${rightSlot ? 'pr-12' : ''}`}
             />
 
             {/* label pływający */}
             <label
                 htmlFor={inputId}
-                className="
-          pointer-events-none absolute left-5 top-1.5 z-10
-          text-xs font-semibold uppercase tracking-wide text-foreground/70 transition-all
-          peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2
-          peer-placeholder-shown:text-[15px] peer-placeholder-shown:font-extrabold
-          peer-placeholder-shown:text-black/80
-          peer-focus:top-1.5 peer-focus:translate-y-0 peer-focus:text-xs peer-focus:text-coral
-        "
+                className="pointer-events-none absolute top-1.5 left-5 z-10 text-xs font-semibold tracking-wide text-foreground/70 uppercase transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-[15px] peer-placeholder-shown:font-extrabold peer-placeholder-shown:text-black/80 peer-focus:top-1.5 peer-focus:translate-y-0 peer-focus:text-xs peer-focus:text-coral"
             >
                 {label}
             </label>
 
             {/* sufiks, np. € */}
-            {rightSlot && (
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-foreground/60">
-          {rightSlot}
-        </span>
-            )}
+            {rightSlot && <span className="absolute top-1/2 right-4 -translate-y-1/2 text-sm font-semibold text-foreground/60">{rightSlot}</span>}
         </div>
     );
 }
-
-
 
 function ConsentRow({ checked, onChange, label, error }: { checked: boolean; onChange: (v: boolean) => void; label: string; error?: string }) {
     const [open, setOpen] = React.useState(false);
