@@ -18,13 +18,12 @@ export default function Index({ applications }: { applications?: ApplicationsPro
     const items: Application[] = Array.isArray(applications)
         ? applications
         : applications?.data ?? [];
-
     return (
         <AppLayout>
-            <div className="max-w-4xl mx-auto p-6">
-                <Link href="/" className="text-coral">&larr; Wróć</Link>
+            <div className="max-w-5xl  p-6">
+                <Link href="/dashboard" className="text-coral">&larr; Wróć</Link>
 
-                <h1 className="text-2xl font-bold mb-4">Aplikacje</h1>
+                <h1 className="text-2xl font-bold mb-4 mt-5">Aplikacje</h1>
 
                 {items.length === 0 ? (
                     <p>Brak aplikacji.</p>

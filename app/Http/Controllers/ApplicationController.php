@@ -148,14 +148,35 @@ class ApplicationController extends Controller
 
         return \Inertia\Inertia::render('Admin/Applications/Show', [
             'application' => [
-                'id'    => $application->id,
-                'name'  => $application->name,
+                'id' => $application->id,
+                'name' => $application->name,
                 'email' => $application->email,
                 'phone' => $application->phone,
-                'offer' => $application->offer
-                    ? $application->offer->only(['id','title','city','country','start_date','duration','language','wage'])
-                    : null,
+                'language_level' => $application->language_level,
+                'additional_language' => $application->additional_language,
+                'learned_profession' => $application->learned_profession,
+                'current_profession' => $application->current_profession,
+                'experience' => $application->experience,
+                'first_aid_course' => $application->first_aid_course,
+                'medical_caregiver_course' => $application->medical_caregiver_course,
+                'care_experience' => $application->care_experience,
+                'housekeeping_experience' => $application->housekeeping_experience,
+                'cooking_experience' => $application->cooking_experience,
+                'driving_license' => $application->driving_license,
+                'smoker' => $application->smoker,
+                'salary_expectations' => $application->salary_expectations,
+                'references_path' => $application->references_path,
+                'consent1' => $application->consent1,
+                'consent2' => $application->consent2,
+                'consent3' => $application->consent3,
+                'offer_id' => $application->offer_id,
                 'offer_title' => $application->offer_title,
+                'status' => $application->status,
+                'created_at' => $application->created_at,
+                'updated_at' => $application->updated_at,
+                'offer' => $application->offer
+                    ? $application->offer->only(['id', 'title', 'city', 'country', 'start_date', 'duration', 'language', 'wage'])
+                    : null,
             ],
         ]);
     }

@@ -8,13 +8,12 @@ export default function Index({ offers }: { offers: any[] }) {
         router.delete(`/admin/offers/${encodeURIComponent(id)}`, {
             preserveScroll: true,
         });    };
-
     return (
         <AppLayout>
-        <div className="mx-auto max-w-5xl p-6">
-            <Link href="/dashboard" className="text-coral">&larr; Wróć</Link>
+        <div className=" max-w-5xl p-6">
+            <Link href="/dashboard" className="text-coral ">&larr; Wróć</Link>
 
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4 flex items-center justify-between mt-5">
                 <h1 className="text-2xl font-bold">Oferty</h1>
                 <Link
                     href="/admin/offers/create"

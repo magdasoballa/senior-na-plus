@@ -145,9 +145,8 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                 ))}
                             </div>
                         </div>
-                        {user ? (
-                            // === AVATAR i menu TYKO dla zalogowanego ===
-                            <DropdownMenu>
+
+                        {user && <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" className="size-10 rounded-full p-1">
                                         <Avatar className="size-8 overflow-hidden rounded-full">
@@ -161,16 +160,10 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                 <DropdownMenuContent className="w-56" align="end">
                                     <UserMenuContent user={user} />
                                 </DropdownMenuContent>
-                            </DropdownMenu>
-                        ) : (
-                            // === Dla niezalogowanego: np. przycisk "Zaloguj" ===
-                            <Link
-                                href="/login"
-                                className="rounded-full bg-coral px-4 py-2 text-sm font-semibold text-white shadow-md ring-1 ring-black/10 hover:opacity-95"
-                            >
-                                Zaloguj
-                            </Link>
-                        )}
+                            </DropdownMenu>}
+
+
+
                     </div>
                 </div>
             </div>
