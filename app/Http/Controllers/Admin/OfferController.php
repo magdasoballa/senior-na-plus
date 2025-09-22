@@ -10,13 +10,51 @@ use Inertia\Inertia;
 
 class OfferController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // najprościej: bez paginacji; możesz dodać ->paginate(20)
-        $offers = Offer::latest()->get();
+        // parametry z query
+        $search  = trim((string) $request->query('search', ''));
+        $perPage = (int) $request->query('per_page', 20);
+        $perPage = in_array($perPage, [10, 20, 50, 100], true) ? $perPage : 20;
+
+        // biała lista kolumn do sortowania
+        $allowedSorts = ['created_at', 'title', 'city', 'country', 'language'];
+        $sort = $request->query('sort', 'created_at');
+        $sort = in_array($sort, $allowedSorts, true) ? $sort : 'created_at';
+
+        $dir = strtolower((string) $request->query('dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+
+        $offers = Offer::query()
+            ->when($search !== '', function ($q) use ($search) {
+                $q->where(function ($qq) use ($search) {
+                    $qq->where('title', 'like', "%{$search}%")
+                        ->orWhere('city', 'like', "%{$search}%")
+                        ->orWhere('country', 'like', "%{$search}%")
+                        ->orWhere('language', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy($sort, $dir)
+            ->paginate($perPage)               // pageName domyślnie 'page' wystarczy
+            ->withQueryString();
 
         return Inertia::render('Admin/Offers/Index', [
-            'offers' => $offers,
+            'offers' => $offers->through(function ($o) {
+                return [
+                    'id'       => $o->id,
+                    'title'    => $o->title,
+                    'city'     => $o->city,
+                    'country'  => $o->country,
+                    'language' => $o->language,
+                    'wage'     => $o->wage,
+                    'created_at' => $o->created_at,
+                ];
+            }),
+            'filters' => [
+                'search'   => $search,
+                'sort'     => $sort,
+                'dir'      => $dir,
+                'per_page' => $perPage,
+            ],
         ]);
     }
 

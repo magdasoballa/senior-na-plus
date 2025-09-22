@@ -10,9 +10,14 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\File as FileRule;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Schema;
 
 class ApplicationController extends Controller
 {
+
+    private const STATUSES = ['new','reviewed','accepted','rejected'];
+
+
     /** Public: formularz aplikacyjny dla oferty */
     public function create(Offer $offer)
     {
@@ -27,7 +32,6 @@ class ApplicationController extends Controller
     /** Public: zapis pełnej aplikacji */
     public function store(Request $request)
     {
-        // Walidacja — max w KB (5 MB = 5120 KB)
         $validated = $request->validate([
             'name'  => 'required|string|max:255',
             'email' => 'required|email:rfc,dns|max:255',
@@ -39,8 +43,7 @@ class ApplicationController extends Controller
             'experience' => 'required|string|in:brak,od 1 roku,od 1 do 3 lat,powyżej 3 lat',
             'references' => [
                 'nullable',
-                FileRule::types(['pdf','doc','docx','jpg','jpeg','png'])
-                    ->max(5 * 1024),
+                FileRule::types(['pdf','doc','docx','jpg','jpeg','png'])->max(5 * 1024),
             ],
             'salary_expectations' => 'nullable|numeric|min:0|max:1000000',
             'consent1' => 'required|accepted',
@@ -105,23 +108,51 @@ class ApplicationController extends Controller
         return back()->with('success', 'Aplikacja została pomyślnie wysłana! Dziękujemy.');
     }
 
-    /** Admin: lista */
-    public function index()
+    /** Admin: lista z filtrami, sortowaniem i paginacją */
+    public function index(Request $request)
     {
-        // Zwykłe aplikacje z tabeli applications
-        $applications = Application::with(['offer' => function ($q) {
-            $q->select('id', 'title');
-        }])
-            ->latest()
-            ->paginate(20)
+        // --- wejściowe parametry filtrów i sortowania ---
+        $search   = trim((string) $request->query('search', ''));
+        $status   = (string) $request->query('status', '');
+        $perPage  = in_array((int)$request->query('per_page', 20), [10,20,50,100], true) ? (int)$request->query('per_page', 20) : 20;
+
+        $allowedSorts = ['created_at', 'name', 'email', 'status'];
+        $sort = in_array($request->query('sort', 'created_at'), $allowedSorts, true)
+            ? $request->query('sort', 'created_at')
+            : 'created_at';
+        $dir  = $request->query('dir') === 'asc' ? 'asc' : 'desc';
+
+        // ---- pełne aplikacje (tu kolumna status istnieje) ----
+        $applications = Application::query()
+            ->with(['offer:id,title'])
+            ->when($search !== '', function ($q) use ($search) {
+                $q->where(function ($qq) use ($search) {
+                    $qq->where('name','like',"%{$search}%")
+                        ->orWhere('email','like',"%{$search}%")
+                        ->orWhere('phone','like',"%{$search}%");
+                });
+            })
+            ->when($status !== '', fn($q) => $q->where('status', $status))
+            ->orderBy($sort, $dir)
+            ->paginate($perPage, ['*'], 'applications_page')
             ->withQueryString();
 
-        // Szybkie aplikacje z tabeli quick_applications
-        $quickApplications = QuickApplication::with(['offer' => function ($q) {
-            $q->select('id', 'title');
-        }])
-            ->latest()
-            ->paginate(20)
+        // ---- szybkie aplikacje (status może NIE istnieć) ----
+        $quickHasStatus = Schema::hasColumn('quick_applications', 'status');
+
+        $quickApplications = QuickApplication::query()
+            ->with(['offer:id,title'])
+            ->when($search !== '', function ($q) use ($search) {
+                $q->where(function ($qq) use ($search) {
+                    $qq->where('name','like',"%{$search}%")
+                        ->orWhere('email','like',"%{$search}%")
+                        ->orWhere('phone','like',"%{$search}%");
+                });
+            })
+            ->when($status !== '' && $quickHasStatus, fn($q) => $q->where('status', $status))
+            ->when(!$quickHasStatus && $sort === 'status', fn($q) => $q->orderBy('created_at', $dir)) // fallback
+            ->when($quickHasStatus, fn($q) => $q->orderBy($sort, $dir), fn($q) => $q->orderBy($sort === 'status' ? 'created_at' : $sort, $dir))
+            ->paginate($perPage, ['*'], 'quick_page')
             ->withQueryString();
 
         return Inertia::render('Admin/Applications/Index', [
@@ -136,7 +167,7 @@ class ApplicationController extends Controller
                     'offer' => $app->offer ? $app->offer->only(['id', 'title']) : null,
                     'status' => $app->status,
                     'created_at' => $app->created_at,
-                    'type' => 'application', // Oznaczenie typu dla frontendu
+                    'type' => 'application',
                 ];
             }),
             'quick_applications' => $quickApplications->through(function ($quickApp) {
@@ -148,17 +179,26 @@ class ApplicationController extends Controller
                     'offer_id' => $quickApp->offer_id,
                     'offer_title' => $quickApp->offer_title,
                     'offer' => $quickApp->offer ? $quickApp->offer->only(['id', 'title']) : null,
-                    'status' => 'new', // Domyślny status, jeśli nie istnieje w tabeli
-                    'created_at' => $quickApp->created_at ?? now(), // Domyślna wartość, jeśli nie istnieje
+                    'status' => $quickApp->status ?? 'new',
+                    'created_at' => $quickApp->created_at ?? now(),
                     'url' => $quickApp->url,
                     'ip' => $quickApp->ip,
                     'user_agent' => $quickApp->user_agent,
                     'consent1' => $quickApp->consent1,
                     'consent2' => $quickApp->consent2,
                     'consent3' => $quickApp->consent3,
-                    'type' => 'quick_application', // Oznaczenie typu dla frontendu
+                    'type' => 'quick_application',
                 ];
             }),
+            // aktualne filtry i pomocnicze dane do UI
+            'filters' => [
+                'search'   => $search,
+                'status'   => $status,
+                'sort'     => $sort,
+                'dir'      => $dir,
+                'per_page' => $perPage,
+            ],
+            'statuses' => self::STATUSES,
         ]);
     }
 
@@ -220,7 +260,7 @@ class ApplicationController extends Controller
                 'phone' => $quickApplication->phone,
                 'offer_id' => $quickApplication->offer_id,
                 'offer_title' => $quickApplication->offer_title,
-                'status' => 'new', // Domyślny status
+                'status' => $quickApplication->status ?? 'new',
                 'created_at' => $quickApplication->created_at ?? now(),
                 'offer' => $quickApplication->offer
                     ? $quickApplication->offer->only(['id', 'title', 'city', 'country', 'start_date', 'duration', 'language', 'wage'])
