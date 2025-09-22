@@ -28,32 +28,29 @@ export default function OfferForm({ mode, offer }: Props) {
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        // zbuduj payload i usuń klucze, których nie chcemy wysyłać
         transform((d) => {
             const payload: any = { ...d };
 
-            // jeśli nie ma nowego pliku – w ogóle nie wysyłaj tego klucza
-            if (!d.hero_image) delete payload.hero_image;
+            // tylko przy edycji dopnij spoofing metody
+            if (mode === "edit") payload._method = "PUT";
 
-            // (opcjonalnie) przytnij spacje
-            if (typeof d.title === 'string') payload.title = d.title.trim();
-            if (typeof d.description === 'string') payload.description = d.description.trim();
+            if (!d.hero_image) delete payload.hero_image; // nie wysyłaj nulli pliku
+            if (typeof d.title === "string") payload.title = d.title.trim();
+            if (typeof d.description === "string") payload.description = d.description.trim();
 
             return payload;
         });
 
-        // tylko gdy jest plik — wysyłamy multipart/FormData
-        const options = {
-            preserveScroll: true,
-            ...(data.hero_image ? { forceFormData: true } : {}),
-        };
+        const options = { preserveScroll: true, forceFormData: true };
 
         if (mode === "create") {
             post("/admin/offers", options);
         } else {
-            put(`/admin/offers/${encodeURIComponent(offer.id)}`, options);
+            // UŻYJ POST, nie put()
+            post(`/admin/offers/${encodeURIComponent(offer!.id)}`, options);
         }
     };
+
 
 
     return (
