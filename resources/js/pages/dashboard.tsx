@@ -20,7 +20,7 @@ export default function Dashboard({ isAdmin, stats }: Props) {
                         <NavList
                             items={[
                                 { label: 'Strony', href: '/admin/settings/pages' },
-                                { label: 'Linki społecznościowe', href: '/admin/social' },
+                                { label: 'Linki społecznościowe', href: '/admin/settings/social-links'},
                                 { label: 'Banery', href: '/admin/banners' },
                                 { label: 'Ustawienia portalu', href: '/admin/settings' },
                                 { label: 'Popup', href: '/admin/popup' }

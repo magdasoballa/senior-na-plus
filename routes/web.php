@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\OfferController as AdminOfferController;
+use App\Http\Controllers\Admin\Settings\SocialLinkController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ContactMessageController;
 use App\Http\Controllers\Front\OfferController;
@@ -67,37 +68,7 @@ Route::middleware(['auth', 'verified'])->get('/dashboard', function () {
 |--------------------------------------------------------------------------
 */
 
-// ===== importy do panelu =====
-use App\Http\Controllers\Admin\Settings\PageController as SettingsPageController;
-use App\Http\Controllers\Admin\Settings\SocialLinkController;
-use App\Http\Controllers\Admin\Settings\BannerController;
-use App\Http\Controllers\Admin\Settings\PortalSettingsController;
-use App\Http\Controllers\Admin\Settings\PopupController;
 
-use App\Http\Controllers\Admin\Dictionaries\SkillController;
-use App\Http\Controllers\Admin\Dictionaries\CareTargetController;
-use App\Http\Controllers\Admin\Dictionaries\MobilityController;
-use App\Http\Controllers\Admin\Dictionaries\GenderController;
-use App\Http\Controllers\Admin\Dictionaries\ExperienceController;
-use App\Http\Controllers\Admin\Dictionaries\RecruitmentRequirementController;
-use App\Http\Controllers\Admin\Dictionaries\DutyController;
-
-use App\Http\Controllers\Admin\Offers\OfferDutyController;
-use App\Http\Controllers\Admin\Offers\OfferRequirementController;
-use App\Http\Controllers\Admin\Offers\OfferPerkController;
-
-use App\Http\Controllers\Admin\Consents\FormController as ConsentsFormController;
-use App\Http\Controllers\Admin\Consents\ContactController as ConsentsContactController;
-
-use App\Http\Controllers\Admin\Messages\Pl\FrontContactController as PlFrontContactController;
-use App\Http\Controllers\Admin\Messages\Pl\SiteContactController as PlSiteContactController;
-use App\Http\Controllers\Admin\Messages\Pl\FormController as PlFormController;
-
-use App\Http\Controllers\Admin\Messages\De\SiteContactController as DeSiteContactController;
-use App\Http\Controllers\Admin\Messages\De\FormController as DeFormController;
-
-use App\Http\Controllers\Admin\PartnerController;
-use App\Http\Controllers\Admin\UserController;
 
 Route::middleware(['auth', 'admin'])
     ->prefix('admin')
