@@ -144,14 +144,17 @@ Route::middleware(['auth', 'admin'])
 
         // ===== Ustawienia =====
         Route::prefix('settings')->name('settings.')->group(function () {
-            Route::resource('pages', SettingsPageController::class);
+            Route::resource('pages', \App\Http\Controllers\Admin\Settings\PageController::class)
+                ->only(['index','edit','update','show']);
+
             Route::resource('social-links', SocialLinkController::class)->only(['index','store','update','destroy']);
             Route::resource('banners',      BannerController::class)->only(['index','store','update','destroy']);
             Route::get('portal', [PortalSettingsController::class, 'edit'])->name('portal.edit');
             Route::put('portal', [PortalSettingsController::class, 'update'])->name('portal.update');
-            Route::get('popup', [PopupController::class, 'edit'])->name('popup.edit');
-            Route::put('popup', [PopupController::class, 'update'])->name('popup.update');
+            Route::get('popup',  [PopupController::class, 'edit'])->name('popup.edit');
+            Route::put('popup',  [PopupController::class, 'update'])->name('popup.update');
         });
+
 
         // ===== Słowniki =====
         Route::prefix('dictionaries')->name('dict.')->group(function () {
