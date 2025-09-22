@@ -65,7 +65,7 @@ export default function Index() {
 
     return (
         <AppLayout>
-            <div className="max-w-5xl space-y-6 p-6">
+            <div className="max-w-6xl space-y-6 p-6">
                 <Link href="/dashboard" className="text-coral">&larr; Wróć</Link>
                 <h1 className="mt-5 text-2xl font-bold text-coral">Aplikacje</h1>
 

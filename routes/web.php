@@ -9,6 +9,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+/*
+|--------------------------------------------------------------------------
+| PUBLIC
+|--------------------------------------------------------------------------
+*/
+
 Route::get('/', function () {
     $offers = Offer::latest()
         ->take(8)
@@ -25,7 +31,7 @@ Route::get('/', function () {
 /** Szczegóły oferty (route-model binding) */
 Route::get('/offers/{offer}', function (Offer $offer) {
     return Inertia::render('Offers/Show', [
-        'offer' => $offer, // przekazujemy rekord z bazy 1:1
+        'offer' => $offer,
     ]);
 })->name('offers.show');
 
@@ -35,7 +41,6 @@ Route::post('/szybka-aplikacja', [QuickApplicationController::class, 'store'])->
 
 /** Lista ofert (/offers) */
 Route::get('/offers', function () {
-    // najnowsze z paginacją — FRONT potrzebuje zwykłej tablicy ->items()
     $paginator = Offer::latest()
         ->select([
             'id', 'title', 'city', 'country', 'start_date', 'duration', 'language', 'wage',
@@ -46,10 +51,10 @@ Route::get('/offers', function () {
     return Inertia::render('Offers/Index', [
         'offers' => $paginator->items(),
         'pagination' => [
-            'current_page' => $paginator->currentPage(),
-            'last_page'    => $paginator->lastPage(),
-            'per_page'     => $paginator->perPage(),
-            'total'        => $paginator->total(),
+            'current_page'  => $paginator->currentPage(),
+            'last_page'     => $paginator->lastPage(),
+            'per_page'      => $paginator->perPage(),
+            'total'         => $paginator->total(),
             'prev_page_url' => $paginator->previousPageUrl(),
             'next_page_url' => $paginator->nextPageUrl(),
         ],
@@ -72,29 +77,117 @@ Route::middleware(['auth', 'verified'])->get('/dashboard', function () {
     ]);
 })->name('dashboard');
 
+
 /*
 |--------------------------------------------------------------------------
-| Admin (wymaga aliasu middleware 'admin' w bootstrap/app.php)
+| ADMIN
 |--------------------------------------------------------------------------
 */
+
+// ===== importy do panelu =====
+use App\Http\Controllers\Admin\Settings\PageController as SettingsPageController;
+use App\Http\Controllers\Admin\Settings\SocialLinkController;
+use App\Http\Controllers\Admin\Settings\BannerController;
+use App\Http\Controllers\Admin\Settings\PortalSettingsController;
+use App\Http\Controllers\Admin\Settings\PopupController;
+
+use App\Http\Controllers\Admin\Dictionaries\SkillController;
+use App\Http\Controllers\Admin\Dictionaries\CareTargetController;
+use App\Http\Controllers\Admin\Dictionaries\MobilityController;
+use App\Http\Controllers\Admin\Dictionaries\GenderController;
+use App\Http\Controllers\Admin\Dictionaries\ExperienceController;
+use App\Http\Controllers\Admin\Dictionaries\RecruitmentRequirementController;
+use App\Http\Controllers\Admin\Dictionaries\DutyController;
+
+use App\Http\Controllers\Admin\Offers\OfferDutyController;
+use App\Http\Controllers\Admin\Offers\OfferRequirementController;
+use App\Http\Controllers\Admin\Offers\OfferPerkController;
+
+use App\Http\Controllers\Admin\Consents\FormController as ConsentsFormController;
+use App\Http\Controllers\Admin\Consents\ContactController as ConsentsContactController;
+
+use App\Http\Controllers\Admin\Messages\Pl\FrontContactController as PlFrontContactController;
+use App\Http\Controllers\Admin\Messages\Pl\SiteContactController as PlSiteContactController;
+use App\Http\Controllers\Admin\Messages\Pl\FormController as PlFormController;
+
+use App\Http\Controllers\Admin\Messages\De\SiteContactController as DeSiteContactController;
+use App\Http\Controllers\Admin\Messages\De\FormController as DeFormController;
+
+use App\Http\Controllers\Admin\PartnerController;
+use App\Http\Controllers\Admin\UserController;
 
 Route::middleware(['auth', 'admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+        // ===== Oferty (główny zasób) =====
         Route::resource('offers', AdminOfferController::class)->except(['show']);
 
-        // Trasy dla zwykłych aplikacji
+        // ===== Oferty – słowniki do ofert =====
+        Route::prefix('offers')->name('offers.')->group(function () {
+            Route::resource('duties',       OfferDutyController::class)->only(['index','store','update','destroy']);
+            Route::resource('requirements', OfferRequirementController::class)->only(['index','store','update','destroy']);
+            Route::resource('perks',        OfferPerkController::class)->only(['index','store','update','destroy']);
+        });
+
+        // ===== Aplikacje =====
         Route::get('applications', [ApplicationController::class, 'index'])->name('applications.index');
         Route::get('applications/{application}', [ApplicationController::class, 'showApplication'])->name('applications.show');
         Route::put('applications/{application}/status', [ApplicationController::class, 'updateStatusApplication'])->name('applications.status');
         Route::get('applications/{application}/download-references', [ApplicationController::class, 'downloadReferences'])->name('applications.download');
         Route::delete('applications/{application}', [ApplicationController::class, 'destroyApplication'])->name('applications.destroy');
 
-        // Trasy dla szybkich aplikacji
+        // ===== Szybkie aplikacje =====
         Route::get('quick-applications/{quickApplication}', [ApplicationController::class, 'showQuickApplication'])->name('quick-applications.show');
         Route::put('quick-applications/{quickApplication}/status', [ApplicationController::class, 'updateStatusQuickApplication'])->name('quick-applications.status');
         Route::delete('quick-applications/{quickApplication}', [ApplicationController::class, 'destroyQuickApplication'])->name('quick-applications.destroy');
+
+        // ===== Ustawienia =====
+        Route::prefix('settings')->name('settings.')->group(function () {
+            Route::resource('pages', SettingsPageController::class);
+            Route::resource('social-links', SocialLinkController::class)->only(['index','store','update','destroy']);
+            Route::resource('banners',      BannerController::class)->only(['index','store','update','destroy']);
+            Route::get('portal', [PortalSettingsController::class, 'edit'])->name('portal.edit');
+            Route::put('portal', [PortalSettingsController::class, 'update'])->name('portal.update');
+            Route::get('popup', [PopupController::class, 'edit'])->name('popup.edit');
+            Route::put('popup', [PopupController::class, 'update'])->name('popup.update');
+        });
+
+        // ===== Słowniki =====
+        Route::prefix('dictionaries')->name('dict.')->group(function () {
+            Route::resource('skills',             SkillController::class)->only(['index','store','update','destroy']);
+            Route::resource('care-targets',       CareTargetController::class)->only(['index','store','update','destroy']);
+            Route::resource('mobility',           MobilityController::class)->only(['index','store','update','destroy']);
+            Route::resource('genders',            GenderController::class)->only(['index','store','update','destroy']);
+            Route::resource('experience',         ExperienceController::class)->only(['index','store','update','destroy']);
+            Route::resource('recruitment-reqs',   RecruitmentRequirementController::class)->only(['index','store','update','destroy']);
+            Route::resource('duties',             DutyController::class)->only(['index','store','update','destroy']);
+        });
+
+        // ===== Zgody =====
+        Route::prefix('consents')->name('consents.')->group(function () {
+            Route::resource('forms',    ConsentsFormController::class)->only(['index','store','update','destroy']);
+            Route::resource('contacts', ConsentsContactController::class)->only(['index','destroy']);
+        });
+
+        // ===== Wiadomości =====
+        Route::prefix('messages')->name('msg.')->group(function () {
+            // PL
+            Route::prefix('pl')->name('pl.')->group(function () {
+                Route::resource('front-contacts', PlFrontContactController::class)->only(['index','show','destroy']);
+                Route::resource('site-contacts',  PlSiteContactController::class)->only(['index','show','destroy']);
+                Route::resource('forms',          PlFormController::class)->only(['index','show','destroy']);
+            });
+            // DE
+            Route::prefix('de')->name('de.')->group(function () {
+                Route::resource('site-contacts',  DeSiteContactController::class)->only(['index','show','destroy']);
+                Route::resource('forms',          DeFormController::class)->only(['index','show','destroy']);
+            });
+        });
+
+        // ===== Partnerzy / Użytkownicy =====
+        Route::resource('partners', PartnerController::class)->only(['index','store','update','destroy']);
+        Route::resource('users',    UserController::class)->only(['index','show']);
     });
 
 /*
