@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\OfferController as AdminOfferController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ContactMessageController;
+use App\Http\Controllers\Front\OfferController;
 use App\Http\Controllers\QuickApplicationController;
 use App\Models\Offer;
 use Illuminate\Support\Facades\Auth;
@@ -39,27 +40,9 @@ Route::get('/offers/{offer}', function (Offer $offer) {
 Route::post('/kontakt', [ContactMessageController::class, 'store'])->name('contact.store');
 Route::post('/szybka-aplikacja', [QuickApplicationController::class, 'store'])->name('quick.apply.store');
 
-/** Lista ofert (/offers) */
-Route::get('/offers', function () {
-    $paginator = Offer::latest()
-        ->select([
-            'id', 'title', 'city', 'country', 'start_date', 'duration', 'language', 'wage',
-            'care_recipient_gender', 'mobility', 'lives_alone',
-        ])
-        ->paginate(12);
+/** Lista ofert (/offers) – kontroler z filtrami */
+Route::get('/offers', [OfferController::class, 'index'])->name('offers.index');
 
-    return Inertia::render('Offers/Index', [
-        'offers' => $paginator->items(),
-        'pagination' => [
-            'current_page'  => $paginator->currentPage(),
-            'last_page'     => $paginator->lastPage(),
-            'per_page'      => $paginator->perPage(),
-            'total'         => $paginator->total(),
-            'prev_page_url' => $paginator->previousPageUrl(),
-            'next_page_url' => $paginator->nextPageUrl(),
-        ],
-    ]);
-})->name('offers.index');
 
 Route::get('/aplikacja/{offer}', [ApplicationController::class, 'create'])->name('application.create');
 Route::post('/aplikuj', [ApplicationController::class, 'store'])->name('application.store');
