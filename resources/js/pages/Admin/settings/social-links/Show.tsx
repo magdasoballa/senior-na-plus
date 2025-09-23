@@ -1,11 +1,12 @@
 import AppLayout from '@/layouts/app-layout'
 import { Link } from '@inertiajs/react'
+import AdminLayout from '@/layouts/admin-layout';
 
 export default function Show({ record }: { record:{
         id:number; name:string; url:string; icon?:string|null; visible_pl:boolean; visible_de:boolean
     }}) {
     return (
-        <AppLayout>
+        <AdminLayout>
             <div className="p-6">
                 <div className="mb-4 flex items-center justify-between">
                     <h1 className="text-2xl font-bold">Szczegóły Link społecznościowy: {record.name}</h1>
@@ -25,6 +26,6 @@ export default function Show({ record }: { record:{
                     </table>
                 </div>
             </div>
-        </AppLayout>
+        </AdminLayout>
     )
 }

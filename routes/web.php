@@ -101,7 +101,9 @@ Route::middleware(['auth', 'admin'])
             Route::resource('pages', \App\Http\Controllers\Admin\Settings\PageController::class)
                 ->only(['index','edit','update','show']);
 
-            Route::resource('social-links', SocialLinkController::class)->only(['index','store','update','destroy']);
+            Route::resource('social-links', SocialLinkController::class)
+                ->only(['index','create','store','show','edit','update','destroy'])
+                ->parameters(['social-links' => 'social_link']);
             Route::resource('banners',      BannerController::class)->only(['index','store','update','destroy']);
             Route::get('portal', [PortalSettingsController::class, 'edit'])->name('portal.edit');
             Route::put('portal', [PortalSettingsController::class, 'update'])->name('portal.update');

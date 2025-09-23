@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Settings\UpdatePageRequest;
 use App\Models\Page;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
@@ -81,27 +82,60 @@ class PageController extends Controller
     {
         $data = $request->validated();
 
-        // checkboxy mogą nie przyjść -> ustaw jednoznacznie
-        $data['visible_pl'] = $request->boolean('visible_pl');
-        $data['visible_de'] = $request->boolean('visible_de');
-
-        // uploady
+        // Uploady (jeśli przyszły pliki)
         if ($request->hasFile('image_pl')) {
-            if ($page->image_pl) Storage::disk('public')->delete($page->image_pl);
+            if ($page->image_pl) \Storage::disk('public')->delete($page->image_pl);
             $data['image_pl'] = $request->file('image_pl')->store('pages', 'public');
         }
         if ($request->hasFile('image_de')) {
-            if ($page->image_de) Storage::disk('public')->delete($page->image_de);
+            if ($page->image_de) \Storage::disk('public')->delete($page->image_de);
             $data['image_de'] = $request->file('image_de')->store('pages', 'public');
         }
 
-        $page->update($data);
+        // Budujemy updates tylko z kluczy, które przyszły
+        $updates = [];
 
-        // obsługa dwóch przycisków
+        foreach ([
+                     'name','slug',
+                     'image_pl','image_de',
+                     'meta_title_pl','meta_title_de',
+                     'meta_description_pl','meta_description_de',
+                     'meta_keywords_pl','meta_keywords_de',
+                     'meta_copyright_pl','meta_copyright_de',
+                 ] as $key) {
+            if (array_key_exists($key, $data)) {
+                $updates[$key] = $data[$key];
+            }
+        }
+
+        // Widoczności – ustawiamy TYLKO jeśli przysłał front (FormData z 1/0)
+        if ($request->has('visible_pl')) {
+            $updates['visible_pl'] = $request->boolean('visible_pl');
+        }
+        if ($request->has('visible_de')) {
+            $updates['visible_de'] = $request->boolean('visible_de');
+        }
+
+        // Zapis bez pułapek mass-assignment
+        $before = $page->replicate(); // do logowania
+        $saved = $page->forceFill($updates)->save();
+
+        // LOG: zobaczysz w storage/logs/laravel.log co poszło do DB
+        Log::info('Page update', [
+            'id'      => $page->id,
+            'request' => $request->all(),
+            'updates' => $updates,
+            'saved'   => $saved,
+            'changes' => $page->getChanges(), // co się faktycznie zmieniło
+        ]);
+
         return $request->boolean('stay')
             ? back()->with('success', 'Zapisano zmiany.')
             : redirect()->route('admin.settings.pages.show', $page)->with('success', 'Zapisano zmiany.');
     }
+
+
+
 
     public function show(Page $page)
     {

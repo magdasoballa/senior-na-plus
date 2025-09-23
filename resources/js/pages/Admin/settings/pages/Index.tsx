@@ -2,6 +2,8 @@
 import AppLayout from '@/layouts/app-layout'
 import { Link, router } from '@inertiajs/react'
 import { useState } from 'react'
+import AdminLayout from '@/layouts/admin-layout';
+import { CheckCircle2, XCircle } from 'lucide-react'
 
 type PageRow = {
     id: number
@@ -35,7 +37,7 @@ export default function PagesIndex({ pages, filters }: Props) {
     }
 
     return (
-        <AppLayout>
+        <AdminLayout>
             <main className="p-6">
                 {/* nagłówek */}
                 <div className="text-sm text-green">Zasoby › Strony</div>
@@ -155,7 +157,7 @@ export default function PagesIndex({ pages, filters }: Props) {
                     Senior na plus {new Date().getFullYear()}
                 </div>
             </main>
-        </AppLayout>
+        </AdminLayout>
     )
 }
 
@@ -194,13 +196,12 @@ function Thumb({ src }: { src: string }) {
 function Status({ ok }: { ok: boolean }) {
     return (
         <span className="inline-flex items-center gap-2">
-      <span
-          className={`inline-block h-5 w-5 rounded-full ring-2 ${
-              ok ? 'bg-green-500 ring-green-100' : 'bg-rose-500 ring-rose-100'
-          }`}
-          aria-hidden
-      />
-      <span className="sr-only">{ok ? 'Widoczny' : 'Niewidoczny'}</span>
+      {ok ? (
+          <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden />
+      ) : (
+          <XCircle className="h-5 w-5 text-rose-600" aria-hidden />
+      )}
+            <span className="sr-only">{ok ? 'Widoczny' : 'Niewidoczny'}</span>
     </span>
     )
 }

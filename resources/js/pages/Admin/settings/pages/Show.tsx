@@ -1,16 +1,28 @@
 import AppLayout from '@/layouts/app-layout'
 import { Link } from '@inertiajs/react'
 import { useState } from 'react'
+import AdminLayout from '@/layouts/admin-layout';
+import { CheckCircle2, XCircle } from 'lucide-react';
 
 export default function Show({ page }: any) {
     const [lang, setLang] = useState<'pl' | 'de'>('pl')
 
-    const Status = ({ ok }: { ok: boolean }) => (
-        <span className={`inline-block h-5 w-5 rounded-full ${ok ? 'bg-green-500' : 'bg-rose-500'}`} />
-    )
+    function Status({ ok }: { ok: boolean }) {
+        return (
+            <span className="inline-flex items-center gap-2">
+      {ok ? (
+          <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden />
+      ) : (
+          <XCircle className="h-5 w-5 text-rose-600" aria-hidden />
+      )}
+                <span className="sr-only">{ok ? 'Widoczny' : 'Niewidoczny'}</span>
+    </span>
+        )
+    }
+
 
     return (
-        <AppLayout>
+        <AdminLayout>
             <main className="p-6">
                 <div className="text-sm text-green">Zasoby › Strony › Szczegóły Strona: {page.name}</div>
                 <div className="mt-1 flex items-center justify-between">
@@ -84,7 +96,7 @@ export default function Show({ page }: any) {
                     </div>
                 </div>
             </main>
-        </AppLayout>
+        </AdminLayout>
     )
 }
 

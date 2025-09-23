@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Admin\Settings;
+namespace app\Http\Requests\Admin\Settings;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -14,6 +14,8 @@ class StoreSocialLinkRequest extends FormRequest
             'name'       => ['required','string','max:190'],
             'url'        => ['required','url','max:255'],
             'icon'       => ['nullable','string','max:190'],
+            'icon_file'  => ['nullable','file','mimes:svg,png,jpg,jpeg,webp','max:2048','required_without:icon'],
+
             'visible_pl' => ['sometimes','boolean'],
             'visible_de' => ['sometimes','boolean'],
         ];

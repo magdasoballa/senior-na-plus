@@ -1,6 +1,7 @@
 import AppLayout from '@/layouts/app-layout'
 import { Link, useForm } from '@inertiajs/react'
 import { useMemo, useState } from 'react'
+import AdminLayout from '@/layouts/admin-layout';
 
 type PageDto = {
   id: number
@@ -45,12 +46,32 @@ export default function Edit({ page }: { page: PageDto }) {
     image_de: null as File | null,
   })
 
-  const submit = (stay = false) =>
-    form.post(`/admin/settings/pages/${page.id}`, {
-      forceFormData: true,
-      onBefore: () => form.transform((d) => ({ ...d, _method: 'put', stay: stay ? 1 : 0 })),
-      preserveScroll: true,
-    })
+
+    const submit = (stay = false) => {
+        form.transform((d: any) => {
+            const payload: any = {
+                ...d,
+                stay,
+                visible_pl: d.visible_pl ? 1 : 0,
+                visible_de: d.visible_de ? 1 : 0,
+                _method: 'put', // method spoofing
+            };
+
+            // ⬇️ kluczowe: nie wysyłaj pustych "plików"
+            if (!(d.image_pl instanceof File)) delete payload.image_pl;
+            if (!(d.image_de instanceof File)) delete payload.image_de;
+
+            return payload;
+        });
+
+        form.post(`/admin/settings/pages/${page.id}`, {
+            forceFormData: true,      // multipart/form-data
+            preserveScroll: true,
+        });
+    };
+
+
+
 
   const setFile = (key: 'image_pl' | 'image_de') =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,7 +80,7 @@ export default function Edit({ page }: { page: PageDto }) {
     }
 
   return (
-    <AppLayout>
+    <AdminLayout>
       <main className="p-6">
         <h1 className="text-2xl font-bold">Aktualizacja Strona: {page.name}</h1>
 
@@ -195,7 +216,7 @@ export default function Edit({ page }: { page: PageDto }) {
           </div>
         </form>
       </main>
-    </AppLayout>
+    </AdminLayout>
   )
 }
 
