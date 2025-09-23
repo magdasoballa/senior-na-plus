@@ -45,49 +45,49 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
             <div className="">
                 <div className="mx-auto flex h-16 items-center px-4 mt-5 md:max-w-7xl">
                     {/* Mobile Menu */}
-                    <div className="lg:hidden">
-                        <Sheet>
-                            <SheetTrigger asChild>
-                                <Button variant="ghost" size="icon" className="mr-2 h-[34px] w-[34px]">
-                                    <Menu className="h-5 w-5" />
-                                </Button>
-                            </SheetTrigger>
-                            <SheetContent side="left" className="flex h-full w-64 flex-col items-stretch justify-between bg-sidebar">
-                                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                                <SheetHeader className="flex justify-start text-left">
-                                    <LogoMobile className=" fill-current text-black dark:text-white" width='200px'/>
+                    {/*<div className="lg:hidden">*/}
+                    {/*    <Sheet>*/}
+                    {/*        <SheetTrigger asChild>*/}
+                    {/*            <Button variant="ghost" size="icon" className="mr-2 h-[34px] w-[34px]">*/}
+                    {/*                <Menu className="h-5 w-5" />*/}
+                    {/*            </Button>*/}
+                    {/*        </SheetTrigger>*/}
+                    {/*        <SheetContent side="left" className="flex h-full w-64 flex-col items-stretch justify-between bg-sidebar">*/}
+                    {/*            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>*/}
+                    {/*            <SheetHeader className="flex justify-start text-left">*/}
+                    {/*                <LogoMobile className=" fill-current text-black dark:text-white" width='200px'/>*/}
 
-                                </SheetHeader>
-                                <div className="flex h-full flex-1 flex-col space-y-4 p-4">
-                                    <div className="flex h-full flex-col justify-between text-sm">
-                                        <div className="flex flex-col space-y-4">
-                                            {mainNavItems.map((item) => (
-                                                <Link key={item.title} href={item.href} className="flex items-center space-x-2 font-medium">
-                                                    {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
-                                                    <span>{item.title}</span>
-                                                </Link>
-                                            ))}
-                                        </div>
+                    {/*            </SheetHeader>*/}
+                    {/*            <div className="flex h-full flex-1 flex-col space-y-4 p-4">*/}
+                    {/*                <div className="flex h-full flex-col justify-between text-sm">*/}
+                    {/*                    <div className="flex flex-col space-y-4">*/}
+                    {/*                        {mainNavItems.map((item) => (*/}
+                    {/*                            <Link key={item.title} href={item.href} className="flex items-center space-x-2 font-medium">*/}
+                    {/*                                {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}*/}
+                    {/*                                <span>{item.title}</span>*/}
+                    {/*                            </Link>*/}
+                    {/*                        ))}*/}
+                    {/*                    </div>*/}
 
-                                        <div className="flex flex-col space-y-4">
-                                            {rightNavItems.map((item) => (
-                                                <a
-                                                    key={item.title}
-                                                    href={typeof item.href === 'string' ? item.href : item.href.url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex items-center space-x-2 font-medium"
-                                                >
-                                                    {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
-                                                    <span>{item.title}</span>
-                                                </a>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            </SheetContent>
-                        </Sheet>
-                    </div>
+                    {/*                    <div className="flex flex-col space-y-4">*/}
+                    {/*                        {rightNavItems.map((item) => (*/}
+                    {/*                            <a*/}
+                    {/*                                key={item.title}*/}
+                    {/*                                href={typeof item.href === 'string' ? item.href : item.href.url}*/}
+                    {/*                                target="_blank"*/}
+                    {/*                                rel="noopener noreferrer"*/}
+                    {/*                                className="flex items-center space-x-2 font-medium"*/}
+                    {/*                            >*/}
+                    {/*                                {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}*/}
+                    {/*                                <span>{item.title}</span>*/}
+                    {/*                            </a>*/}
+                    {/*                        ))}*/}
+                    {/*                    </div>*/}
+                    {/*                </div>*/}
+                    {/*            </div>*/}
+                    {/*        </SheetContent>*/}
+                    {/*    </Sheet>*/}
+                    {/*</div>*/}
 
                     <Link href='/' prefetch className="flex items-center space-x-2">
                         {isDarkMode ? <AppLogoIconWhite width='400px'/> : <AppLogoIcon width='400px'/>}

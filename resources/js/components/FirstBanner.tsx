@@ -93,7 +93,7 @@ const FirstBanner: React.FC = () => {
                 </div>
 
                 {/* Kafelki pod spodem */}
-                <div className=" grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className=" grid grid-cols-1 gap-4 sm:grid-cols-3 mt-15 md:mt-0">
                     <ActionCard
                         title="KONTAKT"
                         icon={<Kontakt width="100px" className="max-h-[90px]" />}

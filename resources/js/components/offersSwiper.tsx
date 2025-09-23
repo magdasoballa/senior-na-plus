@@ -82,7 +82,7 @@ export default function OffersSwiper({ offers }: Props) {
         if (slides.length > 1 && !isInteracting) {
             intervalRef.current = setInterval(() => {
                 setIndex((i) => clamp(i + 1));
-            }, 500000); // Przesuwanie co 5 sekund
+            }, 5000); // Przesuwanie co 5 sekund
         }
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current);
@@ -325,9 +325,9 @@ function Li({
                 children,
             }: React.PropsWithChildren<{ icon: (p: { className?: string }) => JSX.Element; className?: string }>) {
     return (
-        <li className={`flex items-center gap-1 sm:gap-2 rounded-lg px-2 sm:px-2.5  ${className}`}>
-            <Icon className="h-4 w-4 sm:h-7 sm:w-7 text-blush" />
-            <span className="text-xs  md:text-[25px] font-medium">{children}</span>
+        <li className={`flex items-center gap-1 sm:gap-2 rounded-lg px-2 sm:px-2.5 py-2 md:py-0  ${className}`}>
+            <Icon className="h-5 w-5 sm:h-7 sm:w-7 text-blush" />
+            <span className="text-md  md:text-[25px] font-medium">{children}</span>
         </li>
     );
 }
