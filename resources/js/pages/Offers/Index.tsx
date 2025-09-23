@@ -143,12 +143,15 @@ export default function OffersIndex({ offers, filters }: Props) {
 
     return (
         <AppLayout>
+
             <section className="select-none px-3 sm:px-4">
+                <Link href="/" className="text-coral">&larr; Wróć</Link>
+
                 <header className="mb-6 text-center">
+
                     <h1 className={`text-4xl md:text-6xl leading-tight tracking-tight ${isDarkMode ? 'text-white' : ''}`}>
                         Oferty pracy
                     </h1>
-                    <p className="mt-1 text-xl md:text-3xl text-sea">sprawdź nowości</p>
                 </header>
 
                 {/* FILTRY */}
@@ -365,7 +368,7 @@ function OfferCard({ slide }: {
             ring-1 ring-black/10 transition hover:opacity-95
             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral"
                 >
-                    <span className="text-lg md:text-xl font-extrabold tracking-wide text-white">SPRAWDŹ</span>
+                    <span className="text-lg md:text-xl font-extrabold tracking-wide !text-white">SPRAWDŹ</span>
                     <span className="ml-3 grid h-9 w-9 place-items-center rounded-full bg-black/10 ring-1 ring-black/10 transition-transform group-hover:translate-x-0.5">
             <ChevronsRight className="h-6 w-6 text-white" />
           </span>
@@ -382,8 +385,8 @@ function Li({
             }: React.PropsWithChildren<{ icon: (p: { className?: string }) => JSX.Element; className?: string }>) {
     return (
         <li className={`flex items-center gap-3 rounded-lg px-3 py-2 ${className}`}>
-            <Icon className="h-5 w-5 text-blush" />
-            <span className="text-[15px] font-medium">{children}</span>
+            <Icon className="h-5 w-5 sm:h-7 sm:w-7 text-blush" />
+            <span className="text-md  md:text-[25px] font-medium">{children}</span>
         </li>
     );
 }

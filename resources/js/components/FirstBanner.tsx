@@ -41,14 +41,14 @@ function ActionCard({
                 <div className="flex items-center justify-center rounded-2xl">
                     {icon}
                 </div>
-                <div className="text-4xl tracking-tight text-slate-800 capitalize">
+                <div className="text-4xl tracking-tight text-[#22423c] capitalize">
                     {title}
                 </div>
 
-                <span className="group inline-flex items-center rounded-full bg-coral px-4 py-2 font-extrabold text-white shadow-md ring-1 ring-black/10 transition hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral text-xl">
+                <span className="group inline-flex items-center rounded-full bg-coral px-4 py-2 font-extrabold !text-white shadow-md ring-1 ring-black/10 transition hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral text-xl">
           {cta}
                     <span className="ml-3 grid h-9 w-9 place-items-center rounded-full bg-black/10 ring-1 ring-black/10 transition-transform group-hover:translate-x-0.5">
-            <ChevronsRight className="h-7 w-7" />
+            <ChevronsRight className="h-7 w-7 text-white" />
           </span>
         </span>
             </CardContent>
@@ -78,7 +78,7 @@ const FirstBanner: React.FC = () => {
                 <div className="flex flex-col-reverse items-center gap-8 md:flex-row md:items-end">
                     {/* Tekst (lewa kolumna) */}
                     <div className="md:max-w-[40%] md:self-start">
-                        <h1 className="text-6xl text-slate-700">
+                        <h1 className="text-6xl ">
                             <span className="block text-center">Troska i pomoc </span>
 
                             <span className="block text-center">- Twoja praca,</span>

@@ -309,7 +309,7 @@ function SlideCard({
                      ring-1 ring-black/10 transition hover:opacity-95
                      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral"
                 >
-                    <span className="text-base font-extrabold tracking-wide text-white">SPRAWDŹ</span>
+                    <span className="text-base font-extrabold tracking-wide !text-white">SPRAWDŹ</span>
                     <span className="ml-2 grid h-6 w-6 sm:h-8 sm:w-8 place-items-center rounded-full bg-black/10 ring-1 ring-black/10 transition-transform group-hover:translate-x-0.5">
                         <ChevronsRight className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                     </span>

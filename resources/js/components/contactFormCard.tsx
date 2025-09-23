@@ -43,7 +43,7 @@ export default function ContactFormCard() {
     return (
         <section className="mx-auto w-full max-w-lg px-2">
             <div className="text-center">
-                <h2 className={`text-4xl  tracking-tight text-slate-800 sm:text-6xl ${isDarkMode ? 'text-white' : ''}`}>Kontakt</h2>
+                <h2 className={`text-4xl  tracking-tight  sm:text-6xl ${isDarkMode ? 'text-white' : ''}`}>Kontakt</h2>
             </div>
             <form
                 onSubmit={onSubmit}
@@ -131,7 +131,7 @@ export default function ContactFormCard() {
                     >
                         {processing ? 'Wysyłanie…' : 'WYŚLIJ'}
                         <span className="ml-3 grid h-9 w-9 place-items-center rounded-full bg-black/10 ring-1 ring-black/10 transition-transform group-hover:translate-x-0.5">
-              <ChevronsRight className="h-7 w-7" />
+              <ChevronsRight className="h-7 w-7 !text-white" />
             </span>
                     </button>
                 </div>

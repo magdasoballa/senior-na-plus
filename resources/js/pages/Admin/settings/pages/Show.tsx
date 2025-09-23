@@ -12,7 +12,7 @@ export default function Show({ page }: any) {
     return (
         <AppLayout>
             <main className="p-6">
-                <div className="text-sm text-slate-500">Zasoby › Strony › Szczegóły Strona: {page.name}</div>
+                <div className="text-sm text-green">Zasoby › Strony › Szczegóły Strona: {page.name}</div>
                 <div className="mt-1 flex items-center justify-between">
                     <h1 className="text-2xl font-bold">Szczegóły Strona: {page.name}</h1>
                     <Link
@@ -78,7 +78,7 @@ export default function Show({ page }: any) {
                             <button className="rounded-md border px-2 py-1">⏷</button>
                         </div>
                     </div>
-                    <div className="rounded-xl border bg-white p-6 text-slate-500">
+                    <div className="rounded-xl border bg-white p-6 text-green">
                         {/* tu dorobimy listing sekcji */}
                         Brak sekcji.
                     </div>

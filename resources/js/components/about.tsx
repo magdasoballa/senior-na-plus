@@ -32,7 +32,7 @@ const AboutSection = () => {
             <div className="mx-auto max-w-3xl px-6 py-12 sm:py-16">
                 {/* Nagłówki */}
                 <div className="text-center">
-                    <h2 className="text-4xl  tracking-tight text-slate-800 sm:text-6xl">O nas</h2>
+                    <h2 className="text-4xl  tracking-tight  sm:text-6xl">O nas</h2>
                 </div>
 
                 {/* Hero obraz */}
@@ -41,7 +41,7 @@ const AboutSection = () => {
                 </div>
 
                 {/* Tekst */}
-                <div className="mt-6 text-justify leading-8 text-slate-700 text-2xl">
+                <div className="mt-6 text-justify leading-8  text-2xl">
                     <p>
                         <strong>Senior na Plus</strong> to agencja zatrudnienia specjalizująca się w rekrutacji i
                         pośrednictwie pracy dla opiekunów osób starszych. Naszą misją jest łączenie
@@ -57,8 +57,8 @@ const AboutSection = () => {
                   <OferujemyBanner />
 
                     <div className="mt-6 justify-center items-center  flex flex-col">
-                        <h3 className="font-extrabold tracking-tight text-slate-900">OFERUJEMY:</h3>
-                        <ul className="mt-3 space-y-2 text-slate-700 ">
+                        <h3 className="font-extrabold tracking-tight text-green">OFERUJEMY:</h3>
+                        <ul className="mt-3 space-y-2 text-green">
                             {offers.map((item) => (
                                 <li key={item} className="flex gap-3 ">
                                     <Check className="mt-1 h-7 w-7 flex-none" aria-hidden="true" />
@@ -84,8 +84,8 @@ const AboutSection = () => {
                                 className="h-40 w-40 flex-none rounded-full object-cover "
                             />
                             <div className='justify-center items-center flex flex-col'>
-                                <div className="font-extrabold text-lg text-slate-900">{p.name} </div>
-                                <div className="text-lg text-slate-600">{p.title}</div>
+                                <div className="font-extrabold text-lg text-green">{p.name} </div>
+                                <div className="text-lg text-green">{p.title}</div>
                             </div>
                         </div>
                     ))}

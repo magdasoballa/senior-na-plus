@@ -14,7 +14,7 @@ export default function Dashboard({ isAdmin, stats }: Props) {
                 <div className="flex min-h-[calc(100vh-64px)]">
                     {/* SIDEBAR */}
                     <aside className="hidden w-72 shrink-0 border-r bg-white/80 p-4 md:block">
-                        <div className="px-2 pb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <div className="px-2 pb-3 text-xs font-semibold uppercase tracking-wide text-green">
                             Ustawienia
                         </div>
                         <NavList
@@ -62,7 +62,7 @@ export default function Dashboard({ isAdmin, stats }: Props) {
                         </Section>
 
                         <Section title="Wiadomości">
-                            <div className="px-2 pb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                            <div className="px-2 pb-1 text-[10px] font-semibold uppercase tracking-wide text-green">
                                 Wersja PL
                             </div>
                             <NavList
@@ -72,7 +72,7 @@ export default function Dashboard({ isAdmin, stats }: Props) {
                                     { label: 'Formularze (pl)', href: '/admin/messages/pl/forms', badge: 1 }
                                 ]}
                             />
-                            <div className="px-2 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                            <div className="px-2 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wide text-green">
                                 Wersja DE
                             </div>
                             <NavList
@@ -135,7 +135,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
         <div className="mt-4">
             <button
                 onClick={() => setOpen((v) => !v)}
-                className="flex w-full items-center justify-between rounded-md px-2 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                className="flex w-full items-center justify-between rounded-md px-2 py-2 text-left text-sm font-semibold text-green hover:bg-slate-50"
                 type="button"
             >
                 <span>{title}</span>
@@ -157,7 +157,7 @@ function NavList({
                 <Link
                     key={item.href + item.label}
                     href={item.href}
-                    className="group flex items-center justify-between rounded-md px-2 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                    className="group flex items-center justify-between rounded-md px-2 py-2 text-sm text-green hover:bg-slate-50"
                 >
                     <span>{item.label}</span>
                     {typeof item.badge === 'number' && item.badge > 0 && (

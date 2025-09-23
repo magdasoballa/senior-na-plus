@@ -155,13 +155,13 @@ export default function OfferDetails({ offer }: { offer: Offer }) {
                         WSTECZ
                     </a>
 
-                    <h1
+                    <div
                         className={`font-hand mt-2 text-center text-[28px] leading-snug md:text-[34px] ${
                             isDarkMode ? "text-black" : ""
                         }`}
                     >
                         {title}
-                    </h1>
+                    </div>
 
                     {/* SZYBKA APLIKACJA -> otwiera modal */}
                     <div className="mt-3 flex justify-center">
@@ -190,7 +190,7 @@ export default function OfferDetails({ offer }: { offer: Offer }) {
                     </div>
 
                     {/* kafel wynagrodzenia */}
-                    <div className="mt-6 flex items-center justify-between overflow-hidden rounded-[28px] bg-blush px-6 py-5">
+                    <div className="mt-6 flex items-center justify-between overflow-hidden rounded-[28px] bg-blush px-6 pt-5">
                         <div className="flex flex-col items-center justify-center">
                             <div className="text-sm tracking-wider text-black">STAWKA:</div>
                             <div className="text-3xl font-extrabold text-black">
@@ -205,7 +205,7 @@ export default function OfferDetails({ offer }: { offer: Offer }) {
                             </div>
                         </div>
 
-                        <ONasBanner className="max-h-[150px]" width="300px" />
+                        <ONasBanner className="pl-[80px]" width="" height="230px" />
                     </div>
 
                     {/* SEKCJE */}
@@ -752,7 +752,7 @@ function Section({
             <p className="text-center text-black  font-extrabold text-[25px] uppercase mb-4">
                 {heading}
             </p>
-            <div className="mt-3 text-black">{children}</div>
+            <div className="mt-3 text-black text-xl">{children}</div>
         </section>
     );
 }
@@ -873,8 +873,8 @@ function Li({
         <li
             className={`flex items-center gap-2 sm:gap-3 rounded-lg px-2.5 sm:px-3 py-2 ${className}`}
         >
-            <Icon className="h-5 w-5 text-blush" />
-            <span className="text-[14px] sm:text-[15px] font-medium">{children}</span>
+            <Icon className="h-5 w-5 sm:h-7 sm:w-7 text-blush" />
+            <span className="text-md  md:text-[25px] font-medium">{children}</span>
         </li>
     );
 }

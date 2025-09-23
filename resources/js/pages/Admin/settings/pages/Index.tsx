@@ -38,7 +38,7 @@ export default function PagesIndex({ pages, filters }: Props) {
         <AppLayout>
             <main className="p-6">
                 {/* nagłówek */}
-                <div className="text-sm text-slate-500">Zasoby › Strony</div>
+                <div className="text-sm text-green">Zasoby › Strony</div>
                 <h1 className="mt-1 text-3xl font-bold">Strony</h1>
 
                 {/* wyszukiwarka (bez przycisku „nowa”) */}
@@ -60,7 +60,7 @@ export default function PagesIndex({ pages, filters }: Props) {
                 <div className="mt-4 overflow-hidden rounded-xl border bg-white">
                     <div className="overflow-x-auto">
                         <table className="min-w-full text-left text-sm">
-                            <thead className="bg-slate-50 text-slate-600">
+                            <thead className="bg-slate-50 text-green">
                             <tr>
                                 <Th className="w-16">ID</Th>
                                 <Th>Nazwa</Th>
@@ -82,7 +82,7 @@ export default function PagesIndex({ pages, filters }: Props) {
                                         >
                                             {row.name}
                                         </Link>
-                                        <div className="text-xs text-slate-500">{row.slug}</div>
+                                        <div className="text-xs text-green">{row.slug}</div>
                                     </Td>
                                     <Td>{row.image_pl ? <Thumb src={row.image_pl} /> : <span>—</span>}</Td>
                                     <Td>{row.image_de ? <Thumb src={row.image_de} /> : <span>—</span>}</Td>
@@ -106,7 +106,7 @@ export default function PagesIndex({ pages, filters }: Props) {
                                             </Link>
                                             <button
                                                 type="button"
-                                                className="rounded-md px-2 py-1 text-slate-400"
+                                                className="rounded-md px-2 py-1 text-green"
                                                 title="Więcej"
                                                 disabled
                                             >
@@ -119,7 +119,7 @@ export default function PagesIndex({ pages, filters }: Props) {
 
                             {pages.data.length === 0 && (
                                 <tr>
-                                    <Td colSpan={7} className="py-10 text-center text-slate-500">
+                                    <Td colSpan={7} className="py-10 text-center text-green">
                                         Brak wyników.
                                     </Td>
                                 </tr>
@@ -129,7 +129,7 @@ export default function PagesIndex({ pages, filters }: Props) {
                     </div>
 
                     {/* paginacja */}
-                    <div className="flex items-center justify-between border-t px-4 py-3 text-sm text-slate-600">
+                    <div className="flex items-center justify-between border-t px-4 py-3 text-sm text-green">
                         <div>{rangeInfo(pages.meta)}</div>
                         <nav className="flex items-center gap-1">
                             {pages.meta.links.map((l, i) => (
@@ -151,7 +151,7 @@ export default function PagesIndex({ pages, filters }: Props) {
                 </div>
 
                 {/* stopka */}
-                <div className="py-6 text-center text-xs text-slate-400">
+                <div className="py-6 text-center text-xs text-green">
                     Senior na plus {new Date().getFullYear()}
                 </div>
             </main>
