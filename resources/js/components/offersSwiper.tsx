@@ -82,7 +82,7 @@ export default function OffersSwiper({ offers }: Props) {
         if (slides.length > 1 && !isInteracting) {
             intervalRef.current = setInterval(() => {
                 setIndex((i) => clamp(i + 1));
-            }, 5000); // Przesuwanie co 5 sekund
+            }, 500000); // Przesuwanie co 5 sekund
         }
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current);
@@ -164,7 +164,6 @@ export default function OffersSwiper({ offers }: Props) {
         <section className="select-none px-3 sm:px-4">
             <header className="mb-4 sm:mb-6 text-center">
                 <h2 className={`text-3xl md:text-6xl leading-tight tracking-tight ${isDarkMode ? 'text-white' : ''}`}>Oferty pracy</h2>
-                <p className="mt-1 text-lg md:text-3xl text-sea">sprawdź nowości</p>
             </header>
 
             <div
@@ -264,12 +263,18 @@ function SlideCard({
         <article className="basis-full flex-none py-2 sm:py-3">
             <div
                 className="relative mx-auto w-full md:w-[70%] cursor-pointer flex flex-col
-             rounded-xl sm:rounded-3xl md:rounded-[7rem]
-             bg-white dark:bg-white dark:text-black
-             px-2 sm:px-3 md:px-10 py-3 sm:py-4 md:py-10
-             shadow-[0_4px_12px_-2px_rgb(0_0_0/0.1),0_12px_24px_-6px_rgb(0_0_0/0.12)] sm:shadow-[0_8px_16px_-4px_rgb(0_0_0/0.12),0_24px_48px_-12px_rgb(0_0_0/0.14)] md:shadow-[0_10px_36px_-12px_rgb(0_0_0/0.18),0_72px_120px_-28px_rgb(0_0_0/0.28)]
-             ring-1 ring-black/5 sm:ring-black/10 md:ring-black/5
-             transition-all duration-200 hover:shadow-[0_8px_24px_-4px_rgb(0_0_0/0.15)]"
+  rounded-xl sm:rounded-3xl md:rounded-[7rem]
+  bg-white dark:bg-white dark:text-black
+  px-2 sm:px-3 md:px-10 py-3 sm:py-4 md:py-10
+
+  /* tylko prawa + dół */
+  shadow-[10px_10px_16px_-10px_rgb(0_0_0/0.18)]
+  sm:shadow-[14px_14px_24px_-12px_rgb(0_0_0/0.20)]
+  md:shadow-[18px_18px_36px_-16px_rgb(0_0_0/0.24)]
+
+  ring-1 ring-black/5 sm:ring-black/10 md:ring-black/5
+  transition-all duration-200
+  hover:shadow-[16px_16px_28px_-14px_rgb(0_0_0/0.28)]"
                 onClick={go}
                 role="link"
                 tabIndex={0}
@@ -320,9 +325,9 @@ function Li({
                 children,
             }: React.PropsWithChildren<{ icon: (p: { className?: string }) => JSX.Element; className?: string }>) {
     return (
-        <li className={`flex items-center gap-1 sm:gap-2 rounded-lg px-2 sm:px-2.5 py-1.5 sm:py-2 ${className}`}>
-            <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-blush" />
-            <span className="text-xs sm:text-[14px] md:text-[15px] font-medium">{children}</span>
+        <li className={`flex items-center gap-1 sm:gap-2 rounded-lg px-2 sm:px-2.5  ${className}`}>
+            <Icon className="h-4 w-4 sm:h-7 sm:w-7 text-blush" />
+            <span className="text-xs  md:text-[25px] font-medium">{children}</span>
         </li>
     );
 }

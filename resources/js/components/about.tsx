@@ -33,7 +33,6 @@ const AboutSection = () => {
                 {/* Nagłówki */}
                 <div className="text-center">
                     <h2 className="text-4xl  tracking-tight text-slate-800 sm:text-6xl">O nas</h2>
-                    <p className=" text-2xl text-sea sm:text-3xl">poznajmy się</p>
                 </div>
 
                 {/* Hero obraz */}
@@ -42,7 +41,7 @@ const AboutSection = () => {
                 </div>
 
                 {/* Tekst */}
-                <div className="mt-6 text-justify leading-8 text-slate-700">
+                <div className="mt-6 text-justify leading-8 text-slate-700 text-2xl">
                     <p>
                         <strong>Senior na Plus</strong> to agencja zatrudnienia specjalizująca się w rekrutacji i
                         pośrednictwie pracy dla opiekunów osób starszych. Naszą misją jest łączenie

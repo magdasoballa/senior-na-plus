@@ -19,7 +19,7 @@ type ActionCardProps = {
 function ActionCard({
                         title,
                         icon,
-                        cta = "Sprawdź",
+                        cta = "SPRAWDŹ",
                         targetId,
                         href,
                         onClick,
@@ -77,14 +77,13 @@ const FirstBanner: React.FC = () => {
                 {/* Rząd: tekst + obrazek */}
                 <div className="flex flex-col-reverse items-center gap-8 md:flex-row md:items-end">
                     {/* Tekst (lewa kolumna) */}
-                    <div className="md:max-w-[30%] md:self-start">
-                        <p className="text-4xl leading-relaxed text-slate-700">
-                            <span className="block text-center">Z troską o </span>
-                            <span className="block text-center">seniorów -</span>
+                    <div className="md:max-w-[40%] md:self-start">
+                        <h1 className="text-6xl text-slate-700">
+                            <span className="block text-center">Troska i pomoc </span>
 
-                            <span className="block text-center">Twoja praca,</span>
+                            <span className="block text-center">- Twoja praca,</span>
                             <span className="block text-center">nasza misja!</span>
-                        </p>
+                        </h1>
                     </div>
 
                     {/* Obrazek (prawa kolumna) */}
@@ -94,7 +93,7 @@ const FirstBanner: React.FC = () => {
                 </div>
 
                 {/* Kafelki pod spodem */}
-                <div className="mt-8 md:mt-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className=" grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <ActionCard
                         title="KONTAKT"
                         icon={<Kontakt width="100px" className="max-h-[90px]" />}

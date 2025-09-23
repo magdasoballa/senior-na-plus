@@ -44,7 +44,6 @@ export default function ContactFormCard() {
         <section className="mx-auto w-full max-w-lg px-2">
             <div className="text-center">
                 <h2 className={`text-4xl  tracking-tight text-slate-800 sm:text-6xl ${isDarkMode ? 'text-white' : ''}`}>Kontakt</h2>
-                <p className=" text-2xl text-sea sm:text-3xl">czekamy na Ciebie</p>
             </div>
             <form
                 onSubmit={onSubmit}
@@ -140,15 +139,18 @@ export default function ContactFormCard() {
 
             <div className="mt-20">
                 {/* kafelki kontaktowe */}
-                <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 auto-rows-fr">
                     {/* E-MAIL */}
                     <a
                         href="mailto:kontakt@seniornaplus.pl"
-                        className="group block rounded-[28px] bg-sea text-white ring-1 ring-black/10 shadow-sm p-6 md:p-8 text-center transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                        className="group flex h-full flex-col items-center justify-center gap-2
+               rounded-[28px] bg-sea text-white ring-1 ring-black/10 shadow-sm
+               p-6 md:p-8 text-center transition hover:brightness-105
+               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                     >
-                        <AtSign className="mx-auto h-12 w-12 opacity-95" aria-hidden />
-                        <div className="mt-3 font-semibold tracking-wide text-xl">E-MAIL</div>
-                        <div className="mt-2 underline underline-offset-4 group-hover:opacity-90">
+                        <AtSign className="h-12 w-12 opacity-95" aria-hidden />
+                        <div className="mt-1 font-semibold tracking-wide text-xl">E-MAIL</div>
+                        <div className="underline underline-offset-4 group-hover:opacity-90 text-xl">
                             kontakt@seniornaplus.pl
                         </div>
                     </a>
@@ -156,15 +158,19 @@ export default function ContactFormCard() {
                     {/* TELEFON */}
                     <a
                         href="tel:324401554"
-                        className="group block rounded-[28px] bg-sea text-white ring-1 ring-black/10 shadow-sm p-6 md:p-8 text-center transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                        className="group flex h-full flex-col items-center justify-center gap-2
+               rounded-[28px] bg-sea text-white ring-1 ring-black/10 shadow-sm
+               p-6 md:p-8 text-center transition hover:brightness-105
+               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                     >
-                        <Phone className="mx-auto h-12 w-12 opacity-95" aria-hidden />
-                        <div className="mt-3 font-semibold tracking-wide text-xl">TELEFON</div>
-                        <div className="mt-2 underline underline-offset-4 group-hover:opacity-90">
+                        <Phone className="h-12 w-12 opacity-95" aria-hidden />
+                        <div className="mt-1 font-semibold tracking-wide text-xl">TELEFON</div>
+                        <div className="underline underline-offset-4 group-hover:opacity-90 text-xl">
                             32 440 15 54
                         </div>
                     </a>
                 </div>
+
 
                 <div className="mt-20">
                     <MapCard address="Senior na Plus, Gliwice" />
