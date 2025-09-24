@@ -86,47 +86,55 @@ class PageController extends Controller
         if ($request->hasFile('image_pl')) {
             if ($page->image_pl) \Storage::disk('public')->delete($page->image_pl);
             $data['image_pl'] = $request->file('image_pl')->store('pages', 'public');
+        } else {
+            $data['image_pl'] = $page->image_pl; // zachowaj istniejące
         }
+
         if ($request->hasFile('image_de')) {
             if ($page->image_de) \Storage::disk('public')->delete($page->image_de);
             $data['image_de'] = $request->file('image_de')->store('pages', 'public');
+        } else {
+            $data['image_de'] = $page->image_de; // zachowaj istniejące
         }
 
-        // Budujemy updates tylko z kluczy, które przyszły
-        $updates = [];
+        // ZAWSZE aktualizuj WSZYSTKIE pola, używając wartości z requestu lub istniejących
+        $updates = [
+            'name' => $data['name'] ?? $page->name,
+            'slug' => $data['slug'] ?? $page->slug,
 
-        foreach ([
-                     'name','slug',
-                     'image_pl','image_de',
-                     'meta_title_pl','meta_title_de',
-                     'meta_description_pl','meta_description_de',
-                     'meta_keywords_pl','meta_keywords_de',
-                     'meta_copyright_pl','meta_copyright_de',
-                 ] as $key) {
-            if (array_key_exists($key, $data)) {
-                $updates[$key] = $data[$key];
-            }
-        }
+            // Zachowaj istniejące wartości jeśli nie przyszły w requeście
+            'meta_title_pl' => $data['meta_title_pl'] ?? $page->meta_title_pl,
+            'meta_title_de' => $data['meta_title_de'] ?? $page->meta_title_de,
+            'meta_description_pl' => $data['meta_description_pl'] ?? $page->meta_description_pl,
+            'meta_description_de' => $data['meta_description_de'] ?? $page->meta_description_de,
+            'meta_keywords_pl' => $data['meta_keywords_pl'] ?? $page->meta_keywords_pl,
+            'meta_keywords_de' => $data['meta_keywords_de'] ?? $page->meta_keywords_de,
+            'meta_copyright_pl' => $data['meta_copyright_pl'] ?? $page->meta_copyright_pl,
+            'meta_copyright_de' => $data['meta_copyright_de'] ?? $page->meta_copyright_de,
 
-        // Widoczności – ustawiamy TYLKO jeśli przysłał front (FormData z 1/0)
-        if ($request->has('visible_pl')) {
-            $updates['visible_pl'] = $request->boolean('visible_pl');
-        }
-        if ($request->has('visible_de')) {
-            $updates['visible_de'] = $request->boolean('visible_de');
-        }
+            'image_pl' => $data['image_pl'] ?? $page->image_pl,
+            'image_de' => $data['image_de'] ?? $page->image_de,
+        ];
 
-        // Zapis bez pułapek mass-assignment
-        $before = $page->replicate(); // do logowania
+        // Widoczności
+        $updates['visible_pl'] = $request->has('visible_pl')
+            ? $request->boolean('visible_pl')
+            : $page->visible_pl;
+
+        $updates['visible_de'] = $request->has('visible_de')
+            ? $request->boolean('visible_de')
+            : $page->visible_de;
+
+        // Zapis
+        $before = $page->replicate();
         $saved = $page->forceFill($updates)->save();
 
-        // LOG: zobaczysz w storage/logs/laravel.log co poszło do DB
         Log::info('Page update', [
-            'id'      => $page->id,
+            'id' => $page->id,
             'request' => $request->all(),
             'updates' => $updates,
-            'saved'   => $saved,
-            'changes' => $page->getChanges(), // co się faktycznie zmieniło
+            'saved' => $saved,
+            'changes' => $page->getChanges(),
         ]);
 
         return $request->boolean('stay')

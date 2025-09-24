@@ -4,22 +4,33 @@ import { useState } from 'react'
 import AdminLayout from '@/layouts/admin-layout';
 import { CheckCircle2, XCircle } from 'lucide-react';
 
+type FieldType = 'meta_title' | 'meta_description' | 'meta_keywords' | 'meta_copyright'
+
 export default function Show({ page }: any) {
-    const [lang, setLang] = useState<'pl' | 'de'>('pl')
+    // Osobny stan języka dla każdej sekcji
+    const [fieldLang, setFieldLang] = useState<Record<FieldType, 'pl' | 'de'>>({
+        meta_title: 'pl',
+        meta_description: 'pl',
+        meta_keywords: 'pl',
+        meta_copyright: 'pl',
+    })
 
     function Status({ ok }: { ok: boolean }) {
         return (
             <span className="inline-flex items-center gap-2">
-      {ok ? (
-          <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden />
-      ) : (
-          <XCircle className="h-5 w-5 text-rose-600" aria-hidden />
-      )}
+                {ok ? (
+                    <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden />
+                ) : (
+                    <XCircle className="h-5 w-5 text-rose-600" aria-hidden />
+                )}
                 <span className="sr-only">{ok ? 'Widoczny' : 'Niewidoczny'}</span>
-    </span>
+            </span>
         )
     }
 
+    const handleLangChange = (field: FieldType, lang: 'pl' | 'de') => {
+        setFieldLang(prev => ({ ...prev, [field]: lang }))
+    }
 
     return (
         <AdminLayout>
@@ -40,20 +51,44 @@ export default function Show({ page }: any) {
                         <Row label="ID">{page.id}</Row>
                         <Row label="Nazwa">{page.name}</Row>
 
-                        <Row label="Tytuł meta" right={<LangSwitch lang={lang} onChange={setLang} />}>
-                            {page[`meta_title_${lang}`] ?? '—'}
+                        {/* TYTUŁ META - osobny przełącznik */}
+                        <Row label="Tytuł meta" right={
+                            <LangSwitch
+                                lang={fieldLang.meta_title}
+                                onChange={(l) => handleLangChange('meta_title', l)}
+                            />
+                        }>
+                            {page[`meta_title_${fieldLang.meta_title}`] ?? '—'}
                         </Row>
 
-                        <Row label="Opis meta" right={<LangSwitch lang={lang} onChange={setLang} />}>
-                            {page[`meta_description_${lang}`] ?? '—'}
+                        {/* OPIS META - osobny przełącznik */}
+                        <Row label="Opis meta" right={
+                            <LangSwitch
+                                lang={fieldLang.meta_description}
+                                onChange={(l) => handleLangChange('meta_description', l)}
+                            />
+                        }>
+                            {page[`meta_description_${fieldLang.meta_description}`] ?? '—'}
                         </Row>
 
-                        <Row label="Słowa kluczowe meta" right={<LangSwitch lang={lang} onChange={setLang} />}>
-                            {page[`meta_keywords_${lang}`] ?? '—'}
+                        {/* SŁOWA KLUCZOWE META - osobny przełącznik */}
+                        <Row label="Słowa kluczowe meta" right={
+                            <LangSwitch
+                                lang={fieldLang.meta_keywords}
+                                onChange={(l) => handleLangChange('meta_keywords', l)}
+                            />
+                        }>
+                            {page[`meta_keywords_${fieldLang.meta_keywords}`] ?? '—'}
                         </Row>
 
-                        <Row label="Firma meta" right={<LangSwitch lang={lang} onChange={setLang} />}>
-                            {page[`meta_copyright_${lang}`] ?? '—'}
+                        {/* FIRMA META - osobny przełącznik */}
+                        <Row label="Firma meta" right={
+                            <LangSwitch
+                                lang={fieldLang.meta_copyright}
+                                onChange={(l) => handleLangChange('meta_copyright', l)}
+                            />
+                        }>
+                            {page[`meta_copyright_${fieldLang.meta_copyright}`] ?? '—'}
                         </Row>
 
                         <Row label="Link">{page.slug || '—'}</Row>
@@ -76,8 +111,12 @@ export default function Show({ page }: any) {
                             ) : '—'}
                         </Row>
 
-                        <Row label="Widoczny w menu na polskiej wersji"><Status ok={!!page.visible_pl} /></Row>
-                        <Row label="Widoczny w menu na niemieckiej wersji"><Status ok={!!page.visible_de} /></Row>
+                        <Row label="Widoczny w menu na polskiej wersji">
+                            <Status ok={!!page.visible_pl} />
+                        </Row>
+                        <Row label="Widoczny w menu na niemieckiej wersji">
+                            <Status ok={!!page.visible_de} />
+                        </Row>
                     </dl>
                 </div>
 
