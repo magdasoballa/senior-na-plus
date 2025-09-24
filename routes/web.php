@@ -111,6 +111,7 @@ Route::middleware(['auth', 'admin'])
             Route::get('/banners/{banner}/edit',[BannerController::class,'edit'])->name('banners.edit');
             Route::put('/banners/{banner}',    [BannerController::class,'update'])->name('banners.update');
             Route::delete('/banners/{banner}', [BannerController::class,'destroy'])->name('banners.destroy');
+            Route::get('/banners/{banner}', [BannerController::class,'show'])->name('banners.show');
 
             Route::patch('/banners/{banner}/toggle', [BannerController::class,'toggle'])->name('banners.toggle');
             Route::post('/banners/reorder',          [BannerController::class,'reorder'])->name('banners.reorder');            Route::get('portal', [PortalSettingsController::class, 'edit'])->name('portal.edit');

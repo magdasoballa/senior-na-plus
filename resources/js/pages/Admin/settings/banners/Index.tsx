@@ -9,6 +9,8 @@ type Banner = {
     image_url?: string | null;
     visible: boolean;
     position: number;
+    // jeśli masz w DB, możesz dodać też:
+    // link?: string | null;
 };
 type Paginated<T> = {
     data: T[];
@@ -20,6 +22,7 @@ const BASE = '/admin/settings/banners';
 export default function Index() {
     const { banners, filters } = usePage<{ banners: Paginated<Banner>; filters: { q?: string } }>().props;
     const [q, setQ] = useState(filters?.q ?? '');
+    const [preview, setPreview] = useState<Banner | null>(null);
 
     const rows = banners.data;
 
@@ -37,12 +40,20 @@ export default function Index() {
         router.delete(`${BASE}/${id}`, { preserveScroll: true });
     };
 
-    // prosty reorder: góra/dół -> wyślij nową kolejność ids
     const move = (idx: number, dir: 'up' | 'down') => {
         const arr = rows.map(r => r.id);
         if (dir === 'up' && idx > 0) [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
         if (dir === 'down' && idx < arr.length - 1) [arr[idx + 1], arr[idx]] = [arr[idx], arr[idx + 1]];
         router.post(`${BASE}/reorder`, { ids: arr }, { preserveScroll: true });
+    };
+
+    const copy = async (text: string) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            alert('Skopiowano do schowka.');
+        } catch {
+            alert('Nie udało się skopiować.');
+        }
     };
 
     return (
@@ -79,7 +90,7 @@ export default function Index() {
                             <th className="p-3">NAZWA</th>
                             <th className="p-3">ZDJĘCIE</th>
                             <th className="p-3">WIDOCZNY</th>
-                            <th className="p-3 w-40 text-right">AKCJE</th>
+                            <th className="p-3 w-56 text-right">AKCJE</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -120,10 +131,18 @@ export default function Index() {
                                 </td>
                                 <td className="p-3">
                                     <div className="flex justify-end gap-2">
-                                        <Link href={`${BASE}/${b.id}/edit`} className="rounded border px-2 py-1">
+                                        {/* PODGLĄD */}
+                                        <Link href={`${BASE}/${b.id}`} className="rounded border px-2 py-1" title="Szczegóły">
+                                            👁
+                                        </Link>
+
+                                        {/* EDYCJA */}
+                                        <Link href={`${BASE}/${b.id}/edit`} className="rounded border px-2 py-1" title="Edytuj">
                                             <Pencil className="h-4 w-4" />
                                         </Link>
-                                        <button onClick={() => destroy(b.id)} className="rounded border px-2 py-1">
+
+                                        {/* USUŃ */}
+                                        <button onClick={() => destroy(b.id)} className="rounded border px-2 py-1" title="Usuń">
                                             <Trash2 className="h-4 w-4 text-rose-600" />
                                         </button>
                                     </div>
@@ -140,6 +159,64 @@ export default function Index() {
                         </tbody>
                     </table>
                 </div>
+
+                {/* MODAL PODGLĄDU */}
+                {preview && (
+                    <div
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+                        onClick={() => setPreview(null)}
+                    >
+                        <div
+                            className="w-full max-w-3xl rounded-xl bg-white shadow-xl"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex items-center justify-between border-b px-4 py-3">
+                                <div className="font-semibold">
+                                    Podgląd banera #{preview.id} — {preview.name}
+                                </div>
+                                <button className="rounded-md px-2 py-1 hover:bg-slate-100" onClick={() => setPreview(null)}>
+                                    ✕
+                                </button>
+                            </div>
+
+                            <div className="max-h-[75vh] overflow-auto p-4">
+                                {preview.image_url ? (
+                                    <img
+                                        src={preview.image_url}
+                                        alt={preview.name}
+                                        className="mx-auto max-h-[65vh] w-auto max-w-full rounded-lg object-contain ring-1 ring-slate-200"
+                                    />
+                                ) : (
+                                    <div className="p-8 text-center text-slate-500">Brak obrazu</div>
+                                )}
+                            </div>
+
+                            <div className="flex items-center justify-end gap-2 border-t px-4 py-3">
+                                {preview.image_url && (
+                                    <>
+                                        <a
+                                            href={preview.image_url}
+                                            target="_blank"
+                                            rel="noopener"
+                                            className="rounded-lg border px-3 py-1.5 hover:bg-slate-50"
+                                        >
+                                            Otwórz grafikę
+                                        </a>
+                                        <button
+                                            className="rounded-lg border px-3 py-1.5 hover:bg-slate-50"
+                                            onClick={() => copy(preview.image_url!)}
+                                        >
+                                            Kopiuj link do grafiki
+                                        </button>
+                                    </>
+                                )}
+                                <button className="rounded-lg bg-mint px-3 py-1.5 font-semibold" onClick={() => setPreview(null)}>
+                                    Zamknij
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </main>
         </AdminLayout>
     );

@@ -155,4 +155,26 @@ class BannerController extends Controller
         }
         return back();
     }
+
+    public function show(Banner $banner)
+    {
+        $tz = 'Europe/Warsaw';
+
+        return Inertia::render('Admin/settings/banners/Show', [
+            'banner' => [
+                'id'        => $banner->id,
+                'name'      => $banner->name,
+                'visible'   => $banner->visible,
+                'position'  => $banner->position,
+                'image_url' => $banner->image_url,
+                'link'      => $banner->link,
+                'scope'     => $banner->scope,
+                'starts_at' => $banner->starts_at ? $banner->starts_at->timezone($tz)->format('Y-m-d H:i') : null,
+                'ends_at'   => $banner->ends_at   ? $banner->ends_at->timezone($tz)->format('Y-m-d H:i') : null,
+                'created_at'=> $banner->created_at? $banner->created_at->timezone($tz)->format('Y-m-d H:i') : null,
+                'updated_at'=> $banner->updated_at? $banner->updated_at->timezone($tz)->format('Y-m-d H:i') : null,
+            ],
+        ]);
+    }
+
 }
