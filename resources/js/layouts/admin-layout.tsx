@@ -24,7 +24,7 @@ function AdminSidebar() {
                 items={[
                     { label: 'Strony', href: '/admin/settings/pages' },
                     { label: 'Linki społecznościowe', href: '/admin/settings/social-links' },
-                    { label: 'Banery', href: '/admin/banners' },
+                    { label: 'Banery', href: '/admin/settings/banners' },
                     { label: 'Ustawienia portalu', href: '/admin/settings' },
                     { label: 'Popup', href: '/admin/popup' },
                 ]}

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\Settings\BannerController;
 use App\Http\Controllers\Admin\OfferController as AdminOfferController;
 use App\Http\Controllers\Admin\Settings\SocialLinkController;
 use App\Http\Controllers\ApplicationController;
@@ -104,8 +105,15 @@ Route::middleware(['auth', 'admin'])
             Route::resource('social-links', SocialLinkController::class)
                 ->only(['index','create','store','show','edit','update','destroy'])
                 ->parameters(['social-links' => 'social_link']);
-            Route::resource('banners',      BannerController::class)->only(['index','store','update','destroy']);
-            Route::get('portal', [PortalSettingsController::class, 'edit'])->name('portal.edit');
+            Route::get('/banners',             [BannerController::class,'index'])->name('banners.index');
+            Route::get('/banners/create',      [BannerController::class,'create'])->name('banners.create');
+            Route::post('/banners',            [BannerController::class,'store'])->name('banners.store');
+            Route::get('/banners/{banner}/edit',[BannerController::class,'edit'])->name('banners.edit');
+            Route::put('/banners/{banner}',    [BannerController::class,'update'])->name('banners.update');
+            Route::delete('/banners/{banner}', [BannerController::class,'destroy'])->name('banners.destroy');
+
+            Route::patch('/banners/{banner}/toggle', [BannerController::class,'toggle'])->name('banners.toggle');
+            Route::post('/banners/reorder',          [BannerController::class,'reorder'])->name('banners.reorder');            Route::get('portal', [PortalSettingsController::class, 'edit'])->name('portal.edit');
             Route::put('portal', [PortalSettingsController::class, 'update'])->name('portal.update');
             Route::get('popup',  [PopupController::class, 'edit'])->name('popup.edit');
             Route::put('popup',  [PopupController::class, 'update'])->name('popup.update');

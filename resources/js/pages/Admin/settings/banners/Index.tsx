@@ -1,0 +1,146 @@
+import { Link, router, usePage } from '@inertiajs/react';
+import AdminLayout from '@/layouts/admin-layout';
+import { useState } from 'react';
+import { CheckCircle2, XCircle, Pencil, Trash2, MoveUpRight, MoveDownLeft, Filter } from 'lucide-react';
+
+type Banner = {
+    id: number;
+    name: string;
+    image_url?: string | null;
+    visible: boolean;
+    position: number;
+};
+type Paginated<T> = {
+    data: T[];
+    links: { url: string | null; label: string; active: boolean }[];
+};
+
+const BASE = '/admin/settings/banners';
+
+export default function Index() {
+    const { banners, filters } = usePage<{ banners: Paginated<Banner>; filters: { q?: string } }>().props;
+    const [q, setQ] = useState(filters?.q ?? '');
+
+    const rows = banners.data;
+
+    const submitSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        router.get(BASE, { q }, { preserveState: true, replace: true });
+    };
+
+    const toggle = (id: number) => {
+        router.patch(`${BASE}/${id}/toggle`, {}, { preserveScroll: true });
+    };
+
+    const destroy = (id: number) => {
+        if (!confirm('Usunąć baner?')) return;
+        router.delete(`${BASE}/${id}`, { preserveScroll: true });
+    };
+
+    // prosty reorder: góra/dół -> wyślij nową kolejność ids
+    const move = (idx: number, dir: 'up' | 'down') => {
+        const arr = rows.map(r => r.id);
+        if (dir === 'up' && idx > 0) [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
+        if (dir === 'down' && idx < arr.length - 1) [arr[idx + 1], arr[idx]] = [arr[idx], arr[idx + 1]];
+        router.post(`${BASE}/reorder`, { ids: arr }, { preserveScroll: true });
+    };
+
+    return (
+        <AdminLayout>
+            <main className="p-6">
+                <div className="text-sm text-slate-500">Zasoby › Banery</div>
+                <div className="mt-1 flex items-center justify-between">
+                    <h1 className="text-2xl font-bold">Banery</h1>
+                    <Link href={`${BASE}/create`} className="rounded-lg bg-mint px-4 py-2 font-semibold">
+                        Utwórz Baner
+                    </Link>
+                </div>
+
+                <form onSubmit={submitSearch} className="mt-4 flex items-center gap-3">
+                    <div className="relative flex-1">
+                        <input
+                            value={q}
+                            onChange={(e) => setQ(e.target.value)}
+                            placeholder="Szukaj"
+                            className="w-full rounded-xl border bg-white px-4 py-2"
+                        />
+                    </div>
+                    <button className="rounded-xl border px-3 py-2" type="submit">
+                        <Filter className="h-4 w-4" />
+                    </button>
+                </form>
+
+                <div className="mt-4 overflow-hidden rounded-xl border bg-white">
+                    <table className="w-full text-sm">
+                        <thead className="bg-slate-50 text-slate-600">
+                        <tr>
+                            <th className="p-3 w-12"></th>
+                            <th className="p-3">ID</th>
+                            <th className="p-3">NAZWA</th>
+                            <th className="p-3">ZDJĘCIE</th>
+                            <th className="p-3">WIDOCZNY</th>
+                            <th className="p-3 w-40 text-right">AKCJE</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {rows.map((b, i) => (
+                            <tr key={b.id} className="border-t">
+                                <td className="p-3">
+                                    <div className="flex gap-1">
+                                        <button className="rounded border p-1" onClick={() => move(i, 'up')} disabled={i === 0} title="Góra">
+                                            <MoveUpRight className="h-4 w-4" />
+                                        </button>
+                                        <button
+                                            className="rounded border p-1"
+                                            onClick={() => move(i, 'down')}
+                                            disabled={i === rows.length - 1}
+                                            title="Dół"
+                                        >
+                                            <MoveDownLeft className="h-4 w-4" />
+                                        </button>
+                                    </div>
+                                </td>
+                                <td className="p-3">{b.id}</td>
+                                <td className="p-3">{b.name}</td>
+                                <td className="p-3">
+                                    {b.image_url ? (
+                                        <img src={b.image_url} className="h-8 w-24 rounded object-cover ring-1 ring-slate-200" />
+                                    ) : (
+                                        '—'
+                                    )}
+                                </td>
+                                <td className="p-3">
+                                    <button onClick={() => toggle(b.id)} className="inline-flex items-center gap-2">
+                                        {b.visible ? (
+                                            <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                                        ) : (
+                                            <XCircle className="h-5 w-5 text-rose-600" />
+                                        )}
+                                    </button>
+                                </td>
+                                <td className="p-3">
+                                    <div className="flex justify-end gap-2">
+                                        <Link href={`${BASE}/${b.id}/edit`} className="rounded border px-2 py-1">
+                                            <Pencil className="h-4 w-4" />
+                                        </Link>
+                                        <button onClick={() => destroy(b.id)} className="rounded border px-2 py-1">
+                                            <Trash2 className="h-4 w-4 text-rose-600" />
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                        {rows.length === 0 && (
+                            <tr>
+                                <td className="p-6 text-center text-slate-500" colSpan={6}>
+                                    Brak banerów
+                                </td>
+                            </tr>
+                        )}
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </AdminLayout>
+    );
+}
