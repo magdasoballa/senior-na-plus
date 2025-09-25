@@ -37,7 +37,7 @@ export default function Show({ page }: any) {
             <main className="p-6">
                 <div className="text-sm text-green">Zasoby › Strony › Szczegóły Strona: {page.name}</div>
                 <div className="mt-1 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">Szczegóły Strona: {page.name}</h1>
+                    <p className="text-2xl font-bold">Szczegóły Strona: {page.name}</p>
                     <Link
                         href={`/admin/settings/pages/${page.id}/edit`}
                         className="rounded-lg border px-3 py-1 hover:bg-slate-50"

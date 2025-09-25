@@ -12,7 +12,7 @@ export default function Show(){
             <main className="p-6">
                 <div className="text-sm text-slate-500">Popup › #{popup.id}</div>
                 <div className="mt-1 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">Szczegóły Popup: {popup.id}</h1>
+                    <p className="text-2xl font-bold">Szczegóły Popup: {popup.id}</p>
                     <div className="flex gap-2">
                         <Link href={`${BASE}/${popup.id}/edit`} className="rounded-lg border px-3 py-1 hover:bg-slate-50">✎</Link>
                         <Link href={BASE} className="rounded-lg border px-3 py-1 hover:bg-slate-50">↩︎</Link>

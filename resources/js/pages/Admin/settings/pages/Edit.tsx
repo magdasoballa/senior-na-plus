@@ -88,7 +88,7 @@ export default function Edit({ page }: { page: PageDto }) {
     return (
         <AdminLayout>
             <main className="p-6">
-                <h1 className="text-2xl font-bold">Aktualizacja Strona: {page.name}</h1>
+                <p className="text-2xl font-bold">Aktualizacja Strona: {page.name}</p>
 
                 <form
                     onSubmit={(e) => { e.preventDefault(); submit(false) }}

@@ -75,9 +75,9 @@ export default function Form() {
     return (
         <AdminLayout>
             <main className="p-6">
-                <h1 className="text-2xl font-bold">
+                <p className="text-2xl font-bold">
                     {isCreate ? 'Utwórz Baner' : `Aktualizacja Baner: ${banner.id}`}
-                </h1>
+                </p>
 
                 <form onSubmit={submit} encType="multipart/form-data" className="mt-4 overflow-hidden rounded-xl border bg-white">
                     <Row label="Nazwa" required>

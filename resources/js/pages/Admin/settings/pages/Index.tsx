@@ -40,7 +40,7 @@ export default function PagesIndex({ pages, filters }: Props) {
             <main className="p-6">
                 {/* nagłówek */}
                 <div className="text-sm text-green">Zasoby › Strony</div>
-                <h1 className="mt-1 text-3xl font-bold">Strony</h1>
+                <p className="mt-1 text-3xl font-bold">Strony</p>
 
                 {/* wyszukiwarka (bez przycisku „nowa”) */}
                 <div className="mt-5">

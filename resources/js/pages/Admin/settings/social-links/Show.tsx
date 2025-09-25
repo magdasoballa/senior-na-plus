@@ -9,7 +9,7 @@ export default function Show({ record }: { record:{
         <AdminLayout>
             <div className="p-6">
                 <div className="mb-4 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">Szczegóły Link społecznościowy: {record.name}</h1>
+                    <p className="text-2xl font-bold">Szczegóły Link społecznościowy: {record.name}</p>
                     <Link href={`/admin/settings/social-links/${record.id}/edit`} className="rounded-full bg-mint px-4 py-2 font-semibold">Edytuj</Link>
                 </div>
 

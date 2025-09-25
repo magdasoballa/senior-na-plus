@@ -68,7 +68,7 @@ export default function Form(){
         <AdminLayout>
             <main className="p-6">
                 <div className="text-sm text-slate-500">{isEdit ? `Aktualizacja Popup: ${popup!.id}` : 'Nowy Popup'}</div>
-                <h1 className="mt-1 text-2xl font-bold">{isEdit ? `Aktualizacja Popup: ${popup!.id}` : 'Utwórz Popup'}</h1>
+                <p className="mt-1 text-2xl font-bold">{isEdit ? `Aktualizacja Popup: ${popup!.id}` : 'Utwórz Popup'}</p>
 
                 <form onSubmit={submit} className="mt-6 rounded-xl border bg-white p-6">
                     <Field label="Nazwa" required>

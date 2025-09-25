@@ -61,7 +61,7 @@ export default function Index() {
             <main className="p-6">
                 <div className="text-sm text-slate-500">Zasoby › Banery</div>
                 <div className="mt-1 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">Banery</h1>
+                    <p className="text-2xl font-bold">Banery</p>
                     <Link href={`${BASE}/create`} className="rounded-lg bg-mint px-4 py-2 font-semibold">
                         Utwórz Baner
                     </Link>

@@ -1,8 +1,11 @@
 <?php
 
+use App\Http\Controllers\Admin\Dictionaries\CareTargetController;
+use App\Http\Controllers\Admin\Dictionaries\MobilityController;
 use App\Http\Controllers\Admin\Dictionaries\SkillController;
-use App\Http\Controllers\Admin\Settings\BannerController;
 use App\Http\Controllers\Admin\OfferController as AdminOfferController;
+use App\Http\Controllers\Admin\Settings\BannerController;
+use App\Http\Controllers\Admin\Settings\PopupController;
 use App\Http\Controllers\Admin\Settings\PortalSettingsController;
 use App\Http\Controllers\Admin\Settings\SocialLinkController;
 use App\Http\Controllers\ApplicationController;
@@ -13,7 +16,6 @@ use App\Models\Offer;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Http\Controllers\Admin\Settings\PopupController;
 
 /*
 |--------------------------------------------------------------------------
@@ -54,12 +56,12 @@ Route::post('/aplikuj', [ApplicationController::class, 'store'])->name('applicat
 
 Route::middleware(['auth', 'verified'])->get('/dashboard', function () {
     $user = Auth::user();
-    $isAdmin = (bool) ($user->is_admin ?? false);
+    $isAdmin = (bool)($user->is_admin ?? false);
 
     return Inertia::render('dashboard', [
         'isAdmin' => $isAdmin,
         'stats' => $isAdmin ? [
-            'offers'       => \App\Models\Offer::count(),
+            'offers' => \App\Models\Offer::count(),
             'applications' => \App\Models\Application::count(),
         ] : null,
     ]);
@@ -73,7 +75,6 @@ Route::middleware(['auth', 'verified'])->get('/dashboard', function () {
 */
 
 
-
 Route::middleware(['auth', 'admin'])
     ->prefix('admin')
     ->name('admin.')
@@ -83,9 +84,9 @@ Route::middleware(['auth', 'admin'])
 
         // ===== Oferty – słowniki do ofert =====
         Route::prefix('offers')->name('offers.')->group(function () {
-            Route::resource('duties',       OfferDutyController::class)->only(['index','store','update','destroy']);
-            Route::resource('requirements', OfferRequirementController::class)->only(['index','store','update','destroy']);
-            Route::resource('perks',        OfferPerkController::class)->only(['index','store','update','destroy']);
+            Route::resource('duties', OfferDutyController::class)->only(['index', 'store', 'update', 'destroy']);
+            Route::resource('requirements', OfferRequirementController::class)->only(['index', 'store', 'update', 'destroy']);
+            Route::resource('perks', OfferPerkController::class)->only(['index', 'store', 'update', 'destroy']);
         });
 
         // ===== Aplikacje =====
@@ -103,82 +104,96 @@ Route::middleware(['auth', 'admin'])
         // ===== Ustawienia =====
         Route::prefix('settings')->name('settings.')->group(function () {
             Route::resource('pages', \App\Http\Controllers\Admin\Settings\PageController::class)
-                ->only(['index','edit','update','show']);
+                ->only(['index', 'edit', 'update', 'show']);
 
             Route::resource('social-links', SocialLinkController::class)
-                ->only(['index','create','store','show','edit','update','destroy'])
+                ->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy'])
                 ->parameters(['social-links' => 'social_link']);
-            Route::get('/banners',             [BannerController::class,'index'])->name('banners.index');
-            Route::get('/banners/create',      [BannerController::class,'create'])->name('banners.create');
-            Route::post('/banners',            [BannerController::class,'store'])->name('banners.store');
-            Route::get('/banners/{banner}/edit',[BannerController::class,'edit'])->name('banners.edit');
-            Route::put('/banners/{banner}',    [BannerController::class,'update'])->name('banners.update');
-            Route::delete('/banners/{banner}', [BannerController::class,'destroy'])->name('banners.destroy');
-            Route::get('/banners/{banner}', [BannerController::class,'show'])->name('banners.show');
+            Route::get('/banners', [BannerController::class, 'index'])->name('banners.index');
+            Route::get('/banners/create', [BannerController::class, 'create'])->name('banners.create');
+            Route::post('/banners', [BannerController::class, 'store'])->name('banners.store');
+            Route::get('/banners/{banner}/edit', [BannerController::class, 'edit'])->name('banners.edit');
+            Route::put('/banners/{banner}', [BannerController::class, 'update'])->name('banners.update');
+            Route::delete('/banners/{banner}', [BannerController::class, 'destroy'])->name('banners.destroy');
+            Route::get('/banners/{banner}', [BannerController::class, 'show'])->name('banners.show');
 
-            Route::patch('/banners/{banner}/toggle', [BannerController::class,'toggle'])->name('banners.toggle');
-            Route::post('/banners/reorder',          [BannerController::class,'reorder'])->name('banners.reorder');            Route::get('portal', [PortalSettingsController::class, 'edit'])->name('portal.edit');
+            Route::patch('/banners/{banner}/toggle', [BannerController::class, 'toggle'])->name('banners.toggle');
+            Route::post('/banners/reorder', [BannerController::class, 'reorder'])->name('banners.reorder');
+            Route::get('portal', [PortalSettingsController::class, 'edit'])->name('portal.edit');
             Route::prefix('portal')->name('portal.')->group(function () {
-                Route::get('/',                 [PortalSettingsController::class,'index'])->name('index');   // /admin/settings/portal
-                Route::get('/{setting}',        [PortalSettingsController::class,'show'])->name('show');
-                Route::get('/{setting}/edit',   [PortalSettingsController::class,'edit'])->name('edit');
-                Route::put('/{setting}',        [PortalSettingsController::class,'update'])->name('update');
+                Route::get('/', [PortalSettingsController::class, 'index'])->name('index');   // /admin/settings/portal
+                Route::get('/{setting}', [PortalSettingsController::class, 'show'])->name('show');
+                Route::get('/{setting}/edit', [PortalSettingsController::class, 'edit'])->name('edit');
+                Route::put('/{setting}', [PortalSettingsController::class, 'update'])->name('update');
             });
-            Route::get('popups',                 [PopupController::class, 'index'])->name('popups.index');
-            Route::get('popups/create',          [PopupController::class, 'create'])->name('popups.create');
-            Route::post('popups',                [PopupController::class, 'store'])->name('popups.store');
-            Route::get('popups/{popup}',         [PopupController::class, 'show'])->name('popups.show');
-            Route::get('popups/{popup}/edit',    [PopupController::class, 'edit'])->name('popups.edit');
-            Route::put('popups/{popup}',         [PopupController::class, 'update'])->name('popups.update');
-            Route::delete('popups/{popup}',      [PopupController::class, 'destroy'])->name('popups.destroy');
+            Route::get('popups', [PopupController::class, 'index'])->name('popups.index');
+            Route::get('popups/create', [PopupController::class, 'create'])->name('popups.create');
+            Route::post('popups', [PopupController::class, 'store'])->name('popups.store');
+            Route::get('popups/{popup}', [PopupController::class, 'show'])->name('popups.show');
+            Route::get('popups/{popup}/edit', [PopupController::class, 'edit'])->name('popups.edit');
+            Route::put('popups/{popup}', [PopupController::class, 'update'])->name('popups.update');
+            Route::delete('popups/{popup}', [PopupController::class, 'destroy'])->name('popups.destroy');
         });
 
 
         // ===== Słowniki =====
         Route::prefix('dictionaries')->name('dict.')->group(function () {
-            Route::get   ('skills',                [SkillController::class, 'index'])->name('skills.index');
-            Route::get   ('skills/create',         [SkillController::class, 'create'])->name('skills.create');
-            Route::post  ('skills',                [SkillController::class, 'store'])->name('skills.store');
-            Route::get   ('skills/{skill}',        [SkillController::class, 'show'])->name('skills.show');
-            Route::get   ('skills/{skill}/edit',   [SkillController::class, 'edit'])->name('skills.edit');
-            Route::match(['put','patch'],
-                'skills/{skill}',         [SkillController::class, 'update'])->name('skills.update');
-            Route::delete('skills/{skill}',        [SkillController::class, 'destroy'])->name('skills.destroy');
+            Route::get('skills', [SkillController::class, 'index'])->name('skills.index');
+            Route::get('skills/create', [SkillController::class, 'create'])->name('skills.create');
+            Route::post('skills', [SkillController::class, 'store'])->name('skills.store');
+            Route::get('skills/{skill}', [SkillController::class, 'show'])->name('skills.show');
+            Route::get('skills/{skill}/edit', [SkillController::class, 'edit'])->name('skills.edit');
+            Route::match(['put', 'patch'],
+                'skills/{skill}', [SkillController::class, 'update'])->name('skills.update');
+            Route::delete('skills/{skill}', [SkillController::class, 'destroy'])->name('skills.destroy');
 
             // dodatkowo (opcjonalny drag&drop)
-            Route::post  ('skills/reorder',        [SkillController::class, 'reorder'])->name('skills.reorder');
-            Route::resource('care-targets',       CareTargetController::class)->only(['index','store','update','destroy']);
-            Route::resource('mobility',           MobilityController::class)->only(['index','store','update','destroy']);
-            Route::resource('genders',            GenderController::class)->only(['index','store','update','destroy']);
-            Route::resource('experience',         ExperienceController::class)->only(['index','store','update','destroy']);
-            Route::resource('recruitment-reqs',   RecruitmentRequirementController::class)->only(['index','store','update','destroy']);
-            Route::resource('duties',             DutyController::class)->only(['index','store','update','destroy']);
+            Route::post('skills/reorder', [SkillController::class, 'reorder'])->name('skills.reorder');
+            Route::get('care-targets', [CareTargetController::class, 'index'])->name('care-targets.index');
+            Route::get('care-targets/create', [CareTargetController::class, 'create'])->name('care-targets.create');
+            Route::post('care-targets', [CareTargetController::class, 'store'])->name('care-targets.store');
+            Route::get('care-targets/{care_target}', [CareTargetController::class, 'show'])->name('care-targets.show');
+            Route::get('care-targets/{care_target}/edit', [CareTargetController::class, 'edit'])->name('care-targets.edit');
+            Route::match(['put', 'patch'], 'care-targets/{care_target}', [CareTargetController::class, 'update'])->name('care-targets.update');
+            Route::delete('care-targets/{care_target}', [CareTargetController::class, 'destroy'])->name('care-targets.destroy');
+            Route::post('care-targets/reorder', [CareTargetController::class, 'reorder'])->name('care-targets.reorder');
+            Route::get   ('mobility',                  [MobilityController::class, 'index'])->name('mobility.index');
+            Route::get   ('mobility/create',           [MobilityController::class, 'create'])->name('mobility.create');
+            Route::post  ('mobility',                  [MobilityController::class, 'store'])->name('mobility.store');
+            Route::get   ('mobility/{mobility}',       [MobilityController::class, 'show'])->name('mobility.show');
+            Route::get   ('mobility/{mobility}/edit',  [MobilityController::class, 'edit'])->name('mobility.edit');
+            Route::match(['put','patch'], 'mobility/{mobility}', [MobilityController::class, 'update'])->name('mobility.update');
+            Route::delete('mobility/{mobility}',       [MobilityController::class, 'destroy'])->name('mobility.destroy');
+            Route::post  ('mobility/reorder',          [MobilityController::class, 'reorder'])->name('mobility.reorder');            Route::resource('genders', GenderController::class)->only(['index', 'store', 'update', 'destroy']);
+            Route::resource('experience', ExperienceController::class)->only(['index', 'store', 'update', 'destroy']);
+            Route::resource('recruitment-reqs', RecruitmentRequirementController::class)->only(['index', 'store', 'update', 'destroy']);
+            Route::resource('duties', DutyController::class)->only(['index', 'store', 'update', 'destroy']);
         });
 
         // ===== Zgody =====
         Route::prefix('consents')->name('consents.')->group(function () {
-            Route::resource('forms',    ConsentsFormController::class)->only(['index','store','update','destroy']);
-            Route::resource('contacts', ConsentsContactController::class)->only(['index','destroy']);
+            Route::resource('forms', ConsentsFormController::class)->only(['index', 'store', 'update', 'destroy']);
+            Route::resource('contacts', ConsentsContactController::class)->only(['index', 'destroy']);
         });
 
         // ===== Wiadomości =====
         Route::prefix('messages')->name('msg.')->group(function () {
             // PL
             Route::prefix('pl')->name('pl.')->group(function () {
-                Route::resource('front-contacts', PlFrontContactController::class)->only(['index','show','destroy']);
-                Route::resource('site-contacts',  PlSiteContactController::class)->only(['index','show','destroy']);
-                Route::resource('forms',          PlFormController::class)->only(['index','show','destroy']);
+                Route::resource('front-contacts', PlFrontContactController::class)->only(['index', 'show', 'destroy']);
+                Route::resource('site-contacts', PlSiteContactController::class)->only(['index', 'show', 'destroy']);
+                Route::resource('forms', PlFormController::class)->only(['index', 'show', 'destroy']);
             });
             // DE
             Route::prefix('de')->name('de.')->group(function () {
-                Route::resource('site-contacts',  DeSiteContactController::class)->only(['index','show','destroy']);
-                Route::resource('forms',          DeFormController::class)->only(['index','show','destroy']);
+                Route::resource('site-contacts', DeSiteContactController::class)->only(['index', 'show', 'destroy']);
+                Route::resource('forms', DeFormController::class)->only(['index', 'show', 'destroy']);
             });
         });
 
         // ===== Partnerzy / Użytkownicy =====
-        Route::resource('partners', PartnerController::class)->only(['index','store','update','destroy']);
-        Route::resource('users',    UserController::class)->only(['index','show']);
+        Route::resource('partners', PartnerController::class)->only(['index', 'store', 'update', 'destroy']);
+        Route::resource('users', UserController::class)->only(['index', 'show']);
     });
 
 /*

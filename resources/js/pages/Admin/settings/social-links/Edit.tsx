@@ -60,10 +60,10 @@ export default function Edit({
     return (
         <AdminLayout>
             <form onSubmit={submit} className="p-6 space-y-4">
-                <h1 className="mb-4 text-2xl font-bold">
+                <p className="mb-4 text-2xl font-bold">
                     {mode === 'create' ? 'Utwórz' : 'Aktualizacja'} Link społecznościowy
                     {record.name ? `: ${record.name}` : ''}
-                </h1>
+                </p>
 
                 <div className="space-y-4 rounded-xl border bg-white p-5">
                     {/* Nazwa */}

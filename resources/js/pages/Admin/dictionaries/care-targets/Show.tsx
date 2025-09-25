@@ -1,34 +1,34 @@
 import { Link, usePage } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
 
-type Skill = {
+type Row = {
     id:number; name_pl:string; name_de:string|null;
     is_visible_pl:boolean; is_visible_de:boolean;
     created_at?:string; updated_at?:string;
 }
-const BASE = '/admin/dictionaries/skills'
+const BASE = '/admin/dictionaries/care-targets'
 
 export default function Show(){
-    const { skill } = usePage<{ skill: Skill }>().props
+    const { row } = usePage<{ row: Row }>().props
 
     return (
         <AdminLayout>
             <main className="p-6">
-                <div className="text-sm text-slate-500">Szczegóły Umiejętność: {skill.id}</div>
+                <div className="text-sm text-slate-500">Zasoby › Osoby do opieki › Szczegóły</div>
                 <div className="mt-1 flex items-center justify-between">
-                    <p className="text-2xl font-bold">Szczegóły Umiejętność: {skill.id}</p>
+                    <p className="text-2xl font-bold">Szczegóły Osoba do opieki: {row.name_pl}</p>
                     <div className="flex gap-2">
-                        <Link href={`${BASE}/${skill.id}/edit`} className="rounded-lg border px-3 py-1 hover:bg-slate-50">✎</Link>
+                        <Link href={`${BASE}/${row.id}/edit`} className="rounded-lg border px-3 py-1 hover:bg-slate-50">✎</Link>
                         <Link href={BASE} className="rounded-lg border px-3 py-1 hover:bg-slate-50">↩︎</Link>
                     </div>
                 </div>
 
                 <div className="mt-6 overflow-hidden rounded-xl border bg-white">
                     <dl className="divide-y">
-                        <Row label="ID">{skill.id}</Row>
-                        <Row label="Nazwa">{skill.name_pl}</Row>
-                        <Row label="Widoczność na polskiej stronie">{skill.is_visible_pl ? '✅' : '❌'}</Row>
-                        <Row label="Widoczność na niemieckiej stronie">{skill.is_visible_de ? '✅' : '❌'}</Row>
+                        <RowLine label="ID">{row.id}</RowLine>
+                        <RowLine label="Nazwa">{row.name_pl}</RowLine>
+                        <RowLine label="Widoczność na polskiej stronie">{row.is_visible_pl ? '✅' : '❌'}</RowLine>
+                        <RowLine label="Widoczność na niemieckiej stronie">{row.is_visible_de ? '✅' : '❌'}</RowLine>
                     </dl>
                 </div>
 
@@ -37,7 +37,7 @@ export default function Show(){
         </AdminLayout>
     )
 }
-function Row({label, children}:{label:string; children:React.ReactNode}){
+function RowLine({label, children}:{label:string; children:React.ReactNode}){
     return (
         <div className="grid grid-cols-1 gap-3 p-4 md:grid-cols-3">
             <dt className="text-sm font-medium">{label}</dt>

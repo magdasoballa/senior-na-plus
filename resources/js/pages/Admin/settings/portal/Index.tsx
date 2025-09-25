@@ -41,7 +41,7 @@ export default function Index() {
         <AdminLayout>
             <main className="p-6">
                 <div className="text-sm text-slate-500">Zasoby › Ustawienia portalu</div>
-                <h1 className="mt-1 text-2xl font-bold">Ustawienia portalu</h1>
+                <p className="mt-1 text-2xl font-bold">Ustawienia portalu</p>
 
                 <form onSubmit={submit} className="mt-4 max-w-md">
                     <div className="relative">

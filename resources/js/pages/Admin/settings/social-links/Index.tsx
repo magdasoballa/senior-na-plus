@@ -42,7 +42,7 @@ export default function Index({
         <AdminLayout>
             <div className="p-6">
                 <div className="mb-4 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">Linki społecznościowe</h1>
+                    <p className="text-2xl font-bold">Linki społecznościowe</p>
                     <Link
                         href="/admin/settings/social-links/create"
                         className="rounded-full bg-mint px-4 py-2 font-semibold"

@@ -2,19 +2,19 @@ import { Link, useForm, usePage } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
 import { useState } from 'react'
 
-type Skill = { id?:number; name_pl?:string; name_de?:string|null; is_visible_pl?:boolean; is_visible_de?:boolean }
+type Row = { id?:number; name_pl?:string; name_de?:string|null; is_visible_pl?:boolean; is_visible_de?:boolean }
 type Lang = 'pl'|'de'
-const BASE = '/admin/dictionaries/skills'
+const BASE = '/admin/dictionaries/mobility'
 
 export default function Form(){
-    const { skill } = usePage<{ skill: Skill | null }>().props
-    const isEdit = !!skill?.id
+    const { row } = usePage<{ row: Row | null }>().props
+    const isEdit = !!row?.id
 
     const form = useForm({
-        name_pl: skill?.name_pl ?? '',
-        name_de: skill?.name_de ?? '',
-        is_visible_pl: skill?.is_visible_pl ?? true,
-        is_visible_de: skill?.is_visible_de ?? false,
+        name_pl: row?.name_pl ?? '',
+        name_de: row?.name_de ?? '',
+        is_visible_pl: row?.is_visible_pl ?? false,
+        is_visible_de: row?.is_visible_de ?? false,
         redirectTo: 'index' as 'index'|'continue',
     })
 
@@ -22,36 +22,29 @@ export default function Form(){
 
     const submit = (e:React.FormEvent)=>{
         e.preventDefault()
-        if (isEdit) {
-            form.put(`${BASE}/${skill!.id}`, { preserveScroll:true })
-        } else {
-            form.post(`${BASE}`, { preserveScroll:true })
-        }
+        if (isEdit) form.put(`${BASE}/${row!.id}`, { preserveScroll:true })
+        else        form.post(`${BASE}`, { preserveScroll:true })
     }
 
     const submitAndContinue = ()=>{
         form.setData('redirectTo','continue')
         if (isEdit) {
-            form.put(`${BASE}/${skill!.id}`, {
-                preserveScroll:true,
-                onSuccess:()=> form.setData('redirectTo','index'),
-            })
+            form.put(`${BASE}/${row!.id}`, { preserveScroll:true, onSuccess:()=> form.setData('redirectTo','index') })
         } else {
-            form.post(`${BASE}`, {
-                preserveScroll:true,
-                onSuccess:()=> form.setData('redirectTo','index'),
-            })
+            form.post(`${BASE}`, { preserveScroll:true, onSuccess:()=> form.setData('redirectTo','index') })
         }
     }
 
     return (
         <AdminLayout>
             <main className="p-6">
-                <div className="text-sm text-slate-500">{isEdit ? `Aktualizacja Umiejętność: ${skill!.id}` : 'Nowa Umiejętność'}</div>
-                <p className="mt-1 text-2xl font-bold">{isEdit ? `Aktualizacja Umiejętność: ${skill!.id}` : 'Utwórz Umiejętność'}</p>
+                <div className="text-sm text-slate-500">Zasoby › Mobilność podopiecznych › {isEdit ? `Aktualizacja ${row!.name_pl}` : 'Utwórz'}</div>
+                <p className="mt-1 text-2xl font-bold">
+                    {isEdit ? `Aktualizacja Mobilność podopiecznego: ${row!.name_pl}` : 'Utwórz Mobilność podopiecznego'}
+                </p>
 
                 <form onSubmit={submit} className="mt-6 overflow-hidden rounded-xl border bg-white">
-                    {/* Nazwa z przełącznikiem języka */}
+                    {/* Nazwa + przełącznik PL/DE */}
                     <div className="border-b p-6">
                         <div className="mb-2 flex items-center justify-between">
                             <label className="text-sm font-medium">Nazwa <span className="text-rose-600">*</span></label>
@@ -71,7 +64,7 @@ export default function Form(){
                             className={`mt-2 w-full rounded-lg border bg-white px-3 py-2 ${form.errors.name_pl || form.errors.name_de ? 'border-rose-400' : ''}`}
                             value={lang==='pl' ? form.data.name_pl : form.data.name_de}
                             onChange={e => lang==='pl' ? form.setData('name_pl', e.target.value) : form.setData('name_de', e.target.value)}
-                            placeholder={lang==='pl' ? 'np. kurs pierwszej pomocy' : 'z. B. Erste-Hilfe-Kurs'}
+                            placeholder={lang==='pl' ? 'np. w pełni mobilny' : 'z. B. voll mobil'}
                         />
                         {lang==='pl' && form.errors.name_pl && <Err msg={form.errors.name_pl} />}
                         {lang==='de' && form.errors.name_de && <Err msg={form.errors.name_de} />}
@@ -105,10 +98,10 @@ export default function Form(){
                         <Link href={`${BASE}`} className="rounded-lg border px-4 py-2 hover:bg-slate-50">Anuluj</Link>
                         <button type="button" onClick={submitAndContinue}
                                 className="rounded-lg bg-cyan-500 px-4 py-2 font-semibold text-white" disabled={form.processing}>
-                            {isEdit ? 'Aktualizuj i Kontynuuj Edycję' : 'Utwórz i Kontynuuj Edycję'}
+                            {isEdit ? 'Aktualizuj i Kontynuuj Edycję' : 'Utwórz i Dodaj Kolejną'}
                         </button>
                         <button type="submit" className="rounded-lg bg-mint px-4 py-2 font-semibold text-white" disabled={form.processing}>
-                            {isEdit ? 'Aktualizacja Umiejętność' : 'Utwórz Umiejętność'}
+                            {isEdit ? 'Aktualizacja Mobilność podopiecznego' : 'Utwórz Mobilność podopiecznego'}
                         </button>
                     </div>
                 </form>

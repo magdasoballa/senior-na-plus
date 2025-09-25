@@ -28,7 +28,7 @@ export default function Show() {
                     Zasoby › Banery › Szczegóły #{banner.id}
                 </div>
                 <div className="mt-1 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">Szczegóły banera</h1>
+                    <p className="text-2xl font-bold">Szczegóły banera</p>
                     <div className="flex gap-2">
                         <Link href={`${BASE}/${banner.id}/edit`} className="rounded-lg border px-3 py-1 hover:bg-slate-50">✎ Edytuj</Link>
                         <Link href={BASE} className="rounded-lg border px-3 py-1 hover:bg-slate-50">↩︎ Wróć do listy</Link>

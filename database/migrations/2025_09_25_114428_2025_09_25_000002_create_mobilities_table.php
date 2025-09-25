@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('care_targets', function (Blueprint $table) {
+        Schema::create('mobilities', function (Blueprint $table) {
             $table->id();
             $table->string('name_pl');
             $table->string('name_de')->nullable();
@@ -20,6 +20,6 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::dropIfExists('care_targets');
+        Schema::dropIfExists('mobilities');
     }
 };

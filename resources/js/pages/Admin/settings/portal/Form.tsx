@@ -88,7 +88,7 @@ export default function Form(){
         <AdminLayout>
             <main className="p-6">
                 <div className="text-sm text-slate-500">Zasoby › Ustawienia portalu › Edycja #{setting.id}</div>
-                <h1 className="mt-1 text-2xl font-bold">Aktualizacja Ustawienie portalu: {setting.id}</h1>
+                <p className="mt-1 text-2xl font-bold">Aktualizacja Ustawienie portalu: {setting.id}</p>
 
                 <form onSubmit={submit} className="mt-6 rounded-xl border bg-white p-6">
                     <FieldI18n
