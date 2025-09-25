@@ -33,13 +33,13 @@ function AdminSidebar() {
             <Section title="Słowniki">
                 <NavList
                     items={[
-                        { label: 'Umiejętności', href: '/admin/dicts/skills' },
-                        { label: 'Osoby do opieki', href: '/admin/dicts/care-targets' },
-                        { label: 'Mobilność podopiecznych', href: '/admin/dicts/mobility' },
-                        { label: 'Płcie osób do opieki', href: '/admin/dicts/drinking' },
-                        { label: 'Doświadczenia w opiece', href: '/admin/dicts/experience' },
-                        { label: 'Wymagania rekrutacyjne', href: '/admin/dicts/requirements' },
-                        { label: 'Obowiązki', href: '/admin/dicts/duties' },
+                        { label: 'Umiejętności', href: '/admin/dictionaries/skills' },
+                        { label: 'Osoby do opieki', href: '/admin/dictionaries/care-targets' },
+                        { label: 'Mobilność podopiecznych', href: '/admin/dictionaries/mobility' },
+                        { label: 'Płcie osób do opieki', href: '/admin/dictionaries/genders' },
+                        { label: 'Doświadczenia w opiece', href: '/admin/dictionaries/experience' },
+                        { label: 'Wymagania rekrutacyjne', href: '/admin/dictionaries/recruitment-reqs' },
+                        { label: 'Obowiązki', href: '/admin/dictionaries/duties' },
                     ]}
                 />
             </Section>

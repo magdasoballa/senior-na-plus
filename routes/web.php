@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\Dictionaries\SkillController;
 use App\Http\Controllers\Admin\Settings\BannerController;
 use App\Http\Controllers\Admin\OfferController as AdminOfferController;
 use App\Http\Controllers\Admin\Settings\PortalSettingsController;
@@ -135,7 +136,17 @@ Route::middleware(['auth', 'admin'])
 
         // ===== Słowniki =====
         Route::prefix('dictionaries')->name('dict.')->group(function () {
-            Route::resource('skills',             SkillController::class)->only(['index','store','update','destroy']);
+            Route::get   ('skills',                [SkillController::class, 'index'])->name('skills.index');
+            Route::get   ('skills/create',         [SkillController::class, 'create'])->name('skills.create');
+            Route::post  ('skills',                [SkillController::class, 'store'])->name('skills.store');
+            Route::get   ('skills/{skill}',        [SkillController::class, 'show'])->name('skills.show');
+            Route::get   ('skills/{skill}/edit',   [SkillController::class, 'edit'])->name('skills.edit');
+            Route::match(['put','patch'],
+                'skills/{skill}',         [SkillController::class, 'update'])->name('skills.update');
+            Route::delete('skills/{skill}',        [SkillController::class, 'destroy'])->name('skills.destroy');
+
+            // dodatkowo (opcjonalny drag&drop)
+            Route::post  ('skills/reorder',        [SkillController::class, 'reorder'])->name('skills.reorder');
             Route::resource('care-targets',       CareTargetController::class)->only(['index','store','update','destroy']);
             Route::resource('mobility',           MobilityController::class)->only(['index','store','update','destroy']);
             Route::resource('genders',            GenderController::class)->only(['index','store','update','destroy']);
