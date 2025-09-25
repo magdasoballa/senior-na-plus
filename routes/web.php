@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Admin\Dictionaries\CareTargetController;
+use App\Http\Controllers\Admin\Dictionaries\ExperienceController;
+use App\Http\Controllers\Admin\Dictionaries\GenderController;
 use App\Http\Controllers\Admin\Dictionaries\MobilityController;
 use App\Http\Controllers\Admin\Dictionaries\SkillController;
 use App\Http\Controllers\Admin\OfferController as AdminOfferController;
@@ -164,9 +166,23 @@ Route::middleware(['auth', 'admin'])
             Route::get   ('mobility/{mobility}/edit',  [MobilityController::class, 'edit'])->name('mobility.edit');
             Route::match(['put','patch'], 'mobility/{mobility}', [MobilityController::class, 'update'])->name('mobility.update');
             Route::delete('mobility/{mobility}',       [MobilityController::class, 'destroy'])->name('mobility.destroy');
-            Route::post  ('mobility/reorder',          [MobilityController::class, 'reorder'])->name('mobility.reorder');            Route::resource('genders', GenderController::class)->only(['index', 'store', 'update', 'destroy']);
-            Route::resource('experience', ExperienceController::class)->only(['index', 'store', 'update', 'destroy']);
-            Route::resource('recruitment-reqs', RecruitmentRequirementController::class)->only(['index', 'store', 'update', 'destroy']);
+            Route::post  ('mobility/reorder',          [MobilityController::class, 'reorder'])->name('mobility.reorder');
+            Route::get   ('genders',                 [GenderController::class,'index'])->name('genders.index');
+            Route::get   ('genders/create',          [GenderController::class,'create'])->name('genders.create');
+            Route::post  ('genders',                 [GenderController::class,'store'])->name('genders.store');
+            Route::get   ('genders/{gender}',        [GenderController::class,'show'])->name('genders.show');
+            Route::get   ('genders/{gender}/edit',   [GenderController::class,'edit'])->name('genders.edit');
+            Route::match(['put','patch'],'genders/{gender}', [GenderController::class,'update'])->name('genders.update');
+            Route::delete('genders/{gender}',        [GenderController::class,'destroy'])->name('genders.destroy');
+            Route::post  ('genders/reorder',         [GenderController::class,'reorder'])->name('genders.reorder');
+            Route::get   ('experience',                 [ExperienceController::class,'index'])->name('experience.index');
+            Route::get   ('experience/create',          [ExperienceController::class,'create'])->name('experience.create');
+            Route::post  ('experience',                 [ExperienceController::class,'store'])->name('experience.store');
+            Route::get   ('experience/{experience}',    [ExperienceController::class,'show'])->name('experience.show');
+            Route::get   ('experience/{experience}/edit',[ExperienceController::class,'edit'])->name('experience.edit');
+            Route::match(['put','patch'],'experience/{experience}', [ExperienceController::class,'update'])->name('experience.update');
+            Route::delete('experience/{experience}',    [ExperienceController::class,'destroy'])->name('experience.destroy');
+            Route::post  ('experience/reorder',         [ExperienceController::class,'reorder'])->name('experience.reorder');            Route::resource('recruitment-reqs', RecruitmentRequirementController::class)->only(['index', 'store', 'update', 'destroy']);
             Route::resource('duties', DutyController::class)->only(['index', 'store', 'update', 'destroy']);
         });
 
