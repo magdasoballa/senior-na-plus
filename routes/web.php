@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\Settings\BannerController;
 use App\Http\Controllers\Admin\OfferController as AdminOfferController;
+use App\Http\Controllers\Admin\Settings\PortalSettingsController;
 use App\Http\Controllers\Admin\Settings\SocialLinkController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ContactMessageController;
@@ -115,8 +116,12 @@ Route::middleware(['auth', 'admin'])
 
             Route::patch('/banners/{banner}/toggle', [BannerController::class,'toggle'])->name('banners.toggle');
             Route::post('/banners/reorder',          [BannerController::class,'reorder'])->name('banners.reorder');            Route::get('portal', [PortalSettingsController::class, 'edit'])->name('portal.edit');
-            Route::put('portal', [PortalSettingsController::class, 'update'])->name('portal.update');
-            Route::get('popup',  [PopupController::class, 'edit'])->name('popup.edit');
+            Route::prefix('portal')->name('portal.')->group(function () {
+                Route::get('/',                 [PortalSettingsController::class,'index'])->name('index');   // /admin/settings/portal
+                Route::get('/{setting}',        [PortalSettingsController::class,'show'])->name('show');
+                Route::get('/{setting}/edit',   [PortalSettingsController::class,'edit'])->name('edit');
+                Route::put('/{setting}',        [PortalSettingsController::class,'update'])->name('update');
+            });            Route::get('popup',  [PopupController::class, 'edit'])->name('popup.edit');
             Route::put('popup',  [PopupController::class, 'update'])->name('popup.update');
         });
 

@@ -25,7 +25,7 @@ function AdminSidebar() {
                     { label: 'Strony', href: '/admin/settings/pages' },
                     { label: 'Linki społecznościowe', href: '/admin/settings/social-links' },
                     { label: 'Banery', href: '/admin/settings/banners' },
-                    { label: 'Ustawienia portalu', href: '/admin/settings' },
+                    { label: 'Ustawienia portalu', href: '/admin/settings/portal' },
                     { label: 'Popup', href: '/admin/popup' },
                 ]}
             />
