@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Link, router } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
+import { CheckCircle2, XCircle } from 'lucide-react';
 
 type Row = {
     id: number
@@ -90,8 +91,8 @@ export default function Index({
                                         '—'
                                     )}
                                 </td>
-                                <td className="px-4 py-3">{r.visible_pl ? '✓' : '✗'}</td>
-                                <td className="px-4 py-3">{r.visible_de ? '✓' : '✗'}</td>
+                                <td className="px-4 py-3">{r.visible_pl ?  <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden /> :  <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}</td>
+                                <td className="px-4 py-3">{r.visible_de ?  <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden /> :  <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}</td>
                                 <td className="px-4 py-3 space-x-2 text-right">
                                     <Link
                                         href={`/admin/settings/social-links/${r.id}`}

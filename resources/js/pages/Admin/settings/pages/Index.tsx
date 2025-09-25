@@ -1,5 +1,4 @@
-// resources/js/pages/admin/settings/pages/Index.tsx
-import AppLayout from '@/layouts/app-layout'
+
 import { Link, router } from '@inertiajs/react'
 import { useState } from 'react'
 import AdminLayout from '@/layouts/admin-layout';

@@ -12,6 +12,7 @@ use App\Models\Offer;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\Admin\Settings\PopupController;
 
 /*
 |--------------------------------------------------------------------------
@@ -121,8 +122,14 @@ Route::middleware(['auth', 'admin'])
                 Route::get('/{setting}',        [PortalSettingsController::class,'show'])->name('show');
                 Route::get('/{setting}/edit',   [PortalSettingsController::class,'edit'])->name('edit');
                 Route::put('/{setting}',        [PortalSettingsController::class,'update'])->name('update');
-            });            Route::get('popup',  [PopupController::class, 'edit'])->name('popup.edit');
-            Route::put('popup',  [PopupController::class, 'update'])->name('popup.update');
+            });
+            Route::get('popups',                 [PopupController::class, 'index'])->name('popups.index');
+            Route::get('popups/create',          [PopupController::class, 'create'])->name('popups.create');
+            Route::post('popups',                [PopupController::class, 'store'])->name('popups.store');
+            Route::get('popups/{popup}',         [PopupController::class, 'show'])->name('popups.show');
+            Route::get('popups/{popup}/edit',    [PopupController::class, 'edit'])->name('popups.edit');
+            Route::put('popups/{popup}',         [PopupController::class, 'update'])->name('popups.update');
+            Route::delete('popups/{popup}',      [PopupController::class, 'destroy'])->name('popups.destroy');
         });
 
 
