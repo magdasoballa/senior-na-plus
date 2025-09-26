@@ -1,13 +1,14 @@
 import { Link, useForm, usePage } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
 import { useState } from 'react'
+import { CheckCircle2 } from 'lucide-react'
 
 type Row = { id?:number; name_pl?:string; name_de?:string|null; is_visible_pl?:boolean; is_visible_de?:boolean }
 type Lang = 'pl'|'de'
 const BASE = '/admin/dictionaries/mobility'
 
 export default function Form(){
-    const { row } = usePage<{ row: Row | null }>().props
+    const { row, flash } = usePage<{ row: Row | null; flash?: { success?: string } }>().props
     const isEdit = !!row?.id
 
     const form = useForm({
@@ -19,6 +20,7 @@ export default function Form(){
     })
 
     const [lang,setLang] = useState<Lang>('pl')
+    const [saved, setSaved] = useState(false)
 
     const submit = (e:React.FormEvent)=>{
         e.preventDefault()
@@ -27,11 +29,28 @@ export default function Form(){
     }
 
     const submitAndContinue = ()=>{
+        // 3 sygnały „zostań”: redirectTo, stay i query ?continue=1
         form.setData('redirectTo','continue')
+        form.transform(d => ({ ...d, stay: true }))
+
         if (isEdit) {
-            form.put(`${BASE}/${row!.id}`, { preserveScroll:true, onSuccess:()=> form.setData('redirectTo','index') })
+            form.put(`${BASE}/${row!.id}?continue=1`, {
+                preserveScroll:true,
+                onSuccess:()=> {
+                    form.setData('redirectTo','index')
+                    setSaved(true); window.setTimeout(()=>setSaved(false), 2500)
+                },
+                onFinish:()=> form.transform(d=>d),
+            })
         } else {
-            form.post(`${BASE}`, { preserveScroll:true, onSuccess:()=> form.setData('redirectTo','index') })
+            form.post(`${BASE}?continue=1`, {
+                preserveScroll:true,
+                onSuccess:()=> {
+                    form.setData('redirectTo','index')
+                    setSaved(true); window.setTimeout(()=>setSaved(false), 2500)
+                },
+                onFinish:()=> form.transform(d=>d),
+            })
         }
     }
 
@@ -42,6 +61,13 @@ export default function Form(){
                 <p className="mt-1 text-2xl font-bold">
                     {isEdit ? `Aktualizacja Mobilność podopiecznego: ${row!.name_pl}` : 'Utwórz Mobilność podopiecznego'}
                 </p>
+
+                {(saved || flash?.success) && (
+                    <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-800">
+                        <CheckCircle2 className="h-4 w-4" />
+                        {flash?.success ?? 'Zapisano'}
+                    </div>
+                )}
 
                 <form onSubmit={submit} className="mt-6 overflow-hidden rounded-xl border bg-white">
                     {/* Nazwa + przełącznik PL/DE */}

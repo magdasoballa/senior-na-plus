@@ -2,6 +2,7 @@
 import { Link, usePage } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
 import { useState, type ReactNode } from 'react'
+import { Pencil } from 'lucide-react';
 
 type Setting = {
     id: number
@@ -35,8 +36,8 @@ export default function Show() {
                 <div className="mt-1 flex items-center justify-between">
                     <p className="text-2xl font-bold">Szczegóły Ustawienie portalu: {setting.id}</p>
                     <div className="flex gap-2">
-                        <Link href={`${BASE}/${setting.id}/edit`} className="rounded-lg border px-3 py-1 hover:bg-slate-50" aria-label="Edytuj">
-                            ✎
+                        <Link href={`${BASE}/${setting.id}/edit`} className="rounded-lg bg-mint border px-3 py-1 hover:bg-slate-50" aria-label="Edytuj">
+                            <Pencil/>
                         </Link>
                         <Link href={BASE} className="rounded-lg border px-3 py-1 hover:bg-slate-50" aria-label="Powrót">
                             ↩︎

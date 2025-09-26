@@ -45,9 +45,9 @@ class ExperienceController extends Controller
     public function store(ExperienceRequest $request)
     {
         $data = $request->validated();
-        $max = (int) Experience::max('position');
+        $max  = (int) \App\Models\Experience::max('position');
 
-        Experience::create([
+        $row = \App\Models\Experience::create([
             'name_pl'       => $data['name_pl'],
             'name_de'       => $data['name_de'] ?? null,
             'is_visible_pl' => (bool)($data['is_visible_pl'] ?? false),
@@ -55,8 +55,15 @@ class ExperienceController extends Controller
             'position'      => $max + 1,
         ]);
 
-        return to_route('admin.dict.experience.index')->with('success','Utworzono');
+        $stay = $request->input('redirectTo') === 'continue'
+            || $request->boolean('stay')
+            || $request->boolean('continue');
+
+        return $stay
+            ? to_route('admin.dict.experience.create')->with('success','Utworzono')
+            : to_route('admin.dict.experience.index')->with('success','Utworzono');
     }
+
 
     public function show(Experience $experience)
     {
@@ -86,18 +93,22 @@ class ExperienceController extends Controller
         ]);
     }
 
-    public function update(ExperienceRequest $request, Experience $experience)
+    public function update(ExperienceRequest $request, \App\Models\Experience $experience)
     {
         $data = $request->validated();
 
-        $experience->fill([
+        $experience->update([
             'name_pl'       => $data['name_pl'],
             'name_de'       => $data['name_de'] ?? null,
             'is_visible_pl' => (bool)($data['is_visible_pl'] ?? false),
             'is_visible_de' => (bool)($data['is_visible_de'] ?? false),
-        ])->save();
+        ]);
 
-        return $request->input('redirectTo') === 'continue'
+        $stay = $request->input('redirectTo') === 'continue'
+            || $request->boolean('stay')
+            || $request->boolean('continue');
+
+        return $stay
             ? to_route('admin.dict.experience.edit', $experience)->with('success','Zapisano')
             : to_route('admin.dict.experience.index')->with('success','Zapisano');
     }

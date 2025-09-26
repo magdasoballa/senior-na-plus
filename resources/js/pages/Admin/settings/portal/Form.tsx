@@ -1,14 +1,13 @@
-// resources/js/pages/Admin/settings/portal/Form.tsx (i18n; saves both languages to *_pl/*_de)
+// resources/js/pages/Admin/settings/portal/Form.tsx
 import { Link, useForm, usePage } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
 import { useEffect, useMemo, useState } from 'react'
+import { CheckCircle2 } from 'lucide-react'
 
 // --- Types ---
 type Lang = 'pl' | 'de'
 
-// Backend props: osobne kolumny dla PL i DE
-// Upewnij się, że kontroler zwraca te pola w propsach Inertii
-// (phone_pl, phone_de, address_pl, address_de, email_pl, email_de)
+// Backend props
 type Setting = {
     id:number;
     phone_pl:string|null; phone_de:string|null;
@@ -26,7 +25,7 @@ const NBSP = String.fromCharCode(160)
 const normalizeWs = (s:string)=> (s ?? '').split(NBSP).join(' ').replace(/\s+/g, ' ').trim()
 
 export default function Form(){
-    const { setting } = usePage<{ setting: Setting }>().props
+    const { setting, flash } = usePage<{ setting: Setting; flash?: { success?: string } }>().props
 
     const form = useForm({
         phone:   toTranslated(setting.phone_pl,   setting.phone_de),
@@ -34,6 +33,9 @@ export default function Form(){
         email:   toTranslated(setting.email_pl,   setting.email_de),
         redirectTo: 'index' as 'index' | 'continue',
     })
+
+    // lokalny message po „kontynuuj edycję”
+    const [saved, setSaved] = useState(false)
 
     // niezależne przełączniki języka per pole
     const [langPhone, setLangPhone] = useState<Lang>('pl')
@@ -81,7 +83,15 @@ export default function Form(){
             email_pl:   normalizeWs(d.email.pl),   email_de:   normalizeWs(d.email.de),
             redirectTo: 'continue',
         }))
-        form.put(`${BASE}/${setting.id}?continue=1`, { preserveScroll:true, onSuccess(){ form.setData('redirectTo','index') } })
+        form.put(`${BASE}/${setting.id}?continue=1`, {
+            preserveScroll:true,
+            onSuccess(){
+                // pokaż lokalny komunikat i przywróć redirectTo
+                setSaved(true)
+                window.setTimeout(()=>setSaved(false), 2500)
+                form.setData('redirectTo','index')
+            }
+        })
     }
 
     return (
@@ -89,6 +99,14 @@ export default function Form(){
             <main className="p-6">
                 <div className="text-sm text-slate-500">Zasoby › Ustawienia portalu › Edycja #{setting.id}</div>
                 <p className="mt-1 text-2xl font-bold">Aktualizacja Ustawienie portalu: {setting.id}</p>
+
+                {/* komunikat sukcesu (flash z backendu lub lokalny po „kontynuuj edycję”) */}
+                {(saved || flash?.success) && (
+                    <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-800">
+                        <CheckCircle2 className="h-4 w-4" />
+                        {flash?.success ?? 'Zapisano zmiany'}
+                    </div>
+                )}
 
                 <form onSubmit={submit} className="mt-6 rounded-xl border bg-white p-6">
                     <FieldI18n
@@ -131,7 +149,7 @@ export default function Form(){
                         placeholder={{ pl:'kontakt@seniornaplus.pl', de:'kontakt@seniornaplus.de' }}
                         type="email"
                         validate={(v)=> !v || /.+@.+\..+/.test(v) }
-                        invalidMsg="Wygląda na niepoprawny adres e‑mail."
+                        invalidMsg="Wygląda na niepoprawny adres e-mail."
                     />
 
                     <div className="mt-8 flex flex-wrap items-center justify-end gap-3">

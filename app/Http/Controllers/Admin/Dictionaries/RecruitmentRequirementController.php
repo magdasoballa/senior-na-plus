@@ -60,7 +60,14 @@ class RecruitmentRequirementController extends Controller
 
         $req->save();
 
-        return to_route('admin.dict.recruitment-reqs.index')->with('success','Utworzono');
+        // ← akceptuj różne „sygnały” ze strony
+        $stay = $request->input('redirectTo') === 'continue'
+            || $request->boolean('stay')
+            || $request->boolean('continue');
+
+        return $stay
+            ? to_route('admin.dict.recruitment-reqs.edit', $req)->with('success','Utworzono')
+            : to_route('admin.dict.recruitment-reqs.index')->with('success','Utworzono');
     }
 
     public function show(RecruitmentRequirement $recruitment_req)
@@ -111,7 +118,12 @@ class RecruitmentRequirementController extends Controller
 
         $recruitment_req->save();
 
-        return $request->input('redirectTo') === 'continue'
+        // ← jak wyżej
+        $stay = $request->input('redirectTo') === 'continue'
+            || $request->boolean('stay')
+            || $request->boolean('continue');
+
+        return $stay
             ? to_route('admin.dict.recruitment-reqs.edit', $recruitment_req)->with('success','Zapisano')
             : to_route('admin.dict.recruitment-reqs.index')->with('success','Zapisano');
     }

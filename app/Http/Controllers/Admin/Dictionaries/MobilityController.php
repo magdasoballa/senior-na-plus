@@ -45,9 +45,9 @@ class MobilityController extends Controller
     public function store(MobilityRequest $request)
     {
         $data = $request->validated();
-        $max = (int) Mobility::max('position');
+        $max  = (int) Mobility::max('position');
 
-        Mobility::create([
+        $mobility = Mobility::create([
             'name_pl'       => $data['name_pl'],
             'name_de'       => $data['name_de'] ?? null,
             'is_visible_pl' => (bool)($data['is_visible_pl'] ?? false),
@@ -55,8 +55,17 @@ class MobilityController extends Controller
             'position'      => $max + 1,
         ]);
 
-        return to_route('admin.dict.mobility.index')->with('success','Utworzono');
+        $stay = $request->input('redirectTo') === 'continue'
+            || $request->boolean('stay')
+            || $request->boolean('continue');
+
+        // dla create: „Utwórz i Dodaj Kolejną” – wróć na pusty formularz
+        return $stay
+            ? to_route('admin.dict.mobility.create')->with('success','Utworzono')
+            : to_route('admin.dict.mobility.index')->with('success','Utworzono');
     }
+
+
 
     public function show(Mobility $mobility)
     {
@@ -97,7 +106,12 @@ class MobilityController extends Controller
             'is_visible_de' => (bool)($data['is_visible_de'] ?? false),
         ])->save();
 
-        return $request->input('redirectTo') === 'continue'
+        $stay = $request->input('redirectTo') === 'continue'
+            || $request->boolean('stay')
+            || $request->boolean('continue');
+
+        // dla edit: zostań na edycji TEGO rekordu
+        return $stay
             ? to_route('admin.dict.mobility.edit', $mobility)->with('success','Zapisano')
             : to_route('admin.dict.mobility.index')->with('success','Zapisano');
     }

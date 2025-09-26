@@ -44,13 +44,19 @@ class CareTargetController extends Controller
         return Inertia::render('Admin/dictionaries/care-targets/Form', ['row' => null]);
     }
 
-    public function store(CareTargetRequest $request)
+    public function store(Request $request)
     {
-        $data = $request->validated();
+        $data = $request->validate([
+            'name_pl' => ['required','string','max:255'],
+            'name_de' => ['nullable','string','max:255'],
+            'is_visible_pl' => ['boolean'],
+            'is_visible_de' => ['boolean'],
+            // 'stay' => ['nullable','boolean'], // opcjonalnie
+        ]);
 
-        $max = (int) CareTarget::max('position');
+        $max = (int) \App\Models\CareTarget::max('position');
 
-        CareTarget::create([
+        $row = \App\Models\CareTarget::create([
             'name_pl'       => $data['name_pl'],
             'name_de'       => $data['name_de'] ?? null,
             'is_visible_pl' => (bool)($data['is_visible_pl'] ?? false),
@@ -58,7 +64,13 @@ class CareTargetController extends Controller
             'position'      => $max + 1,
         ]);
 
-        return to_route('admin.dict.care-targets.index')->with('success','Utworzono');
+        $stay = $request->input('redirectTo') === 'continue'
+            || $request->boolean('stay')
+            || $request->boolean('continue');
+
+        return $stay
+            ? to_route('admin.dict.care-targets.create')->with('success','Utworzono')
+            : to_route('admin.dict.care-targets.index')->with('success','Utworzono');
     }
 
     public function show(CareTarget $care_target)
@@ -89,18 +101,28 @@ class CareTargetController extends Controller
         ]);
     }
 
-    public function update(CareTargetRequest $request, CareTarget $care_target)
+    public function update(Request $request, \App\Models\CareTarget $care_target)
     {
-        $data = $request->validated();
+        $data = $request->validate([
+            'name_pl' => ['required','string','max:255'],
+            'name_de' => ['nullable','string','max:255'],
+            'is_visible_pl' => ['boolean'],
+            'is_visible_de' => ['boolean'],
+            // 'stay' => ['nullable','boolean'], // opcjonalnie
+        ]);
 
-        $care_target->fill([
+        $care_target->update([
             'name_pl'       => $data['name_pl'],
             'name_de'       => $data['name_de'] ?? null,
             'is_visible_pl' => (bool)($data['is_visible_pl'] ?? false),
             'is_visible_de' => (bool)($data['is_visible_de'] ?? false),
-        ])->save();
+        ]);
 
-        return $request->input('redirectTo') === 'continue'
+        $stay = $request->input('redirectTo') === 'continue'
+            || $request->boolean('stay')
+            || $request->boolean('continue');
+
+        return $stay
             ? to_route('admin.dict.care-targets.edit', $care_target)->with('success','Zapisano')
             : to_route('admin.dict.care-targets.index')->with('success','Zapisano');
     }

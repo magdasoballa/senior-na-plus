@@ -1,5 +1,7 @@
 import { Link, router, useForm, usePage } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
+import { useEffect, useState } from 'react'
+import { CheckCircle2 } from 'lucide-react'
 
 type Duty = { id?: number; name?: string; is_visible?: boolean }
 type FormShape = { name: string; is_visible: boolean; redirectTo: 'index' | 'continue' }
@@ -7,7 +9,7 @@ type FormShape = { name: string; is_visible: boolean; redirectTo: 'index' | 'con
 const BASE = '/admin/dictionaries/duties'
 
 export default function Form() {
-    const { duty } = usePage<{ duty: Duty | null }>().props
+    const { duty, flash } = usePage<{ duty: Duty | null; flash?: { success?: string } }>().props
     const isEdit = !!duty?.id
 
     const form = useForm<FormShape>({
@@ -16,10 +18,18 @@ export default function Form() {
         redirectTo: 'index',
     })
 
+    const [saved, setSaved] = useState(false)
+
+    // auto-hide lokalnego komunikatu po ~2.5s
+    useEffect(() => {
+        if (!saved) return
+        const t = window.setTimeout(() => setSaved(false), 2500)
+        return () => window.clearTimeout(t)
+    }, [saved])
+
     const submit = (e: React.FormEvent) => {
         e.preventDefault()
         if (isEdit) {
-            // zwykły zapis → bez redirectTo=continue
             form.put(`${BASE}/${duty!.id}`, { preserveScroll: true })
         } else {
             form.post(`${BASE}`, { preserveScroll: true })
@@ -27,17 +37,17 @@ export default function Form() {
     }
 
     const submitAndContinue = () => {
+        // wyślij sygnał „zostań”
         form.transform(d => ({ ...d, redirectTo: 'continue' as const }))
 
         form.put(`${BASE}/${duty!.id}`, {
             preserveScroll: true,
-
-            onFinish: () => form.transform(d => d),
+            onSuccess: () => {
+                setSaved(true) // pokaż lokalny komunikat
+            },
+            onFinish: () => form.transform(d => d), // wyczyść transform
         })
     }
-
-
-
 
     return (
         <AdminLayout>
@@ -50,7 +60,15 @@ export default function Form() {
                     {isEdit ? `Aktualizacja Obowiązek: ${duty!.id}` : 'Utwórz Obowiązek'}
                 </p>
 
-                {/* karta formularza jak na screenie */}
+                {/* komunikat sukcesu (flash z backendu lub lokalny „saved”) */}
+                {(saved || flash?.success) && (
+                    <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-800">
+                        <CheckCircle2 className="h-4 w-4" />
+                        {flash?.success ?? 'Zapisano'}
+                    </div>
+                )}
+
+                {/* karta formularza */}
                 <form onSubmit={submit} className="mt-4 rounded-2xl border border-slate-200 bg-white p-6">
                     <Field label="Tytuł" required>
                         <input
@@ -73,7 +91,7 @@ export default function Form() {
                         </label>
                     </Field>
 
-                    {/* przyciski akcji jak w edycie ze screena */}
+                    {/* akcje */}
                     <div className="mt-8 flex items-center justify-end gap-3">
                         <Link
                             href={`${BASE}`}

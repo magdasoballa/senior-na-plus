@@ -1,5 +1,6 @@
 import { Link, usePage } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
+import { CheckCircle2, Pencil, XCircle } from 'lucide-react';
 
 type Skill = {
     id:number; name_pl:string; name_de:string|null;
@@ -18,7 +19,7 @@ export default function Show(){
                 <div className="mt-1 flex items-center justify-between">
                     <p className="text-2xl font-bold">Szczegóły Umiejętność: {skill.id}</p>
                     <div className="flex gap-2">
-                        <Link href={`${BASE}/${skill.id}/edit`} className="rounded-lg border px-3 py-1 hover:bg-slate-50">✎</Link>
+                        <Link href={`${BASE}/${skill.id}/edit`} className="rounded-lg border px-3 py-1 hover:bg-slate-50"><Pencil/></Link>
                         <Link href={BASE} className="rounded-lg border px-3 py-1 hover:bg-slate-50">↩︎</Link>
                     </div>
                 </div>
@@ -27,8 +28,10 @@ export default function Show(){
                     <dl className="divide-y">
                         <Row label="ID">{skill.id}</Row>
                         <Row label="Nazwa">{skill.name_pl}</Row>
-                        <Row label="Widoczność na polskiej stronie">{skill.is_visible_pl ? '✅' : '❌'}</Row>
-                        <Row label="Widoczność na niemieckiej stronie">{skill.is_visible_de ? '✅' : '❌'}</Row>
+                        <Row label="Widoczność na polskiej stronie">{skill.is_visible_pl ?  <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden />
+                            :  <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}</Row>
+                        <Row label="Widoczność na niemieckiej stronie">{skill.is_visible_de ?  <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden />
+                            :  <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}</Row>
                     </dl>
                 </div>
 

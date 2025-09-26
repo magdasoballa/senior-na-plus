@@ -1,6 +1,6 @@
 import { Link, usePage } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
-import { CheckCircle2, XCircle } from 'lucide-react';
+import { CheckCircle2, Pencil, XCircle } from 'lucide-react';
 
 type Req = { id:number; title:string; body:string; image_url:string|null; is_visible:boolean; created_at?:string; updated_at?:string }
 const BASE = '/admin/dictionaries/recruitment-reqs'
@@ -15,7 +15,7 @@ export default function Show(){
                 <div className="mt-1 flex items-center justify-between">
                     <p className="text-2xl font-bold">Szczegóły Wymaganie rekrutacyjne: {req.title}</p>
                     <div className="flex gap-2">
-                        <Link href={`${BASE}/${req.id}/edit`} className="rounded-lg border px-3 py-1 hover:bg-slate-50">✎</Link>
+                        <Link href={`${BASE}/${req.id}/edit`} className="rounded-lg border px-3 py-1 bg-mint hover:bg-slate-50"><Pencil/></Link>
                         <Link href={BASE} className="rounded-lg border px-3 py-1 hover:bg-slate-50">↩︎</Link>
                     </div>
                 </div>

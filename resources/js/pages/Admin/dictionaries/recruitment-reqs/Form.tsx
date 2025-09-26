@@ -1,6 +1,7 @@
 import { Link, router, useForm, usePage } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
+import { CheckCircle2 } from 'lucide-react'
 
 type Req = { id?: number; title?: string; body?: string; image_url?: string | null; is_visible?: boolean }
 
@@ -16,7 +17,7 @@ type FormDataShape = {
 const BASE = '/admin/dictionaries/recruitment-reqs'
 
 export default function Form() {
-    const { req } = usePage<{ req: Req | null }>().props
+    const { req, flash } = usePage<{ req: Req | null; flash?: { success?: string } }>().props
     const isEdit = !!req?.id
 
     const form = useForm<FormDataShape>({
@@ -30,14 +31,32 @@ export default function Form() {
 
     const fileRef = useRef<HTMLInputElement | null>(null)
     const [preview, setPreview] = useState<string | null>(req?.image_url ?? null)
+    const [saved, setSaved] = useState(false)
+
+    // pokaż komunikat jeśli przyszedł z flash (np. po redirect/refresh)
+    useEffect(() => {
+        if (flash?.success) {
+            setSaved(true)
+            const t = window.setTimeout(() => setSaved(false), 2500)
+            return () => window.clearTimeout(t)
+        }
+    }, [flash?.success])
+
+    // czyszczenie blob URL
+    useEffect(() => {
+        return () => {
+            if (preview?.startsWith('blob:')) URL.revokeObjectURL(preview)
+        }
+    }, [preview])
 
     const onFile = (f: File | null) => {
         form.setData('image', f)
-        setPreview(f ? URL.createObjectURL(f) : req?.image_url ?? null)
+        const next = f ? URL.createObjectURL(f) : req?.image_url ?? null
+        setPreview(next)
         if (f) form.setData('remove_image', false)
     }
 
-    const buildFormData = () => {
+    const buildFormData = (extra?: Record<string, string>) => {
         const fd = new FormData()
         fd.append('title', form.data.title)
         fd.append('body', form.data.body)
@@ -45,38 +64,63 @@ export default function Form() {
         fd.append('redirectTo', form.data.redirectTo)
         if (form.data.remove_image) fd.append('remove_image', '1')
         if (form.data.image) fd.append('image', form.data.image)
+        if (extra) Object.entries(extra).forEach(([k, v]) => fd.append(k, v))
         return fd
     }
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault()
         if (isEdit) {
-            const fd = buildFormData()
-            fd.append('_method', 'PUT') // spoofing metody
+            const fd = buildFormData({ _method: 'PUT' })
             router.post(`${BASE}/${req!.id}`, fd, {
+                forceFormData: true,
                 preserveScroll: true,
+                onSuccess: () => {
+                    setSaved(true)
+                    window.setTimeout(() => setSaved(false), 2500)
+                },
                 onFinish: () => form.setData('redirectTo', 'index'),
             })
         } else {
-            // create może iść zwykłym helperem useForm
             form.post(`${BASE}`, { forceFormData: true, preserveScroll: true })
         }
     }
 
     const submitAndContinue = () => {
+        // sygnał 1
         form.setData('redirectTo', 'continue')
+
         if (isEdit) {
-            const fd = buildFormData()
-            fd.append('_method', 'PUT')
-            router.post(`${BASE}/${req!.id}`, fd, {
-                preserveScroll: true,
-                onSuccess: () => form.setData('redirectTo', 'index'),
-            })
-        } else {
-            form.post(`${BASE}`, {
+            // sygnał 2 (_method + stay) + sygnał 3 (?continue=1)
+            const fd = buildFormData({ _method: 'PUT', stay: '1' })
+            router.post(`${BASE}/${req!.id}?continue=1`, fd, {
                 forceFormData: true,
                 preserveScroll: true,
-                onSuccess: () => form.setData('redirectTo', 'index'),
+                onSuccess: () => {
+                    form.setData('redirectTo', 'index')
+                    setSaved(true)
+                    window.setTimeout(() => setSaved(false), 2500)
+                    // fallback: upewnij się, że jesteśmy na /edit
+                    if (!location.pathname.endsWith('/edit')) {
+                        router.replace(`${BASE}/${req!.id}/edit`, { replace: true, preserveState: true })
+                    }
+                },
+            })
+        } else {
+            // create: dodaj „stay”, ?continue=1 i zostań na /create
+            form.transform((d) => ({ ...d, stay: true }))
+            form.post(`${BASE}?continue=1`, {
+                forceFormData: true,
+                preserveScroll: true,
+                onSuccess: () => {
+                    form.setData('redirectTo', 'index')
+                    setSaved(true)
+                    window.setTimeout(() => setSaved(false), 2500)
+                    if (!location.pathname.endsWith('/create')) {
+                        router.replace(`${BASE}/create`, { replace: true, preserveState: true })
+                    }
+                },
+                onFinish: () => form.transform((d) => d),
             })
         }
     }
@@ -85,15 +129,18 @@ export default function Form() {
         <AdminLayout>
             <main className="p-6">
                 <div className="text-sm text-slate-500">
-                    {isEdit
-                        ? `Wymagania rekrutacyjne › Aktualizacja: ${req!.title}`
-                        : 'Wymagania rekrutacyjne › Utwórz'}
+                    {isEdit ? `Wymagania rekrutacyjne › Aktualizacja: ${req!.title}` : 'Wymagania rekrutacyjne › Utwórz'}
                 </div>
                 <p className="mt-1 text-2xl font-bold">
-                    {isEdit
-                        ? `Aktualizacja Wymaganie rekrutacyjne: ${req!.id}`
-                        : 'Utwórz Wymaganie rekrutacyjne'}
+                    {isEdit ? `Aktualizacja Wymaganie rekrutacyjne: ${req!.id}` : 'Utwórz Wymaganie rekrutacyjne'}
                 </p>
+
+                {(saved || flash?.success) && (
+                    <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-800">
+                        <CheckCircle2 className="h-4 w-4" />
+                        {flash?.success ?? 'Zapisano'}
+                    </div>
+                )}
 
                 <form onSubmit={submit} className="mt-6 rounded-xl border bg-white p-6">
                     <Field label="Tytuł" required>

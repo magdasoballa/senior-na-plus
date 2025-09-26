@@ -45,9 +45,9 @@ class GenderController extends Controller
     public function store(GenderRequest $request)
     {
         $data = $request->validated();
-        $max = (int) Gender::max('position');
+        $max  = (int) Gender::max('position');
 
-        Gender::create([
+        $row = Gender::create([
             'name_pl'       => $data['name_pl'],
             'name_de'       => $data['name_de'] ?? null,
             'is_visible_pl' => (bool)($data['is_visible_pl'] ?? false),
@@ -55,7 +55,15 @@ class GenderController extends Controller
             'position'      => $max + 1,
         ]);
 
-        return to_route('admin.dict.genders.index')->with('success','Utworzono');
+        // sygnały „zostań”
+        $stay = $request->input('redirectTo') === 'continue'
+            || $request->boolean('stay')
+            || $request->boolean('continue');
+
+        return $stay
+            // po create: zostań na tworzeniu, by dodać kolejną
+            ? to_route('admin.dict.genders.create')->with('success','Utworzono')
+            : to_route('admin.dict.genders.index')->with('success','Utworzono');
     }
 
     public function show(Gender $gender)
@@ -97,7 +105,13 @@ class GenderController extends Controller
             'is_visible_de' => (bool)($data['is_visible_de'] ?? false),
         ])->save();
 
-        return $request->input('redirectTo') === 'continue'
+        // sygnały „zostań”
+        $stay = $request->input('redirectTo') === 'continue'
+            || $request->boolean('stay')
+            || $request->boolean('continue');
+
+        return $stay
+            // po update: zostań na edycji TEGO rekordu
             ? to_route('admin.dict.genders.edit', $gender)->with('success','Zapisano')
             : to_route('admin.dict.genders.index')->with('success','Zapisano');
     }
