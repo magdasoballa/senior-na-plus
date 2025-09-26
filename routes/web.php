@@ -8,6 +8,9 @@ use App\Http\Controllers\Admin\Dictionaries\MobilityController;
 use App\Http\Controllers\Admin\Dictionaries\RecruitmentRequirementController;
 use App\Http\Controllers\Admin\Dictionaries\SkillController;
 use App\Http\Controllers\Admin\OfferController as AdminOfferController;
+use App\Http\Controllers\Admin\Offers\OfferDutyController;
+use App\Http\Controllers\Admin\Offers\RequirementController as OfferRequirementController;
+use App\Http\Controllers\Admin\Offers\PerkController as OfferPerkController;
 use App\Http\Controllers\Admin\Settings\BannerController;
 use App\Http\Controllers\Admin\Settings\PopupController;
 use App\Http\Controllers\Admin\Settings\PortalSettingsController;
@@ -54,7 +57,6 @@ Route::post('/szybka-aplikacja', [QuickApplicationController::class, 'store'])->
 /** Lista ofert (/offers) – kontroler z filtrami */
 Route::get('/offers', [OfferController::class, 'index'])->name('offers.index');
 
-
 Route::get('/aplikacja/{offer}', [ApplicationController::class, 'create'])->name('application.create');
 Route::post('/aplikuj', [ApplicationController::class, 'store'])->name('application.store');
 
@@ -71,13 +73,11 @@ Route::middleware(['auth', 'verified'])->get('/dashboard', function () {
     ]);
 })->name('dashboard');
 
-
 /*
 |--------------------------------------------------------------------------
 | ADMIN
 |--------------------------------------------------------------------------
 */
-
 
 Route::middleware(['auth', 'admin'])
     ->prefix('admin')
@@ -86,11 +86,11 @@ Route::middleware(['auth', 'admin'])
         // ===== Oferty (główny zasób) =====
         Route::resource('offers', AdminOfferController::class)->except(['show']);
 
-        // ===== Oferty – słowniki do ofert =====
+        // ===== Oferty – słowniki do ofert (pełny CRUD jak w "Słownikach") =====
         Route::prefix('offers')->name('offers.')->group(function () {
-            Route::resource('duties', OfferDutyController::class)->only(['index', 'store', 'update', 'destroy']);
-            Route::resource('requirements', OfferRequirementController::class)->only(['index', 'store', 'update', 'destroy']);
-            Route::resource('perks', OfferPerkController::class)->only(['index', 'store', 'update', 'destroy']);
+            Route::resource('duties', OfferDutyController::class);
+            Route::resource('requirements', OfferRequirementController::class);
+            Route::resource('perks', OfferPerkController::class);
         });
 
         // ===== Aplikacje =====
@@ -113,6 +113,7 @@ Route::middleware(['auth', 'admin'])
             Route::resource('social-links', SocialLinkController::class)
                 ->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy'])
                 ->parameters(['social-links' => 'social_link']);
+
             Route::get('/banners', [BannerController::class, 'index'])->name('banners.index');
             Route::get('/banners/create', [BannerController::class, 'create'])->name('banners.create');
             Route::post('/banners', [BannerController::class, 'store'])->name('banners.store');
@@ -123,6 +124,7 @@ Route::middleware(['auth', 'admin'])
 
             Route::patch('/banners/{banner}/toggle', [BannerController::class, 'toggle'])->name('banners.toggle');
             Route::post('/banners/reorder', [BannerController::class, 'reorder'])->name('banners.reorder');
+
             Route::get('portal', [PortalSettingsController::class, 'edit'])->name('portal.edit');
             Route::prefix('portal')->name('portal.')->group(function () {
                 Route::get('/', [PortalSettingsController::class, 'index'])->name('index');   // /admin/settings/portal
@@ -130,6 +132,7 @@ Route::middleware(['auth', 'admin'])
                 Route::get('/{setting}/edit', [PortalSettingsController::class, 'edit'])->name('edit');
                 Route::put('/{setting}', [PortalSettingsController::class, 'update'])->name('update');
             });
+
             Route::get('popups', [PopupController::class, 'index'])->name('popups.index');
             Route::get('popups/create', [PopupController::class, 'create'])->name('popups.create');
             Route::post('popups', [PopupController::class, 'store'])->name('popups.store');
@@ -139,7 +142,6 @@ Route::middleware(['auth', 'admin'])
             Route::delete('popups/{popup}', [PopupController::class, 'destroy'])->name('popups.destroy');
         });
 
-
         // ===== Słowniki =====
         Route::prefix('dictionaries')->name('dict.')->group(function () {
             Route::get('skills', [SkillController::class, 'index'])->name('skills.index');
@@ -147,12 +149,10 @@ Route::middleware(['auth', 'admin'])
             Route::post('skills', [SkillController::class, 'store'])->name('skills.store');
             Route::get('skills/{skill}', [SkillController::class, 'show'])->name('skills.show');
             Route::get('skills/{skill}/edit', [SkillController::class, 'edit'])->name('skills.edit');
-            Route::match(['put', 'patch'],
-                'skills/{skill}', [SkillController::class, 'update'])->name('skills.update');
+            Route::match(['put', 'patch'], 'skills/{skill}', [SkillController::class, 'update'])->name('skills.update');
             Route::delete('skills/{skill}', [SkillController::class, 'destroy'])->name('skills.destroy');
-
-            // dodatkowo (opcjonalny drag&drop)
             Route::post('skills/reorder', [SkillController::class, 'reorder'])->name('skills.reorder');
+
             Route::get('care-targets', [CareTargetController::class, 'index'])->name('care-targets.index');
             Route::get('care-targets/create', [CareTargetController::class, 'create'])->name('care-targets.create');
             Route::post('care-targets', [CareTargetController::class, 'store'])->name('care-targets.store');
@@ -161,49 +161,66 @@ Route::middleware(['auth', 'admin'])
             Route::match(['put', 'patch'], 'care-targets/{care_target}', [CareTargetController::class, 'update'])->name('care-targets.update');
             Route::delete('care-targets/{care_target}', [CareTargetController::class, 'destroy'])->name('care-targets.destroy');
             Route::post('care-targets/reorder', [CareTargetController::class, 'reorder'])->name('care-targets.reorder');
-            Route::get   ('mobility',                  [MobilityController::class, 'index'])->name('mobility.index');
-            Route::get   ('mobility/create',           [MobilityController::class, 'create'])->name('mobility.create');
-            Route::post  ('mobility',                  [MobilityController::class, 'store'])->name('mobility.store');
-            Route::get   ('mobility/{mobility}',       [MobilityController::class, 'show'])->name('mobility.show');
-            Route::get   ('mobility/{mobility}/edit',  [MobilityController::class, 'edit'])->name('mobility.edit');
+
+            Route::get('mobility', [MobilityController::class, 'index'])->name('mobility.index');
+            Route::get('mobility/create', [MobilityController::class, 'create'])->name('mobility.create');
+            Route::post('mobility', [MobilityController::class, 'store'])->name('mobility.store');
+            Route::get('mobility/{mobility}', [MobilityController::class, 'show'])->name('mobility.show');
+            Route::get('mobility/{mobility}/edit', [MobilityController::class, 'edit'])->name('mobility.edit');
             Route::match(['put','patch'], 'mobility/{mobility}', [MobilityController::class, 'update'])->name('mobility.update');
-            Route::delete('mobility/{mobility}',       [MobilityController::class, 'destroy'])->name('mobility.destroy');
-            Route::post  ('mobility/reorder',          [MobilityController::class, 'reorder'])->name('mobility.reorder');
-            Route::get   ('genders',                 [GenderController::class,'index'])->name('genders.index');
-            Route::get   ('genders/create',          [GenderController::class,'create'])->name('genders.create');
-            Route::post  ('genders',                 [GenderController::class,'store'])->name('genders.store');
-            Route::get   ('genders/{gender}',        [GenderController::class,'show'])->name('genders.show');
-            Route::get   ('genders/{gender}/edit',   [GenderController::class,'edit'])->name('genders.edit');
-            Route::match(['put','patch'],'genders/{gender}', [GenderController::class,'update'])->name('genders.update');
-            Route::delete('genders/{gender}',        [GenderController::class,'destroy'])->name('genders.destroy');
-            Route::post  ('genders/reorder',         [GenderController::class,'reorder'])->name('genders.reorder');
-            Route::get   ('experience',                 [ExperienceController::class,'index'])->name('experience.index');
-            Route::get   ('experience/create',          [ExperienceController::class,'create'])->name('experience.create');
-            Route::post  ('experience',                 [ExperienceController::class,'store'])->name('experience.store');
-            Route::get   ('experience/{experience}',    [ExperienceController::class,'show'])->name('experience.show');
-            Route::get   ('experience/{experience}/edit',[ExperienceController::class,'edit'])->name('experience.edit');
-            Route::match(['put','patch'],'experience/{experience}', [ExperienceController::class,'update'])->name('experience.update');
-            Route::delete('experience/{experience}',    [ExperienceController::class,'destroy'])->name('experience.destroy');
-            Route::post  ('experience/reorder',         [ExperienceController::class,'reorder'])->name('experience.reorder');
-            Route::get   ('recruitment-reqs',                   [RecruitmentRequirementController::class,'index'])->name('recruitment-reqs.index');
-            Route::get   ('recruitment-reqs/create',            [RecruitmentRequirementController::class,'create'])->name('recruitment-reqs.create');
-            Route::post  ('recruitment-reqs',                   [RecruitmentRequirementController::class,'store'])->name('recruitment-reqs.store');
+            Route::delete('mobility/{mobility}', [MobilityController::class, 'destroy'])->name('mobility.destroy');
+            Route::post('mobility/reorder', [MobilityController::class, 'reorder'])->name('mobility.reorder');
 
+            Route::get('genders', [GenderController::class,'index'])->name('genders.index');
+            Route::get('genders/create', [GenderController::class,'create'])->name('genders.create');
+            Route::post('genders', [GenderController::class,'store'])->name('genders.store');
+            Route::get('genders/{gender}', [GenderController::class,'show'])->name('genders.show');
+            Route::get('genders/{gender}/edit', [GenderController::class,'edit'])->name('genders.edit');
+            Route::match(['put','patch'], 'genders/{gender}', [GenderController::class,'update'])->name('genders.update');
+            Route::delete('genders/{gender}', [GenderController::class,'destroy'])->name('genders.destroy');
+            Route::post('genders/reorder', [GenderController::class,'reorder'])->name('genders.reorder');
+
+            Route::get('experience', [ExperienceController::class,'index'])->name('experience.index');
+            Route::get('experience/create', [ExperienceController::class,'create'])->name('experience.create');
+            Route::post('experience', [ExperienceController::class,'store'])->name('experience.store');
+            Route::get('experience/{experience}', [ExperienceController::class,'show'])->name('experience.show');
+            Route::get('experience/{experience}/edit', [ExperienceController::class,'edit'])->name('experience.edit');
+            Route::match(['put','patch'], 'experience/{experience}', [ExperienceController::class,'update'])->name('experience.update');
+            Route::delete('experience/{experience}', [ExperienceController::class,'destroy'])->name('experience.destroy');
+            Route::post('experience/reorder', [ExperienceController::class,'reorder'])->name('experience.reorder');
+
+            Route::get('recruitment-reqs', [RecruitmentRequirementController::class,'index'])->name('recruitment-reqs.index');
+            Route::get('recruitment-reqs/create', [RecruitmentRequirementController::class,'create'])->name('recruitment-reqs.create');
+            Route::post('recruitment-reqs', [RecruitmentRequirementController::class,'store'])->name('recruitment-reqs.store');
             // uwaga na nazwę parametru w URL (recruitment_req), żeby pasowała do metod kontrolera
-            Route::get   ('recruitment-reqs/{recruitment_req}',       [RecruitmentRequirementController::class,'show'])->name('recruitment-reqs.show');
-            Route::get   ('recruitment-reqs/{recruitment_req}/edit',  [RecruitmentRequirementController::class,'edit'])->name('recruitment-reqs.edit');
+            Route::get('recruitment-reqs/{recruitment_req}', [RecruitmentRequirementController::class,'show'])->name('recruitment-reqs.show');
+            Route::get('recruitment-reqs/{recruitment_req}/edit', [RecruitmentRequirementController::class,'edit'])->name('recruitment-reqs.edit');
             Route::match(['put','patch'],'recruitment-reqs/{recruitment_req}', [RecruitmentRequirementController::class,'update'])->name('recruitment-reqs.update');
-            Route::delete('recruitment-reqs/{recruitment_req}',       [RecruitmentRequirementController::class,'destroy'])->name('recruitment-reqs.destroy');
+            Route::delete('recruitment-reqs/{recruitment_req}', [RecruitmentRequirementController::class,'destroy'])->name('recruitment-reqs.destroy');
+            Route::post('recruitment-reqs/reorder', [RecruitmentRequirementController::class,'reorder'])->name('recruitment-reqs.reorder');
 
-            Route::post  ('recruitment-reqs/reorder',           [RecruitmentRequirementController::class,'reorder'])->name('recruitment-reqs.reorder');
-            Route::get   ('duties',                  [DutyController::class, 'index'])->name('duties.index');
-            Route::get   ('duties/create',           [DutyController::class, 'create'])->name('duties.create');
-            Route::post  ('duties',                  [DutyController::class, 'store'])->name('duties.store');
-            Route::get   ('duties/{duty}',           [DutyController::class, 'show'])->name('duties.show');
-            Route::get   ('duties/{duty}/edit',      [DutyController::class, 'edit'])->name('duties.edit');
+            Route::get('duties', [DutyController::class, 'index'])->name('duties.index');
+            Route::get('duties/create', [DutyController::class, 'create'])->name('duties.create');
+            Route::post('duties', [DutyController::class, 'store'])->name('duties.store');
+            Route::get('duties/{duty}', [DutyController::class, 'show'])->name('duties.show');
+            Route::get('duties/{duty}/edit', [DutyController::class, 'edit'])->name('duties.edit');
             Route::match(['put','patch'], 'duties/{duty}', [DutyController::class, 'update'])->name('duties.update');
-            Route::delete('duties/{duty}',           [DutyController::class, 'destroy'])->name('duties.destroy');
-            Route::post  ('duties/reorder',          [DutyController::class, 'reorder'])->name('duties.reorder');        });
+            Route::delete('duties/{duty}', [DutyController::class, 'destroy'])->name('duties.destroy');
+            Route::post('duties/reorder', [DutyController::class, 'reorder'])->name('duties.reorder');
+        });
+
+        Route::prefix('offers')->name('offers.')->group(function () {
+            Route::get   ('duties',              [OfferDutyController::class, 'index'  ])->name('duties.index');
+            Route::get   ('duties/create',       [OfferDutyController::class, 'create' ])->name('duties.create');
+            Route::post  ('duties',              [OfferDutyController::class, 'store'  ])->name('duties.store');
+            Route::get   ('duties/{duty}',       [OfferDutyController::class, 'show'   ])->name('duties.show');
+            Route::get   ('duties/{duty}/edit',  [OfferDutyController::class, 'edit'   ])->name('duties.edit');
+            Route::match (['put','patch'], 'duties/{duty}', [OfferDutyController::class, 'update'])->name('duties.update');
+            Route::delete('duties/{duty}',       [OfferDutyController::class, 'destroy'])->name('duties.destroy');
+
+            // opcjonalnie: drag&drop sortowanie
+            Route::post  ('duties/reorder',      [OfferDutyController::class, 'reorder'])->name('duties.reorder');
+        });
 
         // ===== Zgody =====
         Route::prefix('consents')->name('consents.')->group(function () {
