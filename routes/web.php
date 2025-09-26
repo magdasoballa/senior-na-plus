@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\Admin\Dictionaries\CareTargetController;
+use App\Http\Controllers\Admin\Dictionaries\DutyController;
 use App\Http\Controllers\Admin\Dictionaries\ExperienceController;
 use App\Http\Controllers\Admin\Dictionaries\GenderController;
 use App\Http\Controllers\Admin\Dictionaries\MobilityController;
+use App\Http\Controllers\Admin\Dictionaries\RecruitmentRequirementController;
 use App\Http\Controllers\Admin\Dictionaries\SkillController;
 use App\Http\Controllers\Admin\OfferController as AdminOfferController;
 use App\Http\Controllers\Admin\Settings\BannerController;
@@ -182,9 +184,26 @@ Route::middleware(['auth', 'admin'])
             Route::get   ('experience/{experience}/edit',[ExperienceController::class,'edit'])->name('experience.edit');
             Route::match(['put','patch'],'experience/{experience}', [ExperienceController::class,'update'])->name('experience.update');
             Route::delete('experience/{experience}',    [ExperienceController::class,'destroy'])->name('experience.destroy');
-            Route::post  ('experience/reorder',         [ExperienceController::class,'reorder'])->name('experience.reorder');            Route::resource('recruitment-reqs', RecruitmentRequirementController::class)->only(['index', 'store', 'update', 'destroy']);
-            Route::resource('duties', DutyController::class)->only(['index', 'store', 'update', 'destroy']);
-        });
+            Route::post  ('experience/reorder',         [ExperienceController::class,'reorder'])->name('experience.reorder');
+            Route::get   ('recruitment-reqs',                   [RecruitmentRequirementController::class,'index'])->name('recruitment-reqs.index');
+            Route::get   ('recruitment-reqs/create',            [RecruitmentRequirementController::class,'create'])->name('recruitment-reqs.create');
+            Route::post  ('recruitment-reqs',                   [RecruitmentRequirementController::class,'store'])->name('recruitment-reqs.store');
+
+            // uwaga na nazwę parametru w URL (recruitment_req), żeby pasowała do metod kontrolera
+            Route::get   ('recruitment-reqs/{recruitment_req}',       [RecruitmentRequirementController::class,'show'])->name('recruitment-reqs.show');
+            Route::get   ('recruitment-reqs/{recruitment_req}/edit',  [RecruitmentRequirementController::class,'edit'])->name('recruitment-reqs.edit');
+            Route::match(['put','patch'],'recruitment-reqs/{recruitment_req}', [RecruitmentRequirementController::class,'update'])->name('recruitment-reqs.update');
+            Route::delete('recruitment-reqs/{recruitment_req}',       [RecruitmentRequirementController::class,'destroy'])->name('recruitment-reqs.destroy');
+
+            Route::post  ('recruitment-reqs/reorder',           [RecruitmentRequirementController::class,'reorder'])->name('recruitment-reqs.reorder');
+            Route::get   ('duties',                  [DutyController::class, 'index'])->name('duties.index');
+            Route::get   ('duties/create',           [DutyController::class, 'create'])->name('duties.create');
+            Route::post  ('duties',                  [DutyController::class, 'store'])->name('duties.store');
+            Route::get   ('duties/{duty}',           [DutyController::class, 'show'])->name('duties.show');
+            Route::get   ('duties/{duty}/edit',      [DutyController::class, 'edit'])->name('duties.edit');
+            Route::match(['put','patch'], 'duties/{duty}', [DutyController::class, 'update'])->name('duties.update');
+            Route::delete('duties/{duty}',           [DutyController::class, 'destroy'])->name('duties.destroy');
+            Route::post  ('duties/reorder',          [DutyController::class, 'reorder'])->name('duties.reorder');        });
 
         // ===== Zgody =====
         Route::prefix('consents')->name('consents.')->group(function () {

@@ -27,7 +27,6 @@ class BannerController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        // Użyj dokładnie takiej ścieżki jak masz w plikach frontu
         return Inertia::render('Admin/settings/banners/Index', [
             'banners' => $banners,
             'filters' => ['q' => $q],
@@ -42,7 +41,6 @@ class BannerController extends Controller
                 'name'      => '',
                 'image_url' => null,
                 'visible'   => true,
-                // domyślne pola dodatkowe
                 'starts_at' => '',
                 'ends_at'   => '',
                 'link'      => '',
@@ -69,12 +67,12 @@ class BannerController extends Controller
             $data['image'] = $request->file('image')->store('banners', 'public');
         }
 
-        Banner::create($data);
+        $banner = Banner::create($data);
 
-        // Po utworzeniu wracamy do listy
-        return redirect()
-            ->route('admin.settings.banners.index')
-            ->with('success', 'Baner utworzony.');
+        // ⬇️ zostań na edycji, gdy stay=true
+        return $request->boolean('stay')
+            ? to_route('admin.settings.banners.edit', $banner)->with('success', 'Baner utworzony.')
+            : to_route('admin.settings.banners.index')->with('success', 'Baner utworzony.');
     }
 
     public function edit(Banner $banner)
@@ -87,7 +85,7 @@ class BannerController extends Controller
                 'image_url' => $banner->image_url, // accessor w modelu
                 'link'      => $banner->link,
                 'scope'     => $banner->scope,
-                // Format wymagany przez <input type="datetime-local">
+                // Format dla <input type="datetime-local">
                 'starts_at' => $banner->starts_at
                     ? $banner->starts_at->timezone($this->tz)->format('Y-m-d\TH:i')
                     : '',
@@ -121,10 +119,10 @@ class BannerController extends Controller
 
         $banner->update($data);
 
-        // Po edycji wracamy do listy
-        return redirect()
-            ->route('admin.settings.banners.index')
-            ->with('success', 'Baner zaktualizowany.');
+        // ⬇️ zostań na edycji, gdy stay=true
+        return $request->boolean('stay')
+            ? to_route('admin.settings.banners.edit', $banner)->with('success', 'Baner zaktualizowany.')
+            : to_route('admin.settings.banners.index')->with('success', 'Baner zaktualizowany.');
     }
 
     public function destroy(Banner $banner)
@@ -134,9 +132,7 @@ class BannerController extends Controller
         }
         $banner->delete();
 
-        return redirect()
-            ->route('admin.settings.banners.index')
-            ->with('success', 'Baner usunięty.');
+        return to_route('admin.settings.banners.index')->with('success', 'Baner usunięty.');
     }
 
     /** Toggle widoczności */
@@ -158,23 +154,22 @@ class BannerController extends Controller
 
     public function show(Banner $banner)
     {
-        $tz = 'Europe/Warsaw';
+        $tz = $this->tz;
 
         return Inertia::render('Admin/settings/banners/Show', [
             'banner' => [
-                'id'        => $banner->id,
-                'name'      => $banner->name,
-                'visible'   => $banner->visible,
-                'position'  => $banner->position,
-                'image_url' => $banner->image_url,
-                'link'      => $banner->link,
-                'scope'     => $banner->scope,
-                'starts_at' => $banner->starts_at ? $banner->starts_at->timezone($tz)->format('Y-m-d H:i') : null,
-                'ends_at'   => $banner->ends_at   ? $banner->ends_at->timezone($tz)->format('Y-m-d H:i') : null,
-                'created_at'=> $banner->created_at? $banner->created_at->timezone($tz)->format('Y-m-d H:i') : null,
-                'updated_at'=> $banner->updated_at? $banner->updated_at->timezone($tz)->format('Y-m-d H:i') : null,
+                'id'         => $banner->id,
+                'name'       => $banner->name,
+                'visible'    => $banner->visible,
+                'position'   => $banner->position,
+                'image_url'  => $banner->image_url,
+                'link'       => $banner->link,
+                'scope'      => $banner->scope,
+                'starts_at'  => $banner->starts_at ? $banner->starts_at->timezone($tz)->format('Y-m-d H:i') : null,
+                'ends_at'    => $banner->ends_at   ? $banner->ends_at->timezone($tz)->format('Y-m-d H:i') : null,
+                'created_at' => $banner->created_at? $banner->created_at->timezone($tz)->format('Y-m-d H:i') : null,
+                'updated_at' => $banner->updated_at? $banner->updated_at->timezone($tz)->format('Y-m-d H:i') : null,
             ],
         ]);
     }
-
 }

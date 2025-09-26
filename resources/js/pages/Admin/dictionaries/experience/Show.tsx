@@ -1,5 +1,6 @@
 import { Link, usePage } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
+import { CheckCircle2, XCircle } from 'lucide-react';
 
 type Row = {
     id:number; name_pl:string; name_de:string|null;
@@ -27,8 +28,8 @@ export default function Show(){
                     <dl className="divide-y">
                         <Line label="ID">{row.id}</Line>
                         <Line label="Nazwa">{row.name_pl}</Line>
-                        <Line label="Widoczność na polskiej stronie">{row.is_visible_pl ? '✅' : '❌'}</Line>
-                        <Line label="Widoczność na niemieckiej stronie">{row.is_visible_de ? '✅' : '❌'}</Line>
+                        <Line label="Widoczność na polskiej stronie">{row.is_visible_pl ?  <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden /> :  <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}</Line>
+                        <Line label="Widoczność na niemieckiej stronie">{row.is_visible_de ?  <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden /> :  <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}</Line>
                     </dl>
                 </div>
 

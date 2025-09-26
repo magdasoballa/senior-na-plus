@@ -2,7 +2,8 @@
 import { Link, router } from '@inertiajs/react'
 import { useState } from 'react'
 import AdminLayout from '@/layouts/admin-layout';
-import { CheckCircle2, XCircle } from 'lucide-react'
+import { CheckCircle2, Pencil, XCircle } from 'lucide-react';
+import * as React from 'react';
 
 type PageRow = {
     id: number
@@ -103,16 +104,9 @@ export default function PagesIndex({ pages, filters }: Props) {
                                                 className="rounded-md px-2 py-1 hover:bg-slate-50"
                                                 title="Edytuj"
                                             >
-                                                ✎
+                                                <Pencil className="h-4 w-4" />
                                             </Link>
-                                            <button
-                                                type="button"
-                                                className="rounded-md px-2 py-1 text-green"
-                                                title="Więcej"
-                                                disabled
-                                            >
-                                                ⋯
-                                            </button>
+
                                         </div>
                                     </Td>
                                 </tr>

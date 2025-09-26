@@ -1,7 +1,7 @@
-import AppLayout from '@/layouts/app-layout'
-import { Link, useForm } from '@inertiajs/react'
 import { useState } from 'react'
-import AdminLayout from '@/layouts/admin-layout';
+import { Link, useForm } from '@inertiajs/react'
+import AdminLayout from '@/layouts/admin-layout'
+import { CheckCircle2 } from 'lucide-react'
 
 type PageDto = {
     id: number
@@ -33,6 +33,9 @@ export default function Edit({ page }: { page: PageDto }) {
         meta_copyright: 'pl',
     })
 
+    // Lokalny „toast” po zapisie z pozostaniem na edycji
+    const [saved, setSaved] = useState(false)
+
     const form = useForm({
         name: page.name ?? '',
         slug: page.slug ?? '',
@@ -61,28 +64,39 @@ export default function Edit({ page }: { page: PageDto }) {
                 visible_pl: d.visible_pl ? 1 : 0,
                 visible_de: d.visible_de ? 1 : 0,
                 _method: 'put',
-            };
+            }
 
-            if (!(d.image_pl instanceof File)) delete payload.image_pl;
-            if (!(d.image_de instanceof File)) delete payload.image_de;
+            if (!(d.image_pl instanceof File)) delete payload.image_pl
+            if (!(d.image_de instanceof File)) delete payload.image_de
 
-            return payload;
-        });
+            return payload
+        })
 
         form.post(`/admin/settings/pages/${page.id}`, {
             forceFormData: true,
             preserveScroll: true,
-        });
-    };
+            onSuccess: () => {
+                if (stay) {
+                    setSaved(true)
+                    window.setTimeout(() => setSaved(false), 2500)
+                }
+            },
+            onFinish: () => {
+                // przywróć transform do domyślnego, żeby kolejne submitty nie niosły 'stay'
+                form.transform((d: any) => d)
+            },
+        })
+    }
 
-    const setFile = (key: 'image_pl' | 'image_de') =>
-        (e: React.ChangeEvent<HTMLInputElement>) => {
-            const f = e.target.files?.[0] ?? null
-            form.setData(key, f)
-        }
+    const setFile =
+        (key: 'image_pl' | 'image_de') =>
+            (e: React.ChangeEvent<HTMLInputElement>) => {
+                const f = e.target.files?.[0] ?? null
+                form.setData(key, f)
+            }
 
     const handleLangChange = (field: FieldType, lang: 'pl' | 'de') => {
-        setFieldLang(prev => ({ ...prev, [field]: lang }))
+        setFieldLang((prev) => ({ ...prev, [field]: lang }))
     }
 
     return (
@@ -90,8 +104,18 @@ export default function Edit({ page }: { page: PageDto }) {
             <main className="p-6">
                 <p className="text-2xl font-bold">Aktualizacja Strona: {page.name}</p>
 
+                {saved && (
+                    <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-800">
+                        <CheckCircle2 className="h-4 w-4" />
+                        Zapisano zmiany
+                    </div>
+                )}
+
                 <form
-                    onSubmit={(e) => { e.preventDefault(); submit(false) }}
+                    onSubmit={(e) => {
+                        e.preventDefault()
+                        submit(false)
+                    }}
                     encType="multipart/form-data"
                     className="mt-6 rounded-xl border bg-white p-6"
                 >
@@ -110,9 +134,12 @@ export default function Edit({ page }: { page: PageDto }) {
                     </div>
 
                     {/* TYTUŁ META */}
-                    <Field label="Tytuł meta" required
-                           lang={fieldLang.meta_title}
-                           onLangChange={(l) => handleLangChange('meta_title', l)}>
+                    <Field
+                        label="Tytuł meta"
+                        required
+                        lang={fieldLang.meta_title}
+                        onLangChange={(l) => handleLangChange('meta_title', l)}
+                    >
                         <input
                             className="mt-2 w-full rounded-lg border bg-white px-3 py-2"
                             value={form.data[`meta_title_${fieldLang.meta_title}`]}
@@ -123,46 +150,60 @@ export default function Edit({ page }: { page: PageDto }) {
                     </Field>
 
                     {/* OPIS META */}
-                    <Field label="Opis meta" required
-                           lang={fieldLang.meta_description}
-                           onLangChange={(l) => handleLangChange('meta_description', l)}>
+                    <Field
+                        label="Opis meta"
+                        required
+                        lang={fieldLang.meta_description}
+                        onLangChange={(l) => handleLangChange('meta_description', l)}
+                    >
             <textarea
                 className="mt-2 w-full rounded-lg border bg-white px-3 py-2"
                 rows={3}
                 value={form.data[`meta_description_${fieldLang.meta_description}`]}
-                onChange={(e) => form.setData(`meta_description_${fieldLang.meta_description}`, e.target.value)}
+                onChange={(e) =>
+                    form.setData(`meta_description_${fieldLang.meta_description}`, e.target.value)
+                }
                 required
             />
                         <Error msg={form.errors[`meta_description_${fieldLang.meta_description}`]} />
                     </Field>
 
                     {/* SŁOWA KLUCZOWE META */}
-                    <Field label="Słowa kluczowe meta" required
-                           lang={fieldLang.meta_keywords}
-                           onLangChange={(l) => handleLangChange('meta_keywords', l)}>
+                    <Field
+                        label="Słowa kluczowe meta"
+                        required
+                        lang={fieldLang.meta_keywords}
+                        onLangChange={(l) => handleLangChange('meta_keywords', l)}
+                    >
                         <input
                             className="mt-2 w-full rounded-lg border bg-white px-3 py-2"
                             value={form.data[`meta_keywords_${fieldLang.meta_keywords}`]}
-                            onChange={(e) => form.setData(`meta_keywords_${fieldLang.meta_keywords}`, e.target.value)}
+                            onChange={(e) =>
+                                form.setData(`meta_keywords_${fieldLang.meta_keywords}`, e.target.value)
+                            }
                             required
                         />
                         <Error msg={form.errors[`meta_keywords_${fieldLang.meta_keywords}`]} />
                     </Field>
 
                     {/* FIRMA META */}
-                    <Field label="Firma meta" required
-                           lang={fieldLang.meta_copyright}
-                           onLangChange={(l) => handleLangChange('meta_copyright', l)}>
+                    <Field
+                        label="Firma meta"
+                        required
+                        lang={fieldLang.meta_copyright}
+                        onLangChange={(l) => handleLangChange('meta_copyright', l)}
+                    >
                         <input
                             className="mt-2 w-full rounded-lg border bg-white px-3 py-2"
                             value={form.data[`meta_copyright_${fieldLang.meta_copyright}`]}
-                            onChange={(e) => form.setData(`meta_copyright_${fieldLang.meta_copyright}`, e.target.value)}
+                            onChange={(e) =>
+                                form.setData(`meta_copyright_${fieldLang.meta_copyright}`, e.target.value)
+                            }
                             required
                         />
                         <Error msg={form.errors[`meta_copyright_${fieldLang.meta_copyright}`]} />
                     </Field>
 
-                    {/* Reszta kodu pozostaje bez zmian */}
                     {/* LINK (slug) */}
                     <div className="mt-6">
                         <label className="block text-sm font-medium">Link</label>
@@ -213,7 +254,10 @@ export default function Edit({ page }: { page: PageDto }) {
 
                     {/* ACTIONS */}
                     <div className="mt-8 flex items-center justify-end gap-3">
-                        <Link href="/admin/settings/pages" className="rounded-lg border px-4 py-2 hover:bg-slate-50">
+                        <Link
+                            href="/admin/settings/pages"
+                            className="rounded-lg border px-4 py-2 hover:bg-slate-50"
+                        >
                             Anuluj
                         </Link>
                         <button
@@ -238,8 +282,15 @@ export default function Edit({ page }: { page: PageDto }) {
     )
 }
 
-// Reszta komponentów pomocniczych pozostaje bez zmian
-function Field({ label, children, required, lang, onLangChange }: {
+// ==== Pomocnicze komponenty ====
+
+function Field({
+                   label,
+                   children,
+                   required,
+                   lang,
+                   onLangChange,
+               }: {
     label: string
     children: React.ReactNode
     required?: boolean
@@ -259,7 +310,13 @@ function Field({ label, children, required, lang, onLangChange }: {
     )
 }
 
-function LangSwitch({ lang, onChange }: { lang: 'pl' | 'de'; onChange: (l: 'pl' | 'de') => void }) {
+function LangSwitch({
+                        lang,
+                        onChange,
+                    }: {
+    lang: 'pl' | 'de'
+    onChange: (l: 'pl' | 'de') => void
+}) {
     return (
         <div className="text-sm">
             <button
@@ -280,7 +337,12 @@ function LangSwitch({ lang, onChange }: { lang: 'pl' | 'de'; onChange: (l: 'pl' 
     )
 }
 
-function UploadBox({ label, onChange, preview, error }: {
+function UploadBox({
+                       label,
+                       onChange,
+                       preview,
+                       error,
+                   }: {
     label: string
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
     preview?: string | null
@@ -294,7 +356,10 @@ function UploadBox({ label, onChange, preview, error }: {
                 <input type="file" accept="image/*" className="hidden" onChange={onChange} />
                 {preview && (
                     <div className="mt-3">
-                        <img src={preview} className="h-10 w-24 rounded object-cover ring-1 ring-slate-200" />
+                        <img
+                            src={preview}
+                            className="h-10 w-24 rounded object-cover ring-1 ring-slate-200"
+                        />
                     </div>
                 )}
             </label>

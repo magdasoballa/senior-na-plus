@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Link, router } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
-import { CheckCircle2, XCircle } from 'lucide-react';
+import { CheckCircle2, Eye, Pencil, Trash2, XCircle } from 'lucide-react';
 
 type Row = {
     id: number
@@ -93,28 +93,42 @@ export default function Index({
                                 </td>
                                 <td className="px-4 py-3">{r.visible_pl ?  <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden /> :  <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}</td>
                                 <td className="px-4 py-3">{r.visible_de ?  <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden /> :  <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}</td>
-                                <td className="px-4 py-3 space-x-2 text-right">
-                                    <Link
-                                        href={`/admin/settings/social-links/${r.id}`}
-                                        className="rounded px-2 py-1 hover:bg-slate-50"
-                                    >
-                                        Podgląd
-                                    </Link>
-                                    <Link
-                                        href={`/admin/settings/social-links/${r.id}/edit`}
-                                        className="rounded px-2 py-1 hover:bg-slate-50"
-                                    >
-                                        Edytuj
-                                    </Link>
-                                    <Link
-                                        as="button"
-                                        method="delete"
-                                        href={`/admin/settings/social-links/${r.id}`}
-                                        className="rounded px-2 py-1 text-rose-600 hover:bg-rose-50"
-                                    >
-                                        Usuń
-                                    </Link>
+                                <td className="px-4 py-3 text-right align-middle">
+                                    <div className="inline-flex items-center justify-end gap-1">
+                                        {/* PODGLĄD */}
+                                        <Link
+                                            href={`/admin/settings/social-links/${r.id}`}
+                                            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 bg-white hover:bg-slate-50"
+                                            aria-label="Podgląd"
+                                            title="Podgląd"
+                                        >
+                                            👁
+                                        </Link>
+
+                                        {/* EDYCJA */}
+                                        <Link
+                                            href={`/admin/settings/social-links/${r.id}/edit`}
+                                            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 bg-white hover:bg-slate-50"
+                                            aria-label="Edytuj"
+                                            title="Edytuj"
+                                        >
+                                            <Pencil className="h-4 w-4" />
+                                        </Link>
+
+                                        {/* USUŃ */}
+                                        <Link
+                                            as="button"
+                                            method="delete"
+                                            href={`/admin/settings/social-links/${r.id}`}
+                                            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-rose-200 bg-white text-rose-600 hover:bg-rose-50"
+                                            aria-label="Usuń"
+                                            title="Usuń"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Link>
+                                    </div>
                                 </td>
+
                             </tr>
                         ))}
                         {records.data.length === 0 && (

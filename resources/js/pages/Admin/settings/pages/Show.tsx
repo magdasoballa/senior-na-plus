@@ -2,7 +2,7 @@ import AppLayout from '@/layouts/app-layout'
 import { Link } from '@inertiajs/react'
 import { useState } from 'react'
 import AdminLayout from '@/layouts/admin-layout';
-import { CheckCircle2, XCircle } from 'lucide-react';
+import { CheckCircle2, Pencil, XCircle } from 'lucide-react';
 
 type FieldType = 'meta_title' | 'meta_description' | 'meta_keywords' | 'meta_copyright'
 
@@ -40,9 +40,9 @@ export default function Show({ page }: any) {
                     <p className="text-2xl font-bold">Szczegóły Strona: {page.name}</p>
                     <Link
                         href={`/admin/settings/pages/${page.id}/edit`}
-                        className="rounded-lg border px-3 py-1 hover:bg-slate-50"
+                        className="rounded-lg border px-3 py-1 hover:bg-slate-50 bg-mint "
                     >
-                        ✎
+                        <Pencil />
                     </Link>
                 </div>
 

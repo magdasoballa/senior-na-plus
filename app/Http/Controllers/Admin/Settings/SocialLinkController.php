@@ -62,11 +62,14 @@ class SocialLinkController extends Controller
         }
 
         $maxPos = (int) SocialLink::max('position');
-        SocialLink::create(array_merge($data, ['position' => $maxPos + 1]));
+        $link = SocialLink::create(array_merge($data, ['position' => $maxPos + 1]));
 
-        return redirect()->route('admin.settings.social-links.index')
-            ->with('success','Utworzono link.');
+        // ⬇️ KLUCZOWE: zostań na edycji, gdy stay=true
+        return $request->boolean('stay')
+            ? to_route('admin.settings.social-links.edit', $link)->with('success','Utworzono link.')
+            : to_route('admin.settings.social-links.index')->with('success','Utworzono link.');
     }
+
 
 
     public function show(SocialLink $social_link)
@@ -116,11 +119,12 @@ class SocialLinkController extends Controller
 
         $social_link->update($data);
 
-        // ⬇️ tu zamiast back()
-        return redirect()
-            ->route('admin.settings.social-links.index')
-            ->with('success', 'Zapisano zmiany.');
+        // ⬇️ KLUCZOWE: zostań na edycji, gdy stay=true
+        return $request->boolean('stay')
+            ? to_route('admin.settings.social-links.edit', $social_link)->with('success', 'Zapisano zmiany.')
+            : to_route('admin.settings.social-links.index')->with('success', 'Zapisano zmiany.');
     }
+
 
 
     public function destroy(SocialLink $social_link)

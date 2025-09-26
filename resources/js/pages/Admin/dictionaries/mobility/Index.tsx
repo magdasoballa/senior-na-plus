@@ -1,7 +1,8 @@
 import { Link, router, usePage } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
 import { useState } from 'react'
-import { CheckCircle2, XCircle } from 'lucide-react';
+import { CheckCircle2, Pencil, XCircle } from 'lucide-react';
+import * as React from 'react';
 
 type Row = { id:number; name:string; is_visible_pl:boolean; is_visible_de:boolean }
 type Paginated<T> = { data:T[]; links:{url:string|null;label:string;active:boolean}[]; current_page:number; per_page:number; total:number }
@@ -56,7 +57,7 @@ export default function Index(){
                                 <td className="px-4 py-3">
                                     <div className="flex justify-end gap-2">
                                         <Link href={`${BASE}/${r.id}`} className="rounded border px-2 py-1" title="Podgląd">👁</Link>
-                                        <Link href={`${BASE}/${r.id}/edit`} className="rounded border px-2 py-1" title="Edytuj">✎</Link>
+                                        <Link href={`${BASE}/${r.id}/edit`} className="rounded border px-2 py-1" title="Edytuj"> <Pencil className="h-4 w-4" /></Link>
                                     </div>
                                 </td>
                             </tr>

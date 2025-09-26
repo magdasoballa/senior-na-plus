@@ -1,6 +1,7 @@
 import { Link, useForm, usePage } from '@inertiajs/react';
 import React, { useEffect, useState } from 'react';
 import AdminLayout from '@/layouts/admin-layout';
+import { CheckCircle2 } from 'lucide-react';
 
 type BannerDto = {
     id: number | null;
@@ -16,8 +17,9 @@ type BannerDto = {
 const BASE = '/admin/settings/banners';
 
 export default function Form() {
-    const { banner, isCreate } = usePage<{ banner: BannerDto; isCreate: boolean }>().props;
+    const { banner, isCreate, flash } = usePage<{ banner: BannerDto; isCreate: boolean; flash?: { success?: string } }>().props;
     const [file, setFile] = useState<File | null>(null);
+    const [saved, setSaved] = useState(false);
 
     const form = useForm({
         name: banner.name ?? '',
@@ -51,18 +53,38 @@ export default function Form() {
         form.setData('image', f);
     };
 
-    const submit = (e: React.FormEvent) => {
-        e.preventDefault();
+    // wspólna funkcja zapisu – param stay steruje pozostaniem na edycji
+    const save = (stay: boolean) => {
         form.transform((d: any) => {
-            const payload: any = { ...d, visible: d.visible ? 1 : 0 };
+            const payload: any = {
+                ...d,
+                visible: d.visible ? 1 : 0,
+            };
             if (!(d.image instanceof File)) delete payload.image;
             if (!isCreate) payload._method = 'put';
+            if (stay) payload.stay = true;
             return payload;
         });
-        isCreate
-            ? form.post(`${BASE}`, { forceFormData: true, preserveScroll: true })
-            : form.post(`${BASE}/${banner.id}`, { forceFormData: true, preserveScroll: true });
+
+        const url = isCreate ? `${BASE}` : `${BASE}/${banner.id}`;
+
+        form.post(url, {
+            forceFormData: true,
+            preserveScroll: true,
+            onSuccess: () => {
+                if (stay) {
+                    setSaved(true);
+                    window.setTimeout(() => setSaved(false), 2500);
+                }
+            },
+            onFinish: () => {
+                // przywróć transform do domyślnego
+                form.transform((d: any) => d);
+            },
+        });
     };
+
+    const onSubmit = (e: React.FormEvent) => { e.preventDefault(); save(false); };
 
     const previewUrl = file ? URL.createObjectURL(file) : (banner.image_url || null);
 
@@ -79,7 +101,14 @@ export default function Form() {
                     {isCreate ? 'Utwórz Baner' : `Aktualizacja Baner: ${banner.id}`}
                 </p>
 
-                <form onSubmit={submit} encType="multipart/form-data" className="mt-4 overflow-hidden rounded-xl border bg-white">
+                {(saved || flash?.success) && (
+                    <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-800">
+                        <CheckCircle2 className="h-4 w-4" />
+                        {flash?.success ?? 'Zapisano zmiany'}
+                    </div>
+                )}
+
+                <form onSubmit={onSubmit} encType="multipart/form-data" className="mt-4 overflow-hidden rounded-xl border bg-white">
                     <Row label="Nazwa" required>
                         <input
                             className="mt-1 w-full rounded-lg border bg-white px-3 py-2"
@@ -165,7 +194,19 @@ export default function Form() {
                         <Link href={BASE} className="rounded-lg border px-4 py-2 hover:bg-slate-50">
                             Anuluj
                         </Link>
-                        <button type="submit" className="rounded-lg bg-mint px-4 py-2 font-semibold" disabled={form.processing}>
+                        <button
+                            type="button"
+                            onClick={() => save(true)}  // ← Zapisz i zostań na edycji
+                            className="rounded-lg bg-cyan-500 px-4 py-2 font-semibold text-white"
+                            disabled={form.processing}
+                        >
+                            {isCreate ? 'Utwórz i Kontynuuj Edycję' : 'Zapisz i Kontynuuj Edycję'}
+                        </button>
+                        <button
+                            type="submit"
+                            className="rounded-lg bg-mint px-4 py-2 font-semibold"
+                            disabled={form.processing}
+                        >
                             {isCreate ? 'Utwórz' : 'Zapisz zmiany'}
                         </button>
                     </div>
@@ -175,7 +216,7 @@ export default function Form() {
     );
 }
 
-/* --- POMOCNICZE, zewnętrzne komponenty (stabilne typy!) --- */
+/* --- POMOCNICZE --- */
 
 type RowProps = {
     label: React.ReactNode;

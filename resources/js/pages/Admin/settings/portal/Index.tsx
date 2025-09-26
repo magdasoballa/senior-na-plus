@@ -2,6 +2,8 @@
 import { Link, router, usePage } from '@inertiajs/react'
 import { useState } from 'react'
 import AdminLayout from '@/layouts/admin-layout'
+import { Pencil } from 'lucide-react';
+import * as React from 'react';
 
 // Wiersz z danymi — pokazujemy TYLKO wersję polską (fallback do bazowych kolumn jeśli istnieją)
 type Row = {
@@ -88,7 +90,7 @@ export default function Index() {
                                     <td className="px-4 py-3">
                                         <div className="flex justify-end gap-2">
                                             <Link href={`${BASE}/${row.id}`} className="rounded border px-2 py-1" title="Podgląd" aria-label={`Podgląd #${row.id}`}>👁</Link>
-                                            <Link href={`${BASE}/${row.id}/edit`} className="rounded border px-2 py-1" title="Edytuj" aria-label={`Edytuj #${row.id}`}>✎</Link>
+                                            <Link href={`${BASE}/${row.id}/edit`} className="rounded border px-2 py-1" title="Edytuj" aria-label={`Edytuj #${row.id}`}> <Pencil className="h-4 w-4" /></Link>
                                         </div>
                                     </td>
                                 </tr>
