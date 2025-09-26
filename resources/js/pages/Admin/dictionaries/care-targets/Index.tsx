@@ -1,7 +1,7 @@
 import { Link, router, usePage } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
 import { useState } from 'react'
-import { CheckCircle2, Pencil, XCircle } from 'lucide-react';
+import { CheckCircle2, Pencil, XCircle, Trash2 } from 'lucide-react';
 import * as React from 'react';
 
 type Row = { id:number; name:string; is_visible_pl:boolean; is_visible_de:boolean }
@@ -15,8 +15,21 @@ const BASE = '/admin/dictionaries/care-targets'
 export default function Index(){
     const { careTargets, filters } = usePage<{ careTargets:Paginated<Row>; filters:{q?:string} }>().props
     const [q,setQ] = useState(filters?.q ?? '')
+    const [deletingId, setDeletingId] = useState<number|null>(null)
 
-    const submit = (e:React.FormEvent)=>{ e.preventDefault(); router.get(BASE,{q},{preserveState:true,replace:true}) }
+    const submit = (e:React.FormEvent)=>{
+        e.preventDefault()
+        router.get(BASE,{q},{preserveState:true,replace:true})
+    }
+
+    const handleDelete = (id:number)=>{
+        if (!confirm('Na pewno usunąć tę osobę do opieki?')) return
+        setDeletingId(id)
+        router.delete(`${BASE}/${id}`, {
+            preserveScroll: true,
+            onFinish: ()=> setDeletingId(null),
+        })
+    }
 
     return (
         <AdminLayout>
@@ -31,8 +44,12 @@ export default function Index(){
 
                 <form onSubmit={submit} className="mt-4 max-w-md">
                     <div className="relative">
-                        <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Szukaj"
-                               className="w-full rounded-full border bg-white px-4 py-2 pl-10" />
+                        <input
+                            value={q}
+                            onChange={e=>setQ(e.target.value)}
+                            placeholder="Szukaj"
+                            className="w-full rounded-full border bg-white px-4 py-2 pl-10"
+                        />
                         <span className="pointer-events-none absolute left-3 top-2.5">🔎</span>
                     </div>
                 </form>
@@ -51,16 +68,35 @@ export default function Index(){
                         <tbody>
                         {careTargets.data.map(r=>(
                             <tr key={r.id} className="border-t">
-                                <td className="px-4 py-3 font-mono text-teal-600"><Link href={`${BASE}/${r.id}`}>{r.id}</Link></td>
+                                <td className="px-4 py-3 font-mono text-teal-600">
+                                    <Link href={`${BASE}/${r.id}`}>{r.id}</Link>
+                                </td>
                                 <td className="px-4 py-3">{r.name}</td>
-                                <td className="px-4 py-3">{r.is_visible_pl ? <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden />
-                                    :    <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}</td>
-                                <td className="px-4 py-3">{r.is_visible_de ? <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden />
-                                    :    <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}</td>
+                                <td className="px-4 py-3">
+                                    {r.is_visible_pl
+                                        ? <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden />
+                                        : <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}
+                                </td>
+                                <td className="px-4 py-3">
+                                    {r.is_visible_de
+                                        ? <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden />
+                                        : <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}
+                                </td>
                                 <td className="px-4 py-3">
                                     <div className="flex justify-end gap-2">
                                         <Link href={`${BASE}/${r.id}`} className="rounded border px-2 py-1" title="Podgląd">👁</Link>
-                                        <Link href={`${BASE}/${r.id}/edit`} className="rounded border px-2 py-1" title="Edytuj"> <Pencil className="h-4 w-4" /></Link>
+                                        <Link href={`${BASE}/${r.id}/edit`} className="rounded border px-2 py-1" title="Edytuj">
+                                            <Pencil className="h-4 w-4" />
+                                        </Link>
+                                        <button
+                                            type="button"
+                                            onClick={()=>handleDelete(r.id)}
+                                            disabled={deletingId === r.id}
+                                            title="Usuń"
+                                            className="rounded border px-2 py-1 text-rose-600 hover:bg-rose-50 disabled:opacity-50"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -75,10 +111,13 @@ export default function Index(){
                         <span>{rangeInfo(careTargets)}</span>
                         <nav className="flex items-center gap-1">
                             {careTargets.links.map((l,i)=>(
-                                <Link key={i} href={l.url ?? '#'} preserveScroll
-                                      className={`rounded-md px-3 py-1 ${l.active ? 'bg-slate-200 font-semibold' : 'hover:bg-slate-50'} ${!l.url && 'pointer-events-none opacity-40'}`}>
-                                    {sanitize(l.label)}
-                                </Link>
+                                <Link
+                                    key={i}
+                                    href={l.url ?? '#'}
+                                    preserveScroll
+                                    className={`rounded-md px-3 py-1 ${l.active ? 'bg-slate-200 font-semibold' : 'hover:bg-slate-50'} ${!l.url && 'pointer-events-none opacity-40'}`}
+                                    dangerouslySetInnerHTML={{ __html: sanitize(l.label) }}
+                                />
                             ))}
                         </nav>
                     </div>

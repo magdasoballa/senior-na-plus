@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout'
-import { Link } from '@inertiajs/react'
+import { Link, usePage } from '@inertiajs/react'
 import { useState } from 'react'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -114,23 +114,56 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     )
 }
 
-function NavList({ items }: { items: { label: string; href: string; badge?: number }[] }) {
+type Item = { label: string; href: string; badge?: number }
+
+function NavList({ items }: { items: Item[] }) {
+    const { url } = usePage()
+    const isActive = (href: string) => {
+        // Aktywne, jeśli dokładnie ten adres, albo ścieżka z podstroną (/edit, /create, /:id) lub zapytaniem
+        return (
+            url === href ||
+            url.startsWith(`${href}/`) ||
+            url.startsWith(`${href}?`)
+        )
+    }
+
     return (
         <nav className="space-y-1 px-1">
-            {items.map((item) => (
-                <Link
-                    key={item.href + item.label}
-                    href={item.href}
-                    className="group flex items-center justify-between rounded-md px-2 py-2 text-sm text-green hover:bg-slate-50"
-                >
-                    <span>{item.label}</span>
-            {/*        {typeof item.badge === 'number' && item.badge > 0 && (*/}
-            {/*            <span className="ml-2 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-rose-500 px-1 text-xs font-bold text-white">*/}
-            {/*  {item.badge}*/}
-            {/*</span>*/}
-            {/*        )}*/}
-                </Link>
-            ))}
+            {items.map((item) => {
+                const active = isActive(item.href)
+                return (
+                    <Link
+                        key={item.href + item.label}
+                        href={item.href}
+                        aria-current={active ? 'page' : undefined}
+                        className={[
+                            'group flex items-center justify-between rounded-md px-2 py-2 text-sm',
+                            active
+                                ? 'bg-slate-100 font-semibold text-green ring-1 ring-inset ring-slate-200'
+                                : 'text-green hover:bg-slate-50'
+                        ].join(' ')}
+                    >
+            <span className="flex items-center gap-2">
+              {/* pionowa kreska po lewej dla aktywnej pozycji */}
+                <span
+                    className={[
+                        'h-4 w-1 rounded-full transition-opacity',
+                        active ? 'bg-green opacity-100' : 'opacity-0 group-hover:opacity-30 bg-slate-300'
+                    ].join(' ')}
+                    aria-hidden
+                />
+                {item.label}
+            </span>
+
+                        {/* badge – odkomentuj, jeśli chcesz pokazywać liczby */}
+                        {/* {typeof item.badge === 'number' && item.badge > 0 && (
+              <span className="ml-2 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-rose-500 px-1 text-xs font-bold text-white">
+                {item.badge}
+              </span>
+            )} */}
+                    </Link>
+                )
+            })}
         </nav>
     )
 }

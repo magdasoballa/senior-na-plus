@@ -1,6 +1,6 @@
 import { Link, router, usePage } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
-import { CheckCircle2, Eye, Pencil, XCircle } from 'lucide-react';
+import { CheckCircle2, Eye, Pencil, XCircle, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
 type Row = { id:number; name:string; is_visible:boolean }
@@ -19,10 +19,21 @@ const BASE = '/admin/dictionaries/duties'
 export default function Index(){
     const { duties, filters } = usePage<PageProps>().props
     const [q, setQ] = useState(filters.q ?? '')
+    const [deletingId, setDeletingId] = useState<number|null>(null)
 
     const search = (e:React.FormEvent)=>{
         e.preventDefault()
         router.get(BASE, { q }, { preserveState:true, replace:true })
+    }
+
+    const handleDelete = (id:number) => {
+        if (!confirm('Na pewno usunąć ten obowiązek?')) return
+        setDeletingId(id)
+        router.delete(`${BASE}/${id}`, {
+            data: q ? { q } : {},
+            preserveScroll: true,
+            onFinish: () => setDeletingId(null),
+        })
     }
 
     return (
@@ -37,7 +48,6 @@ export default function Index(){
                     >
                         Utwórz Obowiązek
                     </Link>
-
                 </div>
 
                 {/* search „pill” */}
@@ -73,7 +83,11 @@ export default function Index(){
                                     </Link>
                                 </td>
                                 <td className="px-4 py-3">{row.name}</td>
-                                <td className="px-4 py-3">{row.is_visible ? <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden /> :    <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}</td>
+                                <td className="px-4 py-3">
+                                    {row.is_visible
+                                        ? <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden />
+                                        : <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}
+                                </td>
                                 <td className="px-4 py-3">
                                     <div className="flex items-center justify-end gap-2">
                                         {/* PODGLĄD */}
@@ -94,6 +108,17 @@ export default function Index(){
                                         >
                                             <Pencil className="h-4 w-4" />
                                         </Link>
+                                        {/* USUŃ */}
+                                        <button
+                                            type="button"
+                                            onClick={()=>handleDelete(row.id)}
+                                            disabled={deletingId===row.id}
+                                            className="rounded-md border border-slate-200 bg-white p-2 text-rose-600 hover:bg-rose-50 disabled:opacity-50"
+                                            aria-label="Usuń"
+                                            title="Usuń"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </button>
                                     </div>
                                 </td>
                             </tr>

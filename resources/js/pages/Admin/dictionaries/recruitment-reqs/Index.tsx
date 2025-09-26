@@ -1,7 +1,7 @@
 import { Link, router, usePage } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
 import { useState } from 'react'
-import { CheckCircle2, Pencil, XCircle } from 'lucide-react';
+import { CheckCircle2, Pencil, XCircle, Trash2 } from 'lucide-react';
 import * as React from 'react';
 
 type Row = { id:number; title:string; image_url:string|null; is_visible:boolean }
@@ -12,8 +12,19 @@ const BASE = '/admin/dictionaries/recruitment-reqs'
 export default function Index(){
     const { requirements, filters } = usePage<{ requirements:Paginated<Row>; filters:{q?:string} }>().props
     const [q,setQ] = useState(filters?.q ?? '')
+    const [deletingId, setDeletingId] = useState<number|null>(null)
 
     const submit = (e:React.FormEvent)=>{ e.preventDefault(); router.get(BASE,{q},{preserveState:true,replace:true}) }
+
+    const handleDelete = (id:number) => {
+        if(!confirm('Na pewno usunąć to wymaganie?')) return
+        setDeletingId(id)
+        router.delete(`${BASE}/${id}`, {
+            data: q ? { q } : {},
+            preserveScroll: true,
+            onFinish: () => setDeletingId(null),
+        })
+    }
 
     return (
         <AdminLayout>
@@ -42,7 +53,7 @@ export default function Index(){
                             <th className="px-4 py-3">TYTUŁ</th>
                             <th className="w-36 px-4 py-3">ZDJĘCIE</th>
                             <th className="w-36 px-4 py-3">WIDOCZNY</th>
-                            <th className="w-28 px-4 py-3 text-right">AKCJE</th>
+                            <th className="w-36 px-4 py-3 text-right">AKCJE</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -53,11 +64,24 @@ export default function Index(){
                                 <td className="px-4 py-3">
                                     {r.image_url ? <img src={r.image_url} className="h-8 w-12 rounded object-cover" /> : '—'}
                                 </td>
-                                <td className="px-4 py-3">{r.is_visible ?  <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden /> : <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}</td>
+                                <td className="px-4 py-3">
+                                    {r.is_visible ? <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden /> : <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}
+                                </td>
                                 <td className="px-4 py-3">
                                     <div className="flex justify-end gap-2">
                                         <Link href={`${BASE}/${r.id}`} className="rounded border px-2 py-1" title="Podgląd">👁</Link>
-                                        <Link href={`${BASE}/${r.id}/edit`} className="rounded border px-2 py-1" title="Edytuj"><Pencil className="h-4 w-4" /></Link>
+                                        <Link href={`${BASE}/${r.id}/edit`} className="rounded border px-2 py-1" title="Edytuj">
+                                            <Pencil className="h-4 w-4" />
+                                        </Link>
+                                        <button
+                                            type="button"
+                                            onClick={()=>handleDelete(r.id)}
+                                            disabled={deletingId===r.id}
+                                            title="Usuń"
+                                            className="rounded border px-2 py-1 text-rose-600 hover:bg-rose-50 disabled:opacity-50"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
