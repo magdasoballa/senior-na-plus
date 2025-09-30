@@ -26,7 +26,7 @@ class OfferDutyController extends Controller
             'is_visible' => $d->is_visible,
         ]);
 
-        return Inertia::render('Admin/dictionaries/duties/Index', [
+        return Inertia::render('Admin/Offers/duties/Index', [
             'duties' => $rows,
             'filters' => ['q' => $q],
         ]);
@@ -34,7 +34,7 @@ class OfferDutyController extends Controller
 
     public function create()
     {
-        return Inertia::render('Admin/dictionaries/duties/Form', ['duty' => null]);
+        return Inertia::render('Admin/Offers/duties/Form', ['duty' => null]);
     }
 
     public function store(DutyRequest $request)
@@ -53,7 +53,7 @@ class OfferDutyController extends Controller
 
     public function show(Duty $duty)
     {
-        return Inertia::render('Admin/dictionaries/duties/Show', [
+        return Inertia::render('Admin/Offers/duties/Show', [
             'duty' => [
                 'id' => $duty->id,
                 'name' => $duty->name,
@@ -66,7 +66,7 @@ class OfferDutyController extends Controller
 
     public function edit(Duty $duty)
     {
-        return Inertia::render('Admin/dictionaries/duties/Form', [
+        return Inertia::render('Admin/Offers/duties/Form', [
             'duty' => [
                 'id' => $duty->id,
                 'name' => $duty->name,

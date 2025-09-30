@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\Dictionaries\RecruitmentRequirementController;
 use App\Http\Controllers\Admin\Dictionaries\SkillController;
 use App\Http\Controllers\Admin\OfferController as AdminOfferController;
 use App\Http\Controllers\Admin\Offers\OfferDutyController;
+use App\Http\Controllers\Admin\Offers\PerkController;
 use App\Http\Controllers\Admin\Offers\RequirementController;
 use App\Http\Controllers\Admin\Offers\RequirementController as OfferRequirementController;
 use App\Http\Controllers\Admin\Offers\PerkController as OfferPerkController;
@@ -227,6 +228,14 @@ Route::middleware(['auth', 'admin'])
             Route::match (['put','patch'], 'requirements/{requirement}', [RequirementController::class, 'update'])->name('requirements.update');
             Route::delete('requirements/{requirement}',       [RequirementController::class, 'destroy'])->name('requirements.destroy');
 
+
+            Route::get   ('perks',              [PerkController::class, 'index'  ])->name('perks.index');
+            Route::get   ('perks/create',       [PerkController::class, 'create' ])->name('perks.create');
+            Route::post  ('perks',              [PerkController::class, 'store'  ])->name('perks.store');
+            Route::get   ('perks/{perk}',       [PerkController::class, 'show'   ])->name('perks.show');
+            Route::get   ('perks/{perk}/edit',  [PerkController::class, 'edit'   ])->name('perks.edit');
+            Route::match (['put','patch'], 'perks/{perk}', [PerkController::class, 'update'])->name('perks.update');
+            Route::delete('perks/{perk}',       [PerkController::class, 'destroy'])->name('perks.destroy');
 
             // opcjonalnie: drag&drop sortowanie
             Route::post  ('duties/reorder',      [OfferDutyController::class, 'reorder'])->name('duties.reorder');

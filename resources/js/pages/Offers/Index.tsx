@@ -149,9 +149,9 @@ export default function OffersIndex({ offers, filters }: Props) {
 
                 <header className="mb-6 text-center">
 
-                    <h1 className={`text-4xl md:text-6xl leading-tight tracking-tight ${isDarkMode ? 'text-white' : ''}`}>
+                    <p className={`text-4xl md:text-6xl leading-tight tracking-tight ${isDarkMode ? 'text-white' : ''}`}>
                         Oferty pracy
-                    </h1>
+                    </p>
                 </header>
 
                 {/* FILTRY */}

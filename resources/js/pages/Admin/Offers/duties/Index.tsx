@@ -14,7 +14,7 @@ type PageProps = {
     filters: { q: string }
 }
 
-const BASE = '/admin/dictionaries/duties'
+const BASE = '/admin/offers/duties'
 
 export default function Index(){
     const { duties, filters } = usePage<PageProps>().props
