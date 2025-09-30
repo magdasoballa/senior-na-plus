@@ -26,7 +26,7 @@ class RequirementController extends Controller
             'is_visible' => (bool) $r->is_visible,
         ]);
 
-        return Inertia::render('Admin/offers/requirements/Index', [
+        return Inertia::render('Admin/Offers/requirements/Index', [
             'requirements' => $rows,
             'filters'      => ['q' => $q],
         ]);
@@ -34,7 +34,7 @@ class RequirementController extends Controller
 
     public function create()
     {
-        return Inertia::render('Admin/offers/requirements/Form', ['req' => null]);
+        return Inertia::render('Admin/Offers/requirements/Form', ['req' => null]);
     }
 
     public function store(RequirementRequest $request)
@@ -53,7 +53,7 @@ class RequirementController extends Controller
 
     public function show(OfferRequirement $requirement)
     {
-        return Inertia::render('Admin/offers/requirements/Show', [
+        return Inertia::render('Admin/Offers/requirements/Show', [
             'req' => [
                 'id'         => $requirement->id,
                 'name'       => $requirement->name,
@@ -66,7 +66,7 @@ class RequirementController extends Controller
 
     public function edit(OfferRequirement $requirement)
     {
-        return Inertia::render('Admin/offers/requirements/Form', [
+        return Inertia::render('Admin/Offers/requirements/Form', [
             'req' => [
                 'id'         => $requirement->id,
                 'name'       => $requirement->name,

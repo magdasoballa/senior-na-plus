@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\Dictionaries\RecruitmentRequirementController;
 use App\Http\Controllers\Admin\Dictionaries\SkillController;
 use App\Http\Controllers\Admin\OfferController as AdminOfferController;
 use App\Http\Controllers\Admin\Offers\OfferDutyController;
+use App\Http\Controllers\Admin\Offers\RequirementController;
 use App\Http\Controllers\Admin\Offers\RequirementController as OfferRequirementController;
 use App\Http\Controllers\Admin\Offers\PerkController as OfferPerkController;
 use App\Http\Controllers\Admin\Settings\BannerController;
@@ -217,6 +218,15 @@ Route::middleware(['auth', 'admin'])
             Route::get   ('duties/{duty}/edit',  [OfferDutyController::class, 'edit'   ])->name('duties.edit');
             Route::match (['put','patch'], 'duties/{duty}', [OfferDutyController::class, 'update'])->name('duties.update');
             Route::delete('duties/{duty}',       [OfferDutyController::class, 'destroy'])->name('duties.destroy');
+
+            Route::get   ('requirements',              [RequirementController::class, 'index'  ])->name('requirements.index');
+            Route::get   ('requirements/create',       [RequirementController::class, 'create' ])->name('requirements.create');
+            Route::post  ('requirements',              [RequirementController::class, 'store'  ])->name('requirements.store');
+            Route::get   ('requirements/{requirement}',       [RequirementController::class, 'show'   ])->name('requirements.show');
+            Route::get   ('requirements/{requirement}/edit',  [RequirementController::class, 'edit'   ])->name('requirements.edit');
+            Route::match (['put','patch'], 'requirements/{requirement}', [RequirementController::class, 'update'])->name('requirements.update');
+            Route::delete('requirements/{requirement}',       [RequirementController::class, 'destroy'])->name('requirements.destroy');
+
 
             // opcjonalnie: drag&drop sortowanie
             Route::post  ('duties/reorder',      [OfferDutyController::class, 'reorder'])->name('duties.reorder');

@@ -1,3 +1,4 @@
+import AdminLayout from '@/layouts/admin-layout';
 import AppLayout from '@/layouts/app-layout';
 import { Link, usePage, router } from "@inertiajs/react";
 import * as React from "react";
@@ -60,7 +61,7 @@ export default function Index() {
     };
 
     return (
-        <AppLayout>
+        <AdminLayout>
             <div className="max-w-5xl p-6">
                 <Link href="/dashboard" className="text-coral">&larr; Wróć</Link>
 
@@ -207,6 +208,6 @@ export default function Index() {
                     ))}
                 </div>
             </div>
-        </AppLayout>
+        </AdminLayout>
     );
 }

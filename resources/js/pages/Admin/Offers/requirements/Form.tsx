@@ -15,17 +15,27 @@ export default function Form(){
         redirectTo: 'index',
     })
 
-    const submit = (e:React.FormEvent)=>{
+    const submit = (e: React.FormEvent) => {
         e.preventDefault()
-        if(isEdit) form.put(`${BASE}/${req!.id}`, { preserveScroll:true })
-        else form.post(`${BASE}`, { preserveScroll:true })
+        if (isEdit) {
+            form.put(`${BASE}/${req!.id}`, { preserveScroll: true })
+        } else {
+            form.post(`${BASE}`, { preserveScroll: true })
+        }
     }
-    const submitAndContinue = ()=>{
-        form.transform(d=>({ ...d, redirectTo:'continue' as const }))
-        if(isEdit){
-            form.put(`${BASE}/${req!.id}`, { preserveScroll:true, onFinish:()=> form.transform(d=>d) })
-        }else{
-            form.post(`${BASE}`, { preserveScroll:true, onFinish:()=> form.transform(d=>d) })
+
+    const submitAndContinue = () => {
+        form.transform((d) => ({ ...d, redirectTo: 'continue' as const }))
+        if (isEdit) {
+            form.put(`${BASE}/${req!.id}`, {
+                preserveScroll: true,
+                onFinish: () => form.transform((d) => d),
+            })
+        } else {
+            form.post(`${BASE}`, {
+                preserveScroll: true,
+                onFinish: () => form.transform((d) => d),
+            })
         }
     }
 

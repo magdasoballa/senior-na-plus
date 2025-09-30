@@ -8,7 +8,8 @@ class RequirementRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('admin') ?? false;
+        $u = $this->user();
+        return $u ? (bool) ($u->is_admin ?? false) : false;
     }
 
     public function rules(): array
