@@ -26,6 +26,7 @@ use App\Models\Offer;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\Admin\Consents\ContactController as ConsentsContactController;
 
 /*
 |--------------------------------------------------------------------------
@@ -260,6 +261,18 @@ Route::middleware(['auth', 'admin'])
             Route::delete('{form}', [FormController::class, 'destroy'])->whereNumber('form')->name('destroy');
             Route::patch('{form}/toggle/{locale}', [FormController::class, 'toggle'])
                 ->whereNumber('form')->whereIn('locale', ['pl','de'])->name('toggle');
+        });
+
+        Route::prefix('consents/contacts')->name('consents.contacts.')->group(function () {
+            Route::get   ('/',                 [ConsentsContactController::class,'index'])->name('index');
+            Route::get   ('/create',           [ConsentsContactController::class,'create'])->name('create');
+            Route::post  ('/',                 [ConsentsContactController::class,'store'])->name('store');
+            Route::get   ('{contact}',         [ConsentsContactController::class,'show'])->whereNumber('contact')->name('show');
+            Route::get   ('{contact}/edit',    [ConsentsContactController::class,'edit'])->whereNumber('contact')->name('edit');
+            Route::put   ('{contact}',         [ConsentsContactController::class,'update'])->whereNumber('contact')->name('update');
+            Route::delete('{contact}',         [ConsentsContactController::class,'destroy'])->whereNumber('contact')->name('destroy');
+            Route::patch ('{contact}/toggle/{locale}', [ConsentsContactController::class,'toggle'])
+                ->whereNumber('contact')->whereIn('locale',['pl','de'])->name('toggle');
         });
 //        });
 
