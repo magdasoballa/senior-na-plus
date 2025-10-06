@@ -1,99 +1,103 @@
-import AdminLayout from '@/layouts/admin-layout';
-import AppLayout from '@/layouts/app-layout';
-import { Link, usePage, router } from "@inertiajs/react";
-import * as React from "react";
+import AdminLayout from '@/layouts/admin-layout'
+import { Link, usePage, router } from '@inertiajs/react'
+import * as React from 'react'
+import { Pencil, Trash2 } from 'lucide-react';
 
 type Offer = {
-    id: number | string;
-    title: string;
-    city?: string | null;
-    country?: string | null;
-    language?: string | null;
-    wage?: string | null;
-    created_at: string;
-};
+    id: number | string
+    title: string
+    city?: string | null
+    country?: string | null
+    language?: string | null
+    wage?: string | null
+    created_at: string
+    // NOWE liczniki relacji:
+    duties_count?: number
+    requirements_count?: number
+    perks_count?: number
+}
 
-type PaginationLink = { url?: string; label: string; active: boolean };
+type PaginationLink = { url?: string; label: string; active: boolean }
 
 type PageProps = {
-    offers: { data: Offer[]; links: PaginationLink[] };
-    filters: { search: string; sort: string; dir: 'asc'|'desc'; per_page: number };
-};
+    offers: { data: Offer[]; links: PaginationLink[] }
+    filters: { search: string; sort: string; dir: 'asc' | 'desc'; per_page: number }
+}
 
 export default function Index() {
-    const { offers, filters } = usePage<PageProps>().props;
+    const { offers, filters } = usePage<PageProps>().props
 
     const [local, setLocal] = React.useState({
-        search:   filters?.search ?? '',
-        sort:     filters?.sort   ?? 'created_at',
-        dir:      (filters?.dir as 'asc'|'desc') ?? 'desc',
+        search: filters?.search ?? '',
+        sort: filters?.sort ?? 'created_at',
+        dir: (filters?.dir as 'asc' | 'desc') ?? 'desc',
         per_page: Number(filters?.per_page ?? 20),
-    });
+    })
 
     const apply = (extra?: Partial<typeof local>) => {
-        const params = { ...local, ...(extra ?? {}) };
+        const params = { ...local, ...(extra ?? {}) }
         router.get('/admin/offers', params, {
             preserveState: true,
             preserveScroll: true,
             replace: true,
-        });
-    };
+        })
+    }
 
     const toggleDir = () => {
-        setLocal(prev => {
-            const nextDir = prev.dir === 'asc' ? 'desc' : 'asc';
-            const params  = { ...prev, dir: nextDir };
+        setLocal((prev) => {
+            const nextDir = prev.dir === 'asc' ? 'desc' : 'asc'
+            const params = { ...prev, dir: nextDir }
             router.get('/admin/offers', params, {
                 preserveState: true,
                 preserveScroll: true,
                 replace: true,
-            });
-            return params; // <-- od razu aktualizujemy lokalny state
-        });
-    };
+            })
+            return params
+        })
+    }
 
     const del = (id: number | string) => {
-        if (!confirm("Usunąć tę ofertę?")) return;
+        if (!confirm('Usunąć tę ofertę?')) return
         router.delete(`/admin/offers/${encodeURIComponent(String(id))}`, {
             preserveScroll: true,
             preserveState: true,
-        });
-    };
+        })
+    }
 
     return (
         <AdminLayout>
-            <div className="max-w-5xl p-6">
-                <Link href="/dashboard" className="text-coral">&larr; Wróć</Link>
+            <div className="max-w-7xl p-6">
+                <Link href="/dashboard" className="text-coral">
+                    &larr; Wróć
+                </Link>
 
                 <div className="mb-4 mt-5 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">Oferty</h1>
-                    <Link
-                        href="/admin/offers/create"
-                        className="rounded-full bg-coral px-4 py-2 font-bold text-white"
-                    >
+                    <p className="text-2xl font-bold">Oferty</p>
+                    <Link href="/admin/offers/create" className="rounded-full bg-coral px-4 py-2 font-bold text-white">
                         Dodaj ofertę
                     </Link>
                 </div>
 
                 {/* FILTRY */}
                 <section className="mb-4 rounded-lg bg-[#F5F5F4] p-4">
-                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-                        <label className="block">
+                    {/* dodałem items-end żeby wszystkiego wyrównać do jednego baseline'u */}
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5 items-end">
+                        <label className="flex flex-col">
                             <span className="mb-1 block text-sm">Szukaj (tytuł/miasto/kraj/język)</span>
                             <input
-                                className="w-full rounded border px-3 py-2"
+                                className="w-full h-[38px] rounded border px-3 py-2"
                                 value={local.search}
-                                onChange={(e)=>setLocal(s=>({ ...s, search: e.target.value }))}
-                                onKeyDown={(e)=> e.key==='Enter' && apply()}
+                                onChange={(e) => setLocal((s) => ({ ...s, search: e.target.value }))}
+                                onKeyDown={(e) => e.key === 'Enter' && apply()}
                             />
                         </label>
 
-                        <label className="block">
+                        <label className="flex flex-col">
                             <span className="mb-1 block text-sm">Sortuj wg</span>
                             <select
-                                className="w-full rounded border px-3 py-2"
+                                className="w-full h-[38px] rounded border px-3 py-2"
                                 value={local.sort}
-                                onChange={(e)=> setLocal(s=>({ ...s, sort: e.target.value }))}
+                                onChange={(e) => setLocal((s) => ({ ...s, sort: e.target.value }))}
                             >
                                 <option value="created_at">Data utworzenia</option>
                                 <option value="title">Tytuł</option>
@@ -103,41 +107,45 @@ export default function Index() {
                             </select>
                         </label>
 
-                        <label className="block">
+                        <label className="flex flex-col">
                             <span className="mb-1 block text-sm">Kierunek</span>
                             <button
                                 type="button"
                                 onClick={toggleDir}
-                                className="w-full rounded border px-3 py-2"
+                                className="w-full h-[38px] rounded border px-3 py-2"
                                 title="Zmień kierunek sortowania"
                             >
                                 {local.dir === 'asc' ? 'Rosnąco ↑' : 'Malejąco ↓'}
                             </button>
                         </label>
 
-                        <label className="block">
+                        <label className="flex flex-col">
                             <span className="mb-1 block text-sm">Na stronę</span>
                             <select
-                                className="w-full rounded border px-3 py-2"
+                                className="w-[50%] h-[38px] rounded border px-3 py-2"
                                 value={local.per_page}
-                                onChange={(e)=> setLocal(s=>({ ...s, per_page: Number(e.target.value) }))}
+                                onChange={(e) => setLocal((s) => ({ ...s, per_page: Number(e.target.value) }))}
                             >
-                                {[10,20,50,100].map(n => <option key={n} value={n}>{n}</option>)}
+                                {[10, 20, 50, 100].map((n) => (
+                                    <option key={n} value={n}>
+                                        {n}
+                                    </option>
+                                ))}
                             </select>
                         </label>
 
-                        <div className="flex items-end gap-2">
+                        <div className="flex items-center justify-end gap-2">
                             <button
-                                onClick={()=>apply()}
+                                onClick={() => apply()}
                                 className="h-[38px] rounded-full bg-coral px-4 py-2 font-semibold text-white"
                             >
                                 Zastosuj
                             </button>
                             <button
-                                onClick={()=>{
-                                    const reset = { search:'', sort:'created_at', dir:'desc' as const, per_page:20 };
-                                    setLocal(reset);
-                                    apply(reset);
+                                onClick={() => {
+                                    const reset = { search: '', sort: 'created_at', dir: 'desc' as const, per_page: 20 }
+                                    setLocal(reset)
+                                    apply(reset)
                                 }}
                                 className="h-[38px] rounded-full border px-4 py-2"
                             >
@@ -147,6 +155,7 @@ export default function Index() {
                     </div>
                 </section>
 
+
                 <div className="overflow-hidden rounded-xl border bg-white">
                     <table className="w-full text-left">
                         <thead className="bg-gray-50">
@@ -155,6 +164,10 @@ export default function Index() {
                             <th className="px-4 py-3 text-black">Lokalizacja</th>
                             <th className="px-4 py-3 text-black">Język</th>
                             <th className="px-4 py-3 text-black">Stawka</th>
+                            {/* NOWE kolumny */}
+                            <th className="px-4 py-3 text-black">Obowiązki</th>
+                            <th className="px-4 py-3 text-black">Wymagania</th>
+                            <th className="px-4 py-3 text-black">Oferujemy</th>
                             <th className="w-40 px-4 py-3 text-black"></th>
                         </tr>
                         </thead>
@@ -162,22 +175,25 @@ export default function Index() {
                         {offers.data.map((o) => (
                             <tr key={o.id} className="border-t">
                                 <td className="px-4 py-3 text-black">{o.title}</td>
-                                <td className="px-4 py-3 text-black">{[o.city, o.country].filter(Boolean).join(", ")}</td>
+                                <td className="px-4 py-3 text-black">{[o.city, o.country].filter(Boolean).join(', ')}</td>
                                 <td className="px-4 py-3 text-black">{o.language}</td>
                                 <td className="px-4 py-3 text-black">{o.wage}</td>
+                                {/* NOWE wartości */}
+                                <td className="px-4 py-3 text-black">{o.duties_count ?? 0}</td>
+                                <td className="px-4 py-3 text-black">{o.requirements_count ?? 0}</td>
+                                <td className="px-4 py-3 text-black">{o.perks_count ?? 0}</td>
                                 <td className="px-4 py-3 text-black">
                                     <div className="flex gap-2">
                                         <Link
                                             href={`/admin/offers/${encodeURIComponent(String(o.id))}/edit`}
-                                            className="rounded-full bg-mint px-3 py-1 text-sm font-bold"
+                                            className="rounded-md border border-slate-200 bg-white p-2 hover:bg-slate-50"
                                         >
-                                            Edytuj
+                                            <Pencil className="h-4 w-4" />
+
                                         </Link>
-                                        <button
-                                            onClick={() => del(o.id)}
-                                            className="rounded-full bg-red-500 px-3 py-1 text-sm font-bold text-white"
-                                        >
-                                            Usuń
+                                        <button onClick={() => del(o.id)}  className="rounded-md border border-slate-200 bg-white p-2 text-rose-600 hover:bg-rose-50 disabled:opacity-50">
+                                            <Trash2 className="h-4 w-4" />
+
                                         </button>
                                     </div>
                                 </td>
@@ -185,7 +201,7 @@ export default function Index() {
                         ))}
                         {offers.data.length === 0 && (
                             <tr>
-                                <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
+                                <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
                                     Brak ofert.
                                 </td>
                             </tr>
@@ -209,5 +225,5 @@ export default function Index() {
                 </div>
             </div>
         </AdminLayout>
-    );
+    )
 }

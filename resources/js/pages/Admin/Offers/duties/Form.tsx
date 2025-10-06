@@ -6,7 +6,7 @@ import { CheckCircle2 } from 'lucide-react'
 type Duty = { id?: number; name?: string; is_visible?: boolean }
 type FormShape = { name: string; is_visible: boolean; redirectTo: 'index' | 'continue' }
 
-const BASE = '/admin/dictionaries/duties'
+const BASE = '/admin/offers/duties'
 
 export default function Form() {
     const { duty, flash } = usePage<{ duty: Duty | null; flash?: { success?: string } }>().props

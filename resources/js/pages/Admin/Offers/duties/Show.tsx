@@ -4,7 +4,7 @@ import { CheckCircle2, XCircle, Pencil, CornerUpLeft } from 'lucide-react';
 
 type Duty = { id:number; name:string; is_visible:boolean }
 
-const BASE = '/admin/dictionaries/duties'
+const BASE = '/admin/offers/duties'
 
 export default function Show(){
     const { duty } = usePage<{ duty:Duty }>().props

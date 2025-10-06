@@ -48,7 +48,7 @@ class OfferDutyController extends Controller
             'position' => $max + 1,
         ]);
 
-        return to_route('admin.dict.duties.index')->with('success', 'Utworzono');
+        return to_route('admin.offers.duties.index')->with('success', 'Utworzono');
     }
 
     public function show(Duty $duty)
@@ -85,8 +85,8 @@ class OfferDutyController extends Controller
         ])->save();
 
         return $request->input('redirectTo') === 'continue'
-            ? to_route('admin.dict.duties.edit', $duty)->with('success', 'Zapisano')
-            : to_route('admin.dict.duties.index')->with('success', 'Zapisano');
+            ? to_route('admin.offers.duties.edit', $duty)->with('success', 'Zapisano')
+            : to_route('admin.offers.duties.index')->with('success', 'Zapisano');
     }
 
     public function destroy(Duty $duty)
