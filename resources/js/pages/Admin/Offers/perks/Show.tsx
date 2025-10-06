@@ -1,5 +1,7 @@
 import { Link, useForm, usePage } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
+import { Pencil, Trash2 } from 'lucide-react';
+import * as React from 'react';
 
 type Perk = {
     id: number
@@ -30,27 +32,15 @@ export default function Show() {
                 </div>
 
                 <div className="mt-1 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">Oferujemy – podgląd</h1>
+                    <p className="text-2xl font-bold">Oferujemy – podgląd</p>
                     <div className="flex gap-2">
-                        <Link
-                            href={`${BASE}/${perk.id}/edit`}
-                            className="rounded-lg bg-cyan-500 px-4 py-2 text-white font-semibold"
-                        >
-                            Edytuj
+                        <Link href={`${BASE}/${perk.id}/edit`} className="rounded-lg border px-3 py-1 hover:bg-slate-50">
+                            <Pencil/>
                         </Link>
-                        <button
-                            onClick={handleDelete}
-                            className="rounded-lg bg-rose-600 px-4 py-2 text-white font-semibold"
-                            disabled={form.processing}
-                        >
-                            Usuń
+                        <button onClick={handleDelete} className="rounded-lg border px-3 py-1 text-rose-600 hover:bg-rose-50 disabled:opacity-50" disabled={form.processing}>
+                            <Trash2 className="h-4 w-4" />
                         </button>
-                        <Link
-                            href={BASE}
-                            className="rounded-lg border px-4 py-2 hover:bg-slate-50"
-                        >
-                            Powrót
-                        </Link>
+                        <Link href={BASE} className="rounded-lg border px-3 py-1 hover:bg-slate-50">↩︎</Link>
                     </div>
                 </div>
 

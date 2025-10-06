@@ -11,7 +11,7 @@ export default function Show({ record }: { record:{
             <div className="p-6">
                 <div className="mb-4 flex items-center justify-between">
                     <p className="text-2xl font-bold">Szczegóły Link społecznościowy: {record.name}</p>
-                    <Link href={`/admin/settings/social-links/${record.id}/edit`} className="rounded-full bg-mint px-4 py-2 font-semibold"><Pencil/></Link>
+                    <Link href={`/admin/settings/social-links/${record.id}/edit`} className="rounded-lg border px-3 py-1 hover:bg-slate-50"><Pencil/></Link>
                 </div>
 
                 <div className="overflow-hidden rounded-xl border bg-white">

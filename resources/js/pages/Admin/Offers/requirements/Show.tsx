@@ -1,6 +1,7 @@
 import { Link, usePage } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
-import { CheckCircle2, XCircle } from 'lucide-react'
+import { CheckCircle2, Pencil, XCircle } from 'lucide-react';
+import * as React from 'react';
 
 type Req = { id:number; name:string; is_visible:boolean; created_at?:string|null; updated_at?:string|null }
 const BASE = '/admin/offers/requirements'
@@ -13,7 +14,12 @@ export default function Show(){
                 <div className="text-sm text-slate-500">Oferty › Wymagania › Szczegóły: {req.name}</div>
                 <div className="mt-1 flex items-center justify-between">
                     <p className="text-2xl font-bold">Szczegóły Wymaganie: {req.name}</p>
-                    <Link href={`${BASE}/${req.id}/edit`} className="rounded border px-3 py-1">Edytuj</Link>
+                    <div className="flex gap-2">
+
+                    <Link href={`${BASE}/${req.id}/edit`} className="rounded-lg border px-3 py-1 hover:bg-slate-50">                            <Pencil/>
+                    </Link>
+                    <Link href={BASE} className="rounded-lg border px-3 py-1 hover:bg-slate-50">↩︎</Link>
+                    </div>
                 </div>
 
                 <div className="mt-4 overflow-hidden rounded-xl border bg-white">

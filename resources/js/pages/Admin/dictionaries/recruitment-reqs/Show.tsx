@@ -15,7 +15,7 @@ export default function Show(){
                 <div className="mt-1 flex items-center justify-between">
                     <p className="text-2xl font-bold">Szczegóły Wymaganie rekrutacyjne: {req.title}</p>
                     <div className="flex gap-2">
-                        <Link href={`${BASE}/${req.id}/edit`} className="rounded-lg border px-3 py-1 bg-mint hover:bg-slate-50"><Pencil/></Link>
+                        <Link href={`${BASE}/${req.id}/edit`} className="rounded-lg border px-3 py-1 hover:bg-slate-50"><Pencil/></Link>
                         <Link href={BASE} className="rounded-lg border px-3 py-1 hover:bg-slate-50">↩︎</Link>
                     </div>
                 </div>

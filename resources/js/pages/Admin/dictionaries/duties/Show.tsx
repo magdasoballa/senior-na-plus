@@ -27,23 +27,12 @@ export default function Show(){
                     </p>
 
                     {/* akcje w prawym górnym rogu */}
-                    <div className="flex items-center gap-2">
-                        <Link
-                            href={`${BASE}/${duty.id}/edit`}
-                            className="rounded-full border border-slate-200 bg-white p-2 text-slate-700 shadow-sm transition hover:bg-slate-50"
-                            aria-label="Edytuj"
-                            title="Edytuj"
-                        >
-                            <Pencil className="h-4 w-4" />
+                    <div className="flex gap-2">
+                        <Link href={`${BASE}/${duty.id}/edit`} className="rounded-lg border px-3 py-1 hover:bg-slate-50">
+                            <Pencil/>
                         </Link>
-                        <Link
-                            href={BASE}
-                            className="rounded-full border border-slate-200 bg-white p-2 text-slate-700 shadow-sm transition hover:bg-slate-50"
-                            aria-label="Powrót"
-                            title="Powrót"
-                        >
-                            <CornerUpLeft className="h-4 w-4" />
-                        </Link>
+
+                        <Link href={BASE} className="rounded-lg border px-3 py-1 hover:bg-slate-50">↩︎</Link>
                     </div>
                 </div>
 

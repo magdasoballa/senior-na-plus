@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\Consents\FormController;
 use App\Http\Controllers\Admin\Dictionaries\CareTargetController;
 use App\Http\Controllers\Admin\Dictionaries\DutyController;
 use App\Http\Controllers\Admin\Dictionaries\ExperienceController;
@@ -242,10 +243,23 @@ Route::middleware(['auth', 'admin'])
         });
 
         // ===== Zgody =====
-        Route::prefix('consents')->name('consents.')->group(function () {
-            Route::resource('forms', ConsentsFormController::class)->only(['index', 'store', 'update', 'destroy']);
-            Route::resource('contacts', ConsentsContactController::class)->only(['index', 'destroy']);
+//        Route::prefix('consents')->name('consents.')->group(function () {
+//            Route::resource('forms', ConsentsFormController::class)->only(['index', 'store', 'update', 'destroy']);
+//            Route::resource('contacts', ConsentsContactController::class)->only(['index', 'destroy']);
+
+        Route::prefix('consents/forms')->name('consents.forms.')->group(function () {
+            Route::get('/', [FormController::class, 'index'])->name('index');
+            Route::get('/create', [FormController::class, 'create'])->name('create');
+            Route::post('/', [FormController::class, 'store'])->name('store');
+
+            Route::get('{form}', [FormController::class, 'show'])->whereNumber('form')->name('show');
+            Route::get('{form}/edit', [FormController::class, 'edit'])->whereNumber('form')->name('edit');
+            Route::put('{form}', [FormController::class, 'update'])->whereNumber('form')->name('update');
+            Route::delete('{form}', [FormController::class, 'destroy'])->whereNumber('form')->name('destroy');
+            Route::patch('{form}/toggle/{locale}', [FormController::class, 'toggle'])
+                ->whereNumber('form')->whereIn('locale', ['pl','de'])->name('toggle');
         });
+//        });
 
         // ===== Wiadomości =====
         Route::prefix('messages')->name('msg.')->group(function () {

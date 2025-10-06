@@ -32,18 +32,22 @@ export default function Show({ page }: any) {
         setFieldLang(prev => ({ ...prev, [field]: lang }))
     }
 
+    const BASE = '/admin/settings/pages'
+
+
     return (
         <AdminLayout>
             <main className="p-6">
                 <div className="text-sm text-green">Zasoby › Strony › Szczegóły Strona: {page.name}</div>
                 <div className="mt-1 flex items-center justify-between">
                     <p className="text-2xl font-bold">Szczegóły Strona: {page.name}</p>
-                    <Link
-                        href={`/admin/settings/pages/${page.id}/edit`}
-                        className="rounded-lg border px-3 py-1 hover:bg-slate-50 bg-mint "
-                    >
-                        <Pencil />
-                    </Link>
+                    <div className="flex gap-2">
+                        <Link href={`${BASE}/${page.id}/edit`} className="rounded-lg border px-3 py-1 hover:bg-slate-50">
+                            <Pencil/>
+                        </Link>
+
+                        <Link href={BASE} className="rounded-lg border px-3 py-1 hover:bg-slate-50">↩︎</Link>
+                    </div>
                 </div>
 
                 <div className="mt-6 rounded-xl border bg-white">
