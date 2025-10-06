@@ -130,10 +130,10 @@ export default function Form(){
                     <div className="flex items-center justify-end gap-3 p-6">
                         <Link href={`${BASE}`} className="rounded-lg border px-4 py-2 hover:bg-slate-50">Anuluj</Link>
                         <button type="button" onClick={submitAndContinue}
-                                className="rounded-lg bg-cyan-500 px-4 py-2 font-semibold text-white" disabled={form.processing}>
+                                className="rounded-lg bg-mint px-4 py-2 font-semibold cursor-pointer" disabled={form.processing}>
                             {isEdit ? 'Aktualizuj i Kontynuuj Edycję' : 'Utwórz i Dodaj Kolejną'}
                         </button>
-                        <button type="submit" className="rounded-lg bg-mint px-4 py-2 font-semibold text-white" disabled={form.processing}>
+                        <button type="submit" className="rounded-lg bg-mint px-4 py-2 font-semibold cursor-pointer" disabled={form.processing}>
                             {isEdit ? 'Aktualizacja Osoba do opieki' : 'Utwórz Osoba do opieki'}
                         </button>
                     </div>

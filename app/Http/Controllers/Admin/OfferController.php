@@ -138,16 +138,16 @@ class OfferController extends Controller
 
     public function edit(Offer $offer)
     {
-        $offer->load(['duties:id','requirements:id','perks:id']);
+        $offer->load(['duties:id', 'requirements:id', 'perks:id']);
 
         return Inertia::render('Admin/Offers/Edit', [
-            'offer' => [
-                ...$offer->toArray(),
-                // << ZAMIANA: zamiast *_text podajemy tablice ID >>
-                'duties'       => $offer->duties->pluck('id'),
-                'requirements' => $offer->requirements->pluck('id'),
-                'perks'        => $offer->perks->pluck('id'),
-            ],
+            'offer' => array_merge($offer->only([
+                'id','title','city','country','language','wage','start_date','region','new_city','description','is_visible'
+            ]), [
+                'duties'       => $offer->duties()->pluck('duties.id')->values(),
+                'requirements' => $offer->requirements()->pluck('offer_requirements.id')->values(),
+                'perks'        => $offer->perks()->pluck('offer_perks.id')->values(),
+            ]),
             'dict' => [
                 'duties'       => Duty::orderBy('position')->get(['id','name']),
                 'requirements' => OfferRequirement::orderBy('position')->get(['id','name']),
@@ -155,6 +155,7 @@ class OfferController extends Controller
             ],
         ]);
     }
+
 
     public function update(Request $request, Offer $offer)
     {
@@ -233,5 +234,74 @@ class OfferController extends Controller
     {
         $lines = preg_split("/\r\n|\n|\r/", $text);
         return array_values(array_filter(array_map('trim', $lines), fn($v) => $v !== ''));
+    }
+
+    public function show(Offer $offer)
+    {
+        // Załaduj relacje; jeśli masz checkbox na pivocie, możesz dołożyć ->withPivot('checked')
+        $offer->load([
+            'duties:id,name',
+            'requirements:id,name',
+            'perks:id,name',
+        ]);
+
+        $payload = [
+            'id'          => $offer->id,
+            'title'       => $offer->title,
+            'start_date'  => $offer->start_date,
+            'country'     => $offer->country,
+            'region'      => $offer->region,
+            'city'        => $offer->city,
+            'new_city'    => $offer->new_city,
+            'language'    => $offer->language,
+            'wage'        => $offer->wage,
+            'description' => $offer->description,
+            'is_visible'  => (bool)$offer->is_visible,
+
+            // ⬇️ kluczowe: normalizacja niezależnie od typu wejścia
+            'duties'       => $this->normalizeRelation($offer->duties),
+            'requirements' => $this->normalizeRelation($offer->requirements),
+            'perks'        => $this->normalizeRelation($offer->perks),
+        ];
+
+        return Inertia::render('Admin/Offers/Show', ['offer' => $payload]);
+    }
+
+    /**
+     * Przyjmuje: Collection|array|null (modele, tablice, stringi, liczby).
+     * Zwraca: tablicę rekordów postaci ['id'=>?, 'name'=>?, 'checked'=>bool]
+     */
+    private function normalizeRelation($items): array
+    {
+        return collect($items)->map(function ($i, $key) {
+            // Przypadek: element to string (np. wynik pluck('name'))
+            if (is_string($i)) {
+                return ['id' => is_int($key) ? $key : null, 'name' => $i, 'checked' => true];
+            }
+            // Przypadek: element to liczba (np. same ID)
+            if (is_int($i)) {
+                return ['id' => $i, 'name' => (string)$i, 'checked' => true];
+            }
+            // Przypadek: element to tablica
+            if (is_array($i)) {
+                return [
+                    'id'      => $i['id']   ?? null,
+                    'name'    => $i['name'] ?? (string)($i['pivot']['name'] ?? ''),
+                    'checked' => isset($i['checked'])
+                        ? (bool)$i['checked']
+                        : (bool)($i['pivot']['checked'] ?? true),
+                ];
+            }
+            // Przypadek: element to model Eloquent
+            if ($i instanceof Model) {
+                return [
+                    'id'      => $i->getAttribute('id'),
+                    'name'    => $i->getAttribute('name'),
+                    'checked' => (bool)optional($i->getRelation('pivot'))->checked ?? true,
+                ];
+            }
+            // Fallback: rzutuj na string
+            return ['id' => null, 'name' => (string)$i, 'checked' => true];
+        })->values()->all();
     }
 }

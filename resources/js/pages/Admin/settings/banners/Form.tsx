@@ -197,14 +197,14 @@ export default function Form() {
                         <button
                             type="button"
                             onClick={() => save(true)}  // ← Zapisz i zostań na edycji
-                            className="rounded-lg bg-cyan-500 px-4 py-2 font-semibold text-white"
+                            className="rounded-lg bg-mint px-4 py-2 font-semibold cursor-pointer"
                             disabled={form.processing}
                         >
                             {isCreate ? 'Utwórz i Kontynuuj Edycję' : 'Zapisz i Kontynuuj Edycję'}
                         </button>
                         <button
                             type="submit"
-                            className="rounded-lg bg-mint px-4 py-2 font-semibold"
+                            className="rounded-lg bg-mint px-4 py-2 font-semibold cursor-pointer"
                             disabled={form.processing}
                         >
                             {isCreate ? 'Utwórz' : 'Zapisz zmiany'}

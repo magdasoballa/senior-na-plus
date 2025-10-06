@@ -1,7 +1,7 @@
 import AdminLayout from '@/layouts/admin-layout'
 import { Link, usePage, router } from '@inertiajs/react'
 import * as React from 'react'
-import { Pencil, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Trash2 } from 'lucide-react'
 
 type Offer = {
     id: number | string
@@ -11,7 +11,6 @@ type Offer = {
     language?: string | null
     wage?: string | null
     created_at: string
-    // NOWE liczniki relacji:
     duties_count?: number
     requirements_count?: number
     perks_count?: number
@@ -44,7 +43,7 @@ export default function Index() {
     }
 
     const toggleDir = () => {
-        setLocal((prev) => {
+        setLocal(prev => {
             const nextDir = prev.dir === 'asc' ? 'desc' : 'asc'
             const params = { ...prev, dir: nextDir }
             router.get('/admin/offers', params, {
@@ -66,7 +65,7 @@ export default function Index() {
 
     return (
         <AdminLayout>
-            <div className="max-w-7xl p-6">
+            <div className="max-w-7xl min-w-6xl p-6">
                 <Link href="/dashboard" className="text-coral">
                     &larr; Wróć
                 </Link>
@@ -78,26 +77,25 @@ export default function Index() {
                     </Link>
                 </div>
 
-                {/* FILTRY */}
+                {/* FILTRY (bez zmian) */}
                 <section className="mb-4 rounded-lg bg-[#F5F5F4] p-4">
-                    {/* dodałem items-end żeby wszystkiego wyrównać do jednego baseline'u */}
-                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5 items-end">
+                    <div className="grid items-end gap-3 sm:grid-cols-2 lg:grid-cols-5">
                         <label className="flex flex-col">
                             <span className="mb-1 block text-sm">Szukaj (tytuł/miasto/kraj/język)</span>
                             <input
-                                className="w-full h-[38px] rounded border px-3 py-2"
+                                className="h-[38px] w-full rounded border px-3 py-2"
                                 value={local.search}
-                                onChange={(e) => setLocal((s) => ({ ...s, search: e.target.value }))}
-                                onKeyDown={(e) => e.key === 'Enter' && apply()}
+                                onChange={e => setLocal(s => ({ ...s, search: e.target.value }))}
+                                onKeyDown={e => e.key === 'Enter' && apply()}
                             />
                         </label>
 
                         <label className="flex flex-col">
                             <span className="mb-1 block text-sm">Sortuj wg</span>
                             <select
-                                className="w-full h-[38px] rounded border px-3 py-2"
+                                className="h-[38px] w-full rounded border px-3 py-2"
                                 value={local.sort}
-                                onChange={(e) => setLocal((s) => ({ ...s, sort: e.target.value }))}
+                                onChange={e => setLocal(s => ({ ...s, sort: e.target.value }))}
                             >
                                 <option value="created_at">Data utworzenia</option>
                                 <option value="title">Tytuł</option>
@@ -112,7 +110,7 @@ export default function Index() {
                             <button
                                 type="button"
                                 onClick={toggleDir}
-                                className="w-full h-[38px] rounded border px-3 py-2"
+                                className="h-[38px] w-full rounded border px-3 py-2"
                                 title="Zmień kierunek sortowania"
                             >
                                 {local.dir === 'asc' ? 'Rosnąco ↑' : 'Malejąco ↓'}
@@ -122,11 +120,11 @@ export default function Index() {
                         <label className="flex flex-col">
                             <span className="mb-1 block text-sm">Na stronę</span>
                             <select
-                                className="w-[50%] h-[38px] rounded border px-3 py-2"
+                                className="h-[38px] w-[50%] rounded border px-3 py-2"
                                 value={local.per_page}
-                                onChange={(e) => setLocal((s) => ({ ...s, per_page: Number(e.target.value) }))}
+                                onChange={e => setLocal(s => ({ ...s, per_page: Number(e.target.value) }))}
                             >
-                                {[10, 20, 50, 100].map((n) => (
+                                {[10, 20, 50, 100].map(n => (
                                     <option key={n} value={n}>
                                         {n}
                                     </option>
@@ -135,10 +133,7 @@ export default function Index() {
                         </label>
 
                         <div className="flex items-center justify-end gap-2">
-                            <button
-                                onClick={() => apply()}
-                                className="h-[38px] rounded-full bg-coral px-4 py-2 font-semibold text-white"
-                            >
+                            <button onClick={() => apply()} className="h-[38px] rounded-full bg-coral px-4 py-2 font-semibold text-white">
                                 Zastosuj
                             </button>
                             <button
@@ -155,45 +150,62 @@ export default function Index() {
                     </div>
                 </section>
 
-
                 <div className="overflow-hidden rounded-xl border bg-white">
                     <table className="w-full text-left">
                         <thead className="bg-gray-50">
                         <tr>
+                            <th className="w-20 px-4 py-3 text-black">ID</th>
                             <th className="px-4 py-3 text-black">Tytuł</th>
                             <th className="px-4 py-3 text-black">Lokalizacja</th>
                             <th className="px-4 py-3 text-black">Język</th>
                             <th className="px-4 py-3 text-black">Stawka</th>
-                            {/* NOWE kolumny */}
                             <th className="px-4 py-3 text-black">Obowiązki</th>
                             <th className="px-4 py-3 text-black">Wymagania</th>
                             <th className="px-4 py-3 text-black">Oferujemy</th>
-                            <th className="w-40 px-4 py-3 text-black"></th>
+                            <th className="w-40 px-4 py-3 text-black" />
                         </tr>
                         </thead>
                         <tbody>
-                        {offers.data.map((o) => (
+                        {offers.data.map(o => (
                             <tr key={o.id} className="border-t">
+                                <td className="px-4 py-3 text-slate-500">{o.id}</td>
                                 <td className="px-4 py-3 text-black">{o.title}</td>
                                 <td className="px-4 py-3 text-black">{[o.city, o.country].filter(Boolean).join(', ')}</td>
                                 <td className="px-4 py-3 text-black">{o.language}</td>
                                 <td className="px-4 py-3 text-black">{o.wage}</td>
-                                {/* NOWE wartości */}
                                 <td className="px-4 py-3 text-black">{o.duties_count ?? 0}</td>
                                 <td className="px-4 py-3 text-black">{o.requirements_count ?? 0}</td>
                                 <td className="px-4 py-3 text-black">{o.perks_count ?? 0}</td>
                                 <td className="px-4 py-3 text-black">
                                     <div className="flex gap-2">
+                                        {/* Podgląd (publiczny widok) */}
+                                        <Link
+                                            href={`/admin/offers/${encodeURIComponent(String(o.id))}`}
+                                            className="rounded-md border border-slate-200 bg-white p-2 hover:bg-slate-50"
+                                            aria-label="Podgląd"
+                                            title="Podgląd"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            <Eye className="h-4 w-4" />
+                                        </Link>
+
                                         <Link
                                             href={`/admin/offers/${encodeURIComponent(String(o.id))}/edit`}
                                             className="rounded-md border border-slate-200 bg-white p-2 hover:bg-slate-50"
+                                            aria-label="Edytuj"
+                                            title="Edytuj"
                                         >
                                             <Pencil className="h-4 w-4" />
-
                                         </Link>
-                                        <button onClick={() => del(o.id)}  className="rounded-md border border-slate-200 bg-white p-2 text-rose-600 hover:bg-rose-50 disabled:opacity-50">
-                                            <Trash2 className="h-4 w-4" />
 
+                                        <button
+                                            onClick={() => del(o.id)}
+                                            className="rounded-md border border-slate-200 bg-white p-2 text-rose-600 hover:bg-rose-50 disabled:opacity-50"
+                                            aria-label="Usuń"
+                                            title="Usuń"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
                                         </button>
                                     </div>
                                 </td>
@@ -201,7 +213,7 @@ export default function Index() {
                         ))}
                         {offers.data.length === 0 && (
                             <tr>
-                                <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
+                                <td colSpan={9} className="px-4 py-8 text-center text-gray-500">
                                     Brak ofert.
                                 </td>
                             </tr>
@@ -218,7 +230,7 @@ export default function Index() {
                             href={link.url || '#'}
                             preserveState
                             preserveScroll
-                            className={`px-3 py-1 rounded ${link.active ? 'bg-coral text-white' : 'bg-gray-200 text-foreground/80'}`}
+                            className={`rounded px-3 py-1 ${link.active ? 'bg-coral text-white' : 'bg-gray-200 text-foreground/80'}`}
                             dangerouslySetInnerHTML={{ __html: link.label }}
                         />
                     ))}

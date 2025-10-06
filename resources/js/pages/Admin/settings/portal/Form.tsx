@@ -157,14 +157,14 @@ export default function Form(){
                         <button
                             type="button"
                             onClick={submitAndContinue}
-                            className="rounded-lg bg-cyan-500 px-4 py-2 font-semibold text-white hover:brightness-110 disabled:opacity-60"
+                            className="rounded-lg bg-mint px-4 py-2 font-semibold  disabled:opacity-60 cursor-pointer"
                             disabled={form.processing}
                         >
                             Aktualizuj i Kontynuuj Edycję
                         </button>
                         <button
                             type="submit"
-                            className="rounded-lg bg-mint px-4 py-2 font-semibold text-white hover:brightness-110 disabled:opacity-60"
+                            className="rounded-lg bg-mint px-4 py-2 font-semibold cursor-pointer disabled:opacity-60"
                             disabled={form.processing}
                         >
                             Aktualizacja Ustawienie portalu

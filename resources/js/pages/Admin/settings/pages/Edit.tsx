@@ -263,14 +263,14 @@ export default function Edit({ page }: { page: PageDto }) {
                         <button
                             type="button"
                             onClick={() => submit(true)}
-                            className="rounded-lg bg-mint px-4 py-2 font-semibold"
+                            className="rounded-lg bg-mint px-4 py-2 font-semibold cursor-pointer"
                             disabled={form.processing}
                         >
                             Aktualizuj i Kontynuuj Edycję
                         </button>
                         <button
                             type="submit"
-                            className="rounded-lg bg-mint px-4 py-2 font-semibold"
+                            className="rounded-lg bg-mint px-4 py-2 font-semibold cursor-pointer"
                             disabled={form.processing}
                         >
                             Aktualizuj Strona

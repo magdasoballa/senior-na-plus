@@ -88,7 +88,9 @@ Route::middleware(['auth', 'admin'])
     ->group(function () {
         // ===== Oferty (główny zasób) =====
         Route::resource('offers', AdminOfferController::class)->except(['show']);
-
+        Route::get('offers/{offer}', [AdminOfferController::class, 'show'])
+            ->whereNumber('offer')
+            ->name('offers.show');
         // ===== Oferty – słowniki do ofert (pełny CRUD jak w "Słownikach") =====
         Route::prefix('offers')->name('offers.')->group(function () {
             Route::resource('duties', OfferDutyController::class);

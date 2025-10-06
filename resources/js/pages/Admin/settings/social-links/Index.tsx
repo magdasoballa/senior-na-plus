@@ -102,7 +102,7 @@ export default function Index({
                                             aria-label="Podgląd"
                                             title="Podgląd"
                                         >
-                                            👁
+                                             <Eye className="h-4 w-4" />
                                         </Link>
 
                                         {/* EDYCJA */}

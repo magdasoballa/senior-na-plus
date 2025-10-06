@@ -69,7 +69,7 @@ export default function Edit(){
                 <Link href={BASE} className="text-coral">&larr; Wróć</Link>
 
                 <div className="mb-4 mt-5 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">Edycja oferty</h1>
+                    <p className="text-2xl font-bold">Edycja oferty</p>
                     <Link href={`${BASE}`} className="rounded-full border px-4 py-2">Anuluj</Link>
                 </div>
 

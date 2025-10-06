@@ -114,12 +114,12 @@ export default function Form() {
                         <button
                             type="button"
                             onClick={submitAndContinue}
-                            className="rounded-lg bg-cyan-500 px-4 py-2 font-semibold text-white"
+                            className="rounded-lg bg-mint px-4 py-2 font-semibold cursor-pointer"
                             disabled={form.processing}
                         >
                             {isEdit ? 'Aktualizuj i Kontynuuj' : 'Utwórz i Kontynuuj'}
                         </button>
-                        <button type="submit" className="rounded-lg bg-mint px-4 py-2 font-semibold text-white" disabled={form.processing}>
+                        <button type="submit" className="rounded-lg bg-mint px-4 py-2 font-semibold cursor-pointer" disabled={form.processing}>
                             {isEdit ? 'Zapisz' : 'Utwórz'}
                         </button>
                     </div>

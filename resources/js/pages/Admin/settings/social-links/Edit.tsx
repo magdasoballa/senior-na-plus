@@ -196,7 +196,7 @@ export default function Edit({
 
                 {/* ACTIONS */}
                 <div className="mt-2 flex items-center justify-end gap-3">
-                    <Link href="/admin/settings/social-links" className="rounded-full border px-4 py-2">
+                    <Link href="/admin/settings/social-links" className="rounded-full border px-4 py-2 hover:bg-slate-50">
                         Anuluj
                     </Link>
 
@@ -205,7 +205,7 @@ export default function Edit({
                         type="button"
                         onClick={submitAndContinue}
                         disabled={processing}
-                        className="rounded-full bg-cyan-500 px-4 py-2 font-semibold text-white disabled:opacity-50"
+                        className="rounded-full bg-mint px-4 py-2 font-semibold  disabled:opacity-50 cursor-pointer"
                     >
                         Aktualizuj i Kontynuuj Edycję
                     </button>
@@ -213,7 +213,7 @@ export default function Edit({
                     <button
                         type="submit"
                         disabled={processing}
-                        className="rounded-full bg-mint px-4 py-2 font-semibold disabled:opacity-50"
+                        className="rounded-full bg-mint px-4 py-2 font-semibold disabled:opacity-50 cursor-pointer"
                     >
                         {processing ? 'Zapisywanie…' : mode === 'create' ? 'Utwórz' : 'Zapisz zmiany'}
                     </button>

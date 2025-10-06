@@ -1,7 +1,7 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import AdminLayout from '@/layouts/admin-layout';
 import { useState } from 'react';
-import { CheckCircle2, XCircle, Pencil, Trash2, MoveUpRight, MoveDownLeft, Filter } from 'lucide-react';
+import { CheckCircle2, XCircle, Pencil, Trash2, MoveUpRight, MoveDownLeft, Filter, Eye } from 'lucide-react';
 
 type Banner = {
     id: number;
@@ -133,7 +133,7 @@ export default function Index() {
                                     <div className="flex justify-end gap-2">
                                         {/* PODGLĄD */}
                                         <Link href={`${BASE}/${b.id}`} className="rounded border px-2 py-1" title="Szczegóły">
-                                            👁
+                                             <Eye className="h-4 w-4" />
                                         </Link>
 
                                         {/* EDYCJA */}

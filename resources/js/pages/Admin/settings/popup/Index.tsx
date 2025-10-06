@@ -1,7 +1,7 @@
 import { Link, router, usePage } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
 import { useState } from 'react'
-import { CheckCircle2, Pencil, XCircle } from 'lucide-react';
+import { CheckCircle2, Eye, Pencil, XCircle } from 'lucide-react';
 import * as React from 'react';
 
 type Row = { id:number; name:string; link:string|null; image_url:string|null; is_visible:boolean }
@@ -60,7 +60,7 @@ export default function Index(){
                                     : <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}</td>
                                 <td className="px-4 py-3">
                                     <div className="flex justify-end gap-2">
-                                        <Link href={`${BASE}/${r.id}`} className="rounded border px-2 py-1" title="Podgląd">👁</Link>
+                                        <Link href={`${BASE}/${r.id}`} className="rounded border px-2 py-1" title="Podgląd"> <Eye className="h-4 w-4" /></Link>
                                         <Link href={`${BASE}/${r.id}/edit`} className="rounded border px-2 py-1" title="Edytuj"> <Pencil className="h-4 w-4" /></Link>
                                     </div>
                                 </td>

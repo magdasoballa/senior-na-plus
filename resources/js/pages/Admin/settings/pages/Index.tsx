@@ -2,7 +2,7 @@
 import { Link, router } from '@inertiajs/react'
 import { useState } from 'react'
 import AdminLayout from '@/layouts/admin-layout';
-import { CheckCircle2, Pencil, XCircle } from 'lucide-react';
+import { CheckCircle2, Eye, Pencil, XCircle } from 'lucide-react';
 import * as React from 'react';
 
 type PageRow = {
@@ -94,14 +94,14 @@ export default function PagesIndex({ pages, filters }: Props) {
                                         <div className="inline-flex items-center gap-2">
                                             <Link
                                                 href={`/admin/settings/pages/${row.id}`}
-                                                className="rounded-md px-2 py-1 hover:bg-slate-50"
+                                                className="rounded border px-2 py-1 hover:bg-slate-50"
                                                 title="Podgląd"
                                             >
-                                                👁
+                                                 <Eye className="h-4 w-4" />
                                             </Link>
                                             <Link
                                                 href={`/admin/settings/pages/${row.id}/edit`}
-                                                className="rounded-md px-2 py-1 hover:bg-slate-50"
+                                                className="rounded-md px-2 py-1 hover:bg-slate-50 border"
                                                 title="Edytuj"
                                             >
                                                 <Pencil className="h-4 w-4" />

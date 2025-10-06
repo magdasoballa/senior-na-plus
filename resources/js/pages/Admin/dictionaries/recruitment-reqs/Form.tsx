@@ -230,14 +230,14 @@ export default function Form() {
                         <button
                             type="button"
                             onClick={submitAndContinue}
-                            className="rounded-lg bg-cyan-500 px-4 py-2 font-semibold text-white"
+                            className="rounded-lg bg-mint px-4 py-2 font-semibold cursor-pointer"
                             disabled={form.processing}
                         >
                             {isEdit ? 'Aktualizuj i Kontynuuj Edycję' : 'Utwórz i Kontynuuj Edycję'}
                         </button>
                         <button
                             type="submit"
-                            className="rounded-lg bg-mint px-4 py-2 font-semibold text-white"
+                            className="rounded-lg bg-mint px-4 py-2 font-semibold cursor-pointer"
                             disabled={form.processing}
                         >
                             {isEdit ? 'Aktualizacja Wymaganie rekrutacyjne' : 'Utwórz Wymaganie rekrutacyjne'}
