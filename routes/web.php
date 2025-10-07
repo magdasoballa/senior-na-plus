@@ -27,6 +27,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\Admin\Consents\ContactController as ConsentsContactController;
+use App\Http\Controllers\Admin\Messages\Pl\FrontContactController as PlFrontContactController;
+use App\Http\Controllers\Admin\Messages\Pl\SiteContactController  as PlSiteContactController;
+use App\Http\Controllers\Admin\Messages\Pl\FormController        as PlFormController;
+
+use App\Http\Controllers\Admin\Messages\De\SiteContactController  as DeSiteContactController;
+use App\Http\Controllers\Admin\Messages\De\FormController        as DeFormController;
 
 /*
 |--------------------------------------------------------------------------
@@ -278,16 +284,32 @@ Route::middleware(['auth', 'admin'])
 
         // ===== Wiadomości =====
         Route::prefix('messages')->name('msg.')->group(function () {
-            // PL
+            // === PL ===
             Route::prefix('pl')->name('pl.')->group(function () {
-                Route::resource('front-contacts', PlFrontContactController::class)->only(['index', 'show', 'destroy']);
-                Route::resource('site-contacts', PlSiteContactController::class)->only(['index', 'show', 'destroy']);
-                Route::resource('forms', PlFormController::class)->only(['index', 'show', 'destroy']);
+                Route::resource('front-contacts', PlFrontContactController::class)
+                    ->only(['index','show','edit','update','destroy'])
+                    ->parameters(['front-contacts' => 'contact']);   // <— DODANE
+
+                Route::resource('site-contacts', PlSiteContactController::class)
+                    ->only(['index','show','edit','update','destroy'])
+                    ->parameters(['site-contacts' => 'contact']);    // <— DODANE
+
+                Route::patch('front-contacts/{contact}/toggle-read', [PlFrontContactController::class, 'toggleRead'])
+                    ->name('front-contacts.toggle-read');
+                Route::patch('site-contacts/{contact}/toggle-read', [PlSiteContactController::class, 'toggleRead'])
+                    ->name('site-contacts.toggle-read');
             });
-            // DE
+
+            // === DE ===
             Route::prefix('de')->name('de.')->group(function () {
-                Route::resource('site-contacts', DeSiteContactController::class)->only(['index', 'show', 'destroy']);
-                Route::resource('forms', DeFormController::class)->only(['index', 'show', 'destroy']);
+                Route::resource('site-contacts', DeSiteContactController::class)
+                    ->only(['index','show','edit','update','destroy'])
+                    ->parameters(['site-contacts' => 'contact']);
+
+                Route::resource('forms', DeFormController::class)->only(['index','show','destroy']);
+
+                Route::patch('site-contacts/{contact}/toggle-read', [DeSiteContactController::class, 'toggleRead'])
+                    ->name('site-contacts.toggle-read');
             });
         });
 

@@ -35,7 +35,7 @@ function AdminSidebar() {
                 { label: 'Płcie osób do opieki', href: '/admin/dictionaries/genders' },
                 { label: 'Doświadczenia w opiece', href: '/admin/dictionaries/experience' },
                 { label: 'Wymagania rekrutacyjne', href: '/admin/dictionaries/recruitment-reqs' },
-                { label: 'Obowiązki', href: '/admin/dictionaries/duties' }, // ← słownikowe
+                { label: 'Obowiązki', href: '/admin/dictionaries/duties' },
             ],
         },
         {
@@ -54,6 +54,20 @@ function AdminSidebar() {
                 { label: 'Kontakty', href: '/admin/consents/contacts' },
             ],
         },
+        {
+            title: 'Wiadomości',
+            items: [
+                { kind: 'label', label: 'WERSJA PL' },
+                { label: 'Kontakty Front (pl)',  href: '/admin/messages/pl/front-contacts', exact: true },
+                { label: 'Kontakty Strona (pl)', href: '/admin/messages/pl/site-contacts',  exact: true },
+                { label: 'Formularze (pl)',      href: '/admin/messages/pl/forms',          exact: true },
+
+                { kind: 'label', label: 'WERSJA DE' },
+                { label: 'Kontakty Strona (de)', href: '/admin/messages/de/site-contacts',  exact: true },
+                { label: 'Formularze (de)',      href: '/admin/messages/de/forms',          exact: true },
+            ],
+        },
+
         { title: 'Partnerzy', items: [{ label: 'Partnerzy', href: '/admin/partners' }] },
         { title: 'Użytkownicy', items: [{ label: 'Strona główna', href: '/admin/users' }] },
     ]
@@ -68,12 +82,15 @@ function AdminSidebar() {
 }
 
 /** ---------------- Pomocnicze ---------------- */
-type NavItem = { label: string; href: string; badge?: number }
+type NavItemBase = { label: string }
+type NavItemLink = NavItemBase & { kind?: 'link'; href: string; badge?: number; exact?: boolean }
+type NavItemLabel = NavItemBase & { kind: 'label' }
+type NavItem = NavItemLink | NavItemLabel
 type NavGroup = { title: string; items: NavItem[] }
 
 function Section({ title, items }: { title: string; items: NavItem[] }) {
     const { url } = usePage()
-    const hasActive = useMemo(() => items.some((i) => isActive(url, i.href)), [url, items])
+    const hasActive = useMemo(() => items.some((i) => 'href' in i && isActive(url, (i as NavItemLink).href)), [url, items])
     const [open, setOpen] = useState<boolean>(hasActive || true)
 
     return (
@@ -92,48 +109,53 @@ function Section({ title, items }: { title: string; items: NavItem[] }) {
     )
 }
 
-function NavList({
-                     items,
-                 }: {
-    items: { label: string; href: string; badge?: number; exact?: boolean }[]
-}) {
+function NavList({ items }: { items: NavItem[] }) {
     const currentPath =
         typeof window !== 'undefined'
             ? window.location.pathname
-            : (typeof location !== 'undefined' ? location.pathname : '');
+            : typeof location !== 'undefined'
+                ? location.pathname
+                : ''
 
-    const isActive = (href: string, exact?: boolean) => {
-        if (exact) return currentPath === href;                // tylko dokładny match
-        return currentPath === href || currentPath.startsWith(href + '/'); // prefix dla podstron
-    };
+    const activeCheck = (href: string, exact?: boolean) => {
+        if (exact) return currentPath === href
+        return currentPath === href || currentPath.startsWith(href + '/')
+    }
 
     return (
         <nav className="space-y-1 px-1">
-            {items.map((item) => {
-                const active = isActive(item.href, item.exact);
+            {items.map((item, idx) => {
+                if ('kind' in item && item.kind === 'label') {
+                    return (
+                        <div key={`label-${idx}`} className="px-2 pt-3 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                            {item.label}
+                        </div>
+                    )
+                }
+                const link = item as NavItemLink
+                const active = activeCheck(link.href, link.exact)
                 return (
                     <Link
-                        key={item.href + item.label}
-                        href={item.href}
+                        key={link.href + link.label}
+                        href={link.href}
                         className={
                             `group flex items-center justify-between rounded-md px-2 py-2 text-sm hover:bg-slate-50 ` +
                             (active ? 'bg-slate-100 font-semibold text-green' : 'text-green')
                         }
                     >
-                        <span>{item.label}</span>
+                        <span>{link.label}</span>
+                        {typeof link.badge === 'number' && link.badge > 0 && (
+                            <span className="ml-2 inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-rose-100 px-1.5 text-[11px] font-semibold text-rose-600">
+                {link.badge}
+              </span>
+                        )}
                     </Link>
-                );
+                )
             })}
         </nav>
-    );
+    )
 }
 
-
 function isActive(currentUrl: string, href: string) {
-    // wyróżnij gdy URL jest dokładnie na tej trasie lub w jej „pod-ścieżkach”
-    return (
-        currentUrl === href ||
-        currentUrl.startsWith(`${href}/`) ||
-        currentUrl.startsWith(`${href}?`)
-    )
+    return currentUrl === href || currentUrl.startsWith(`${href}/`) || currentUrl.startsWith(`${href}?`)
 }
