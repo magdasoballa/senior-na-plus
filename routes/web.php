@@ -319,6 +319,28 @@ Route::middleware(['auth', 'admin'])
 
                 Route::resource('forms', DeFormController::class)->only(['index','show','destroy']);
             });
+
+            // === PL ===
+            Route::prefix('pl')->name('pl.')->group(function () {
+                Route::resource('forms', \App\Http\Controllers\Admin\Messages\Pl\FormController::class)
+                    ->only(['index','show','edit','update','destroy'])
+                    ->parameters(['forms' => 'form']);
+
+                Route::patch('forms/{form}/toggle-read',
+                    [\App\Http\Controllers\Admin\Messages\Pl\FormController::class, 'toggleRead'])
+                    ->name('forms.toggle-read');
+            });
+
+            // === DE ===
+            Route::prefix('de')->name('de.')->group(function () {
+                Route::resource('forms', \App\Http\Controllers\Admin\Messages\De\FormController::class)
+                    ->only(['index','show','edit','update','destroy'])
+                    ->parameters(['forms' => 'form']);
+
+                Route::patch('forms/{form}/toggle-read',
+                    [\App\Http\Controllers\Admin\Messages\De\FormController::class, 'toggleRead'])
+                    ->name('forms.toggle-read');
+            });
         });
 
 
