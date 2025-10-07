@@ -121,14 +121,11 @@ export default function Index() {
                                     )}
                                 </td>
                                 <td className="p-3">
-                                    <button onClick={() => toggle(b.id)} className="inline-flex items-center gap-2">
-                                        {b.visible ? (
-                                            <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-                                        ) : (
-                                            <XCircle className="h-5 w-5 text-rose-600" />
-                                        )}
-                                    </button>
+                                    <div className="flex justify-center">
+                                            {b.visible ? <CheckCircle2 className="h-5 w-5 text-emerald-600" /> : <XCircle className="h-5 w-5 text-rose-600" />}
+                                    </div>
                                 </td>
+
                                 <td className="p-3">
                                     <div className="flex justify-end gap-2">
                                         {/* PODGLĄD */}

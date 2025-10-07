@@ -64,8 +64,9 @@ export default function Index(){
                                 <td className="px-4 py-3">
                                     {r.image_url ? <img src={r.image_url} className="h-8 w-12 rounded object-cover" /> : '—'}
                                 </td>
-                                <td className="px-4 py-3">
-                                    {r.is_visible ? <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden /> : <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}
+                                <td className="px-4 py-3">                                    <div className="flex justify-center">
+
+                                    {r.is_visible ? <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden /> : <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}</div>
                                 </td>
                                 <td className="px-4 py-3">
                                     <div className="flex justify-end gap-2">

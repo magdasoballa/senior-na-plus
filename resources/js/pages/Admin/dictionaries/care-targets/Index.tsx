@@ -73,14 +73,18 @@ export default function Index(){
                                 </td>
                                 <td className="px-4 py-3">{r.name}</td>
                                 <td className="px-4 py-3">
+                                    <div className="flex justify-center">
+
                                     {r.is_visible_pl
                                         ? <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden />
-                                        : <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}
+                                        : <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}</div>
                                 </td>
                                 <td className="px-4 py-3">
+                                    <div className="flex justify-center">
+
                                     {r.is_visible_de
                                         ? <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden />
-                                        : <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}
+                                        : <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}</div>
                                 </td>
                                 <td className="px-4 py-3">
                                     <div className="flex justify-end gap-2">

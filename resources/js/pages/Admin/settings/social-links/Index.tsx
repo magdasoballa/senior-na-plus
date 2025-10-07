@@ -68,8 +68,9 @@ export default function Index({
                             <th className="px-4 py-3 text-left">ID</th>
                             <th className="px-4 py-3 text-left">Nazwa</th>
                             <th className="px-4 py-3 text-left">Ikona</th>
-                            <th className="px-4 py-3 text-left">Widoczność PL</th>
-                            <th className="px-4 py-3 text-left">Widoczność DE</th>
+                            {/* WYŚRODKOWANE NAGŁÓWKI */}
+                            <th className="px-4 py-3 text-center">Widoczność PL</th>
+                            <th className="px-4 py-3 text-center">Widoczność DE</th>
                             <th className="px-4 py-3 text-right">Akcje</th>
                         </tr>
                         </thead>
@@ -86,13 +87,32 @@ export default function Index({
                                             className="h-6 w-6 object-contain"
                                         />
                                     ) : r.icon ? (
-                                        <i className={resolveFa(r.icon) || ''} />
+                                        <i className={resolveFa(r.icon) || ''} aria-hidden />
                                     ) : (
                                         '—'
                                     )}
                                 </td>
-                                <td className="px-4 py-3">{r.visible_pl ?  <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden /> :  <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}</td>
-                                <td className="px-4 py-3">{r.visible_de ?  <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden /> :  <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}</td>
+
+                                {/* WYŚRODKOWANE IKONY W KOMÓRKACH */}
+                                <td className="px-4 py-3">
+                                    <div className="flex justify-center">
+                                        {r.visible_pl ? (
+                                            <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden />
+                                        ) : (
+                                            <XCircle className="h-5 w-5 text-rose-600" aria-hidden />
+                                        )}
+                                    </div>
+                                </td>
+                                <td className="px-4 py-3">
+                                    <div className="flex justify-center">
+                                        {r.visible_de ? (
+                                            <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden />
+                                        ) : (
+                                            <XCircle className="h-5 w-5 text-rose-600" aria-hidden />
+                                        )}
+                                    </div>
+                                </td>
+
                                 <td className="px-4 py-3 text-right align-middle">
                                     <div className="inline-flex items-center justify-end gap-1">
                                         {/* PODGLĄD */}
@@ -102,7 +122,7 @@ export default function Index({
                                             aria-label="Podgląd"
                                             title="Podgląd"
                                         >
-                                             <Eye className="h-4 w-4" />
+                                            <Eye className="h-4 w-4" />
                                         </Link>
 
                                         {/* EDYCJA */}
@@ -128,9 +148,9 @@ export default function Index({
                                         </Link>
                                     </div>
                                 </td>
-
                             </tr>
                         ))}
+
                         {records.data.length === 0 && (
                             <tr>
                                 <td className="px-4 py-8 text-center" colSpan={6}>
@@ -150,9 +170,7 @@ export default function Index({
                                 key={i}
                                 href={l.url}
                                 preserveScroll
-                                className={`rounded px-3 py-1 ${
-                                    l.active ? 'bg-slate-200' : ''
-                                }`}
+                                className={`rounded px-3 py-1 ${l.active ? 'bg-slate-200' : ''}`}
                                 dangerouslySetInnerHTML={{ __html: l.label }}
                             />
                         ) : (

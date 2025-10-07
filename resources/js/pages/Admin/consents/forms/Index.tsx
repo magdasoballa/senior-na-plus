@@ -49,43 +49,63 @@ export default function Index() {
                     </div>
                 </div>
                 <div className="mt-4 overflow-hidden rounded-xl border bg-white">
-                    <table className="w-full text-sm">
+                    <table className="w-full table-fixed text-sm">
+                        <colgroup>
+                            <col className="w-20" />            {/* ID */}
+                            <col />                              {/* NAZWA – wypełnia resztę */}
+                            <col className="w-48 sm:w-56" />     {/* WIDOCZNOŚĆ PL */}
+                            <col className="w-48 sm:w-56" />     {/* WIDOCZNOŚĆ DE */}
+                            <col className="w-36 sm:w-40" />     {/* Akcje */}
+                        </colgroup>
+
                         <thead className="bg-slate-50">
                         <tr>
-                            <th className="w-20 px-3 py-2 text-left">ID</th>
+                            <th className="px-3 py-2 text-left">ID</th>
                             <th className="px-3 py-2 text-left">NAZWA</th>
-                            <th className="w-32 px-3 py-2 text-center">PL</th>
-                            <th className="w-32 px-3 py-2 text-center">DE</th>
-                            <th className="w-44 px-3 py-2" />
+                            <th className="px-3 py-2 text-center">WIDOCZNOŚĆ PL</th>
+                            <th className="px-3 py-2 text-center">WIDOCZNOŚĆ DE</th>
+                            <th className="px-3 py-2 text-right"></th>
                         </tr>
                         </thead>
+
                         <tbody>
-                        {forms.data.map((r) => (
+                        {forms.data.map(r => (
                             <tr key={r.id} className="border-t">
-                                <td className="px-3 py-2 text-slate-500">{r.id}</td>
-                                <td className="px-3 py-2">{r.name}</td>
-                                <td className="px-3 py-2 text-center">
-                                    {r.visible_pl ? <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden /> : <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}
+                                <td className="px-3 py-2 align-middle text-slate-500">{r.id}</td>
+                                <td className="px-3 py-2 align-middle">
+                                    <span className="block truncate">{r.name}</span>
                                 </td>
-                                <td className="px-3 py-2 text-center">
-                                    {r.visible_de ? <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden /> : <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}
+
+                                <td className="px-3 py-2 align-middle">
+                                    <div className="flex justify-center">
+                                        {r.visible_pl
+                                            ? <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                                            : <XCircle className="h-5 w-5 text-rose-600" />
+                                        }
+                                    </div>
                                 </td>
-                                <td className="px-4 py-3">
+
+                                <td className="px-3 py-2 align-middle">
+                                    <div className="flex justify-center">
+                                        {r.visible_de
+                                            ? <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                                            : <XCircle className="h-5 w-5 text-rose-600" />
+                                        }
+                                    </div>
+                                </td>
+
+                                <td className="px-3 py-2 align-middle">
                                     <div className="flex items-center justify-end gap-2">
-                                        {/* PODGLĄD */}
-                                        <Link href={`${BASE}/${r.id}`} className="rounded-md border border-slate-200 bg-white p-2 hover:bg-slate-50" aria-label="Podgląd" title="Podgląd">
+                                        <Link href={`${BASE}/${r.id}`} className="rounded-md border p-2 hover:bg-slate-50" title="Podgląd">
                                             <Eye className="h-4 w-4" />
                                         </Link>
-                                        {/* EDYCJA */}
-                                        <Link href={`${BASE}/${r.id}/edit`} className="rounded-md border border-slate-200 bg-white p-2 hover:bg-slate-50" aria-label="Edytuj" title="Edytuj">
+                                        <Link href={`${BASE}/${r.id}/edit`} className="rounded-md border p-2 hover:bg-slate-50" title="Edytuj">
                                             <Pencil className="h-4 w-4" />
                                         </Link>
-                                        {/* USUŃ */}
                                         <button
                                             type="button"
                                             onClick={() => form.delete(`${BASE}/${r.id}`, { preserveScroll: true })}
-                                            className="rounded-md border border-slate-200 bg-white p-2 text-rose-600 hover:bg-rose-50 disabled:opacity-50"
-                                            aria-label="Usuń"
+                                            className="rounded-md border p-2 text-rose-600 hover:bg-rose-50"
                                             title="Usuń"
                                         >
                                             <Trash2 className="h-4 w-4" />
@@ -94,16 +114,17 @@ export default function Index() {
                                 </td>
                             </tr>
                         ))}
+
                         {forms.data.length === 0 && (
                             <tr>
-                                <td colSpan={5} className="px-3 py-6 text-center text-slate-500">
-                                    Brak danych
-                                </td>
+                                <td colSpan={5} className="px-3 py-6 text-center text-slate-500">Brak danych</td>
                             </tr>
                         )}
                         </tbody>
                     </table>
                 </div>
+
+
             </main>
         </AdminLayout>
     )

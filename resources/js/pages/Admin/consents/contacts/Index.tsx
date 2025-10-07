@@ -27,7 +27,8 @@ export default function Index(){
                 <div className="mt-4 flex items-center gap-3">
                     <div className="relative w-72">
                         <input
-                            value={q} onChange={e=>setQ(e.target.value)}
+                            value={q}
+                            onChange={e=>setQ(e.target.value)}
                             onKeyDown={e=>{ if(e.key==='Enter'){ window.location.href = `${BASE}?q=${encodeURIComponent(q)}` }}}
                             placeholder="Szukaj"
                             className="w-full rounded-lg border bg-white px-3 py-2"
@@ -36,28 +37,52 @@ export default function Index(){
                 </div>
 
                 <div className="mt-4 overflow-hidden rounded-xl border bg-white">
-                    <table className="w-full text-sm">
+                    <table className="w-full table-fixed text-sm text-center">
+                        <colgroup>
+                            <col className="w-20" />              {/* ID */}
+                            <col />                                {/* NAZWA */}
+                            <col className="w-48 sm:w-56" />       {/* PL */}
+                            <col className="w-48 sm:w-56" />       {/* DE */}
+                            <col className="w-36 sm:w-40" />       {/* Akcje */}
+                        </colgroup>
+
                         <thead className="bg-slate-50">
                         <tr>
-                            <th className="w-20 px-3 py-2 text-left">ID</th>
-                            <th className="px-3 py-2 text-left">NAZWA</th>
-                            <th className="w-56 px-3 py-2 text-left">WIDOCZNOŚĆ PL</th>
-                            <th className="w-56 px-3 py-2 text-left">WIDOCZNOŚĆ DE</th>
-                            <th className="w-40 px-3 py-2"></th>
+                            <th className="px-3 py-2">ID</th>
+                            <th className="px-3 py-2">NAZWA</th>
+                            <th className="px-3 py-2">WIDOCZNOŚĆ PL</th>
+                            <th className="px-3 py-2">WIDOCZNOŚĆ DE</th>
+                            <th className="px-3 py-2">AKCJE</th>
                         </tr>
                         </thead>
+
                         <tbody>
                         {contacts.data.map(r=>(
                             <tr key={r.id} className="border-t">
-                                <td className="px-3 py-2 text-slate-500">{r.id}</td>
-                                <td className="px-3 py-2">{r.name}</td>
-                                <td className="px-3 py-2">{r.visible_pl ? <CheckCircle2 className="h-5 w-5 text-emerald-600" /> : <XCircle className="h-5 w-5 text-rose-600" />}</td>
-                                <td className="px-3 py-2">{r.visible_de ? <CheckCircle2 className="h-5 w-5 text-emerald-600" /> : <XCircle className="h-5 w-5 text-rose-600" />}</td>
-                                <td className="px-4 py-3">
-                                    <div className="flex items-center justify-end gap-2">
-                                        <Link href={`${BASE}/${r.id}`} className="rounded-md border p-2 hover:bg-slate-50" title="Podgląd"><Eye className="h-4 w-4"/></Link>
-                                        <Link href={`${BASE}/${r.id}/edit`} className="rounded-md border p-2 hover:bg-slate-50" title="Edytuj"><Pencil className="h-4 w-4"/></Link>
-                                        <button type="button" onClick={()=> form.delete(`${BASE}/${r.id}`, { preserveScroll:true })} className="rounded-md border p-2 text-rose-600 hover:bg-rose-50" title="Usuń">
+                                <td className="px-3 py-2 align-middle text-slate-500">{r.id}</td>
+                                <td className="px-3 py-2 align-middle">
+                                    <span className="inline-block max-w-full truncate">{r.name}</span>
+                                </td>
+                                <td className="px-3 py-2 align-middle">
+                                    {r.visible_pl ? <CheckCircle2 className="inline h-5 w-5 text-emerald-600" /> : <XCircle className="inline h-5 w-5 text-rose-600" />}
+                                </td>
+                                <td className="px-3 py-2 align-middle">
+                                    {r.visible_de ? <CheckCircle2 className="inline h-5 w-5 text-emerald-600" /> : <XCircle className="inline h-5 w-5 text-rose-600" />}
+                                </td>
+                                <td className="px-3 py-2 align-middle">
+                                    <div className="flex items-center justify-center gap-2">
+                                        <Link href={`${BASE}/${r.id}`} className="rounded-md border p-2 hover:bg-slate-50" title="Podgląd">
+                                            <Eye className="h-4 w-4"/>
+                                        </Link>
+                                        <Link href={`${BASE}/${r.id}/edit`} className="rounded-md border p-2 hover:bg-slate-50" title="Edytuj">
+                                            <Pencil className="h-4 w-4"/>
+                                        </Link>
+                                        <button
+                                            type="button"
+                                            onClick={()=> form.delete(`${BASE}/${r.id}`, { preserveScroll:true })}
+                                            className="rounded-md border p-2 text-rose-600 hover:bg-rose-50"
+                                            title="Usuń"
+                                        >
                                             <Trash2 className="h-4 w-4"/>
                                         </button>
                                     </div>

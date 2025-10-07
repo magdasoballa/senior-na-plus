@@ -51,7 +51,11 @@ export default function Index(){
                             <tr key={r.id} className="border-t">
                                 <td className="px-4 py-3 font-mono text-teal-600"><Link href={`${BASE}/${r.id}`}>{r.id}</Link></td>
                                 <td className="px-4 py-3">{r.name}</td>
-                                <td className="px-4 py-3">{r.is_visible ? <CheckCircle2 className="h-5 w-5 text-emerald-600" /> : <XCircle className="h-5 w-5 text-rose-600" />}</td>
+                                <td className="px-4 py-3">
+                                    <div className="flex justify-center">
+
+                                        {r.is_visible ? <CheckCircle2 className="h-5 w-5 text-emerald-600" /> : <XCircle className="h-5 w-5 text-rose-600" />}</div>
+                                </td>
                                 <td className="px-4 py-3">
                                     <div className="flex justify-end gap-2">
                                         <Link href={`${BASE}/${r.id}`} className="rounded border px-2 py-1" title="Podgląd"><Eye className="h-4 w-4" /></Link>
