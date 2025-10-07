@@ -21,7 +21,6 @@ export default function Index(){
     return (
         <AdminLayout>
             <main className="p-6">
-                <div className="text-sm text-slate-500">Popup</div>
                 <div className="mt-1 flex items-center justify-between">
                     <p className="text-2xl font-bold">Popup</p>
                     <Link href={`${BASE}/create`} className="rounded-lg bg-mint px-3 py-1 font-semibold text-white hover:brightness-110">+ Dodaj</Link>

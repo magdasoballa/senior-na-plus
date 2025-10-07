@@ -40,7 +40,6 @@ export default function Index() {
     return (
         <AdminLayout>
             <main className="p-6">
-                <div className="text-sm text-slate-500">Zasoby › Ustawienia portalu</div>
                 <p className="mt-1 text-2xl font-bold">Ustawienia portalu</p>
 
                 <form onSubmit={submit} className="mt-4 max-w-md">

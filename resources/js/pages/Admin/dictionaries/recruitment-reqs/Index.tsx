@@ -29,7 +29,6 @@ export default function Index(){
     return (
         <AdminLayout>
             <main className="p-6">
-                <div className="text-sm text-slate-500">Zasoby › Wymagania rekrutacyjne</div>
                 <div className="mt-1 flex items-center justify-between">
                     <p className="text-2xl font-bold">Wymagania rekrutacyjne</p>
                     <Link href={`${BASE}/create`} className="rounded-lg bg-mint px-3 py-1 font-semibold text-white hover:brightness-110">

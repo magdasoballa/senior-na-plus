@@ -40,7 +40,6 @@ export default function PagesIndex({ pages, filters }: Props) {
     <AdminLayout>
       <main className="p-6">
         {/* nagłówek */}
-        <div className="text-sm text-green">Zasoby › Strony</div>
         <p className="mt-1 text-3xl font-bold">Strony</p>
 
         {/* wyszukiwarka */}
