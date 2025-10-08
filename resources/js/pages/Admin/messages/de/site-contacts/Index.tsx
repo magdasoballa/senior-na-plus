@@ -1,7 +1,7 @@
 import { Link, router, usePage } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
 import { useState } from 'react'
-import { Eye, Pencil, Trash2, Filter, CheckCircle2 } from 'lucide-react'
+import { Eye, Pencil, Trash2, Filter, CheckCircle2, XCircle } from 'lucide-react';
 import * as React from 'react'
 
 type Row = {
@@ -126,7 +126,7 @@ export default function Index() {
                                         {r.is_read ? (
                                             <CheckCircle2 className="block h-5 w-5 text-emerald-600" />
                                         ) : (
-                                            <span className="text-slate-400">—</span>
+                                            <span className="text-slate-400"><XCircle className="h-5 w-5 text-rose-600" aria-hidden /></span>
                                         )}
                                     </div>
                                 </td>

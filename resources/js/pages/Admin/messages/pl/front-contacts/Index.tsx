@@ -1,7 +1,7 @@
 
 import { Link, router, usePage } from '@inertiajs/react'
 import { useEffect, useRef, useState } from 'react'
-import { Eye, Trash2, Pencil, CheckCircle2, Filter } from 'lucide-react'
+import { Eye, Trash2, Pencil, CheckCircle2, Filter, XCircle } from 'lucide-react';
 import * as React from 'react'
 import AdminLayout from '@/layouts/admin-layout';
 
@@ -128,9 +128,7 @@ export default function Index() {
                             />
                             <span className="pointer-events-none absolute left-3 top-2.5">🔎</span>
                         </div>
-                        <button className="rounded-xl border px-3 py-2" type="submit" title="Szukaj">
-                            <Filter className="h-4 w-4" />
-                        </button>
+
                     </form>
 
                     {/* Filtry (popover) */}
@@ -259,7 +257,7 @@ export default function Index() {
 
                                 <td className="px-5 py-3">
                                     <div className="flex items-center justify-center">
-                                        {r.is_read ? <CheckCircle2 className="h-5 w-5 text-emerald-600" /> : <span className="text-slate-400">—</span>}
+                                        {r.is_read ? <CheckCircle2 className="h-5 w-5 text-emerald-600" /> : <span className="text-slate-400"><XCircle className="h-5 w-5 text-rose-600" aria-hidden /></span>}
                                     </div>
                                 </td>
 

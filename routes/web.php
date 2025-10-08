@@ -287,41 +287,25 @@ Route::middleware(['auth', 'admin'])
 
             // === PL ===
             Route::prefix('pl')->name('pl.')->group(function () {
-                Route::resource('front-contacts', PlFrontContactController::class)
+                // Front contacts (PL)
+                Route::resource('front-contacts', \App\Http\Controllers\Admin\Messages\Pl\FrontContactController::class)
                     ->only(['index','show','edit','update','destroy'])
                     ->parameters(['front-contacts' => 'contact']);
 
                 Route::patch('front-contacts/{contact}/toggle-read',
-                    [PlFrontContactController::class, 'toggleRead'])
+                    [\App\Http\Controllers\Admin\Messages\Pl\FrontContactController::class, 'toggleRead'])
                     ->name('front-contacts.toggle-read');
 
-                Route::resource('site-contacts', PlSiteContactController::class)
+                // Site contacts (PL)
+                Route::resource('site-contacts', \App\Http\Controllers\Admin\Messages\Pl\SiteContactController::class)
                     ->only(['index','show','edit','update','destroy'])
                     ->parameters(['site-contacts' => 'contact']);
 
                 Route::patch('site-contacts/{contact}/toggle-read',
-                    [PlSiteContactController::class, 'toggleRead'])
+                    [\App\Http\Controllers\Admin\Messages\Pl\SiteContactController::class, 'toggleRead'])
                     ->name('site-contacts.toggle-read');
 
-                // (jeśli używasz) Formularze PL
-                Route::resource('forms', PlFormController::class)->only(['index','show','destroy']);
-            });
-
-            // === DE ===
-            Route::prefix('de')->name('de.')->group(function () {
-                Route::resource('site-contacts', DeSiteContactController::class)
-                    ->only(['index','show','edit','update','destroy'])
-                    ->parameters(['site-contacts' => 'contact']);
-
-                Route::patch('site-contacts/{contact}/toggle-read',
-                    [DeSiteContactController::class, 'toggleRead'])
-                    ->name('site-contacts.toggle-read');
-
-                Route::resource('forms', DeFormController::class)->only(['index','show','destroy']);
-            });
-
-            // === PL ===
-            Route::prefix('pl')->name('pl.')->group(function () {
+                // Formularze (PL)
                 Route::resource('forms', \App\Http\Controllers\Admin\Messages\Pl\FormController::class)
                     ->only(['index','show','edit','update','destroy'])
                     ->parameters(['forms' => 'form']);
@@ -333,15 +317,26 @@ Route::middleware(['auth', 'admin'])
 
             // === DE ===
             Route::prefix('de')->name('de.')->group(function () {
+                // Site contacts (DE)
+                Route::resource('site-contacts', \App\Http\Controllers\Admin\Messages\De\SiteContactController::class)
+                    ->only(['index','show','edit','update','destroy'])
+                    ->parameters(['site-contacts' => 'contact']);
+
+                Route::patch('site-contacts/{contact}/toggle-read',
+                    [\App\Http\Controllers\Admin\Messages\De\SiteContactController::class, 'toggleRead'])
+                    ->name('site-contacts.toggle-read');
+
+                // Formularze (DE) — pełny CRUD widoczny na screenach
                 Route::resource('forms', \App\Http\Controllers\Admin\Messages\De\FormController::class)
                     ->only(['index','show','edit','update','destroy'])
-                    ->parameters(['forms' => 'form']);
+                    ->parameters(['forms' => 'form']); // {form} -> FormSubmission
 
                 Route::patch('forms/{form}/toggle-read',
                     [\App\Http\Controllers\Admin\Messages\De\FormController::class, 'toggleRead'])
                     ->name('forms.toggle-read');
             });
         });
+
 
 
         // ===== Partnerzy / Użytkownicy =====
