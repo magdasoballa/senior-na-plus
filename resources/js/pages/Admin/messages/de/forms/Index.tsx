@@ -1,7 +1,6 @@
-// resources/js/pages/Admin/messages/de/forms/Index.tsx
 import { Link, router, usePage } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Eye, Pencil, Trash2, Filter, CheckCircle2, XCircle } from 'lucide-react'
 import * as React from 'react'
 import { FilterPopover, FilterRow, Select, TriStateRead } from '@/components/admin/FilterPopover'
@@ -9,7 +8,8 @@ import { FilterPopover, FilterRow, Select, TriStateRead } from '@/components/adm
 type Row = {
     id: number
     full_name: string
-    zip: string | null
+    zip?: string | null
+    zip_code?: string | null
     city: string | null
     phone: string | null
     created_at: string | null
@@ -27,53 +27,40 @@ type Paginated<T> = {
 
 const BASE = '/admin/messages/de/forms'
 
-// opcje – dopasuj w razie potrzeby do wartości w DB
-const PEOPLE_OPTS = [
-    'jedna osoba na miejscu',
-    'dwie ale tylko jedna osoba wymaga opieki',
-    'dwie osoby',
-    'trzy osoby',
-    'więcej niż trzy osoby',
-]
-const MOBILITY_OPTS = [
-    'osoba leżąca',
-    'mobilność ograniczona',
-    'mobilność lekko ograniczona używa, rolatora (chodzika)',
-    'samodzielna',
-]
-const GENDER_OPTS = ['Mężczyzna', 'Kobieta']
-
 export default function Index() {
     const { forms, filters } = usePage<{ forms: Paginated<Row>; filters: any }>().props
 
     const [q, setQ] = useState<string>(filters?.q ?? '')
-    const [persons, setPersons] = useState<string>(filters?.persons ?? '')
-    const [mobility, setMobility] = useState<string>(filters?.mobility ?? '')
-    const [gender, setGender] = useState<string>(filters?.gender ?? '')
     const [read, setRead] = useState<string>(filters?.read ?? '') // '', '1', '0'
     const [perPage, setPerPage] = useState<number>(Number(filters?.per_page) || forms.per_page || 25)
+
     const [filtersOpen, setFiltersOpen] = useState(false)
+    const popRef = useRef<HTMLDivElement | null>(null)
+
+    useEffect(() => {
+        const onDown = (e: MouseEvent) => {
+            if (!popRef.current) return
+            if (!popRef.current.contains(e.target as Node)) setFiltersOpen(false)
+        }
+        const onEsc = (e: KeyboardEvent) => e.key === 'Escape' && setFiltersOpen(false)
+        document.addEventListener('mousedown', onDown)
+        document.addEventListener('keydown', onEsc)
+        return () => {
+            document.removeEventListener('mousedown', onDown)
+            document.removeEventListener('keydown', onEsc)
+        }
+    }, [])
 
     const submit = (e?: React.FormEvent) => {
         e?.preventDefault()
         router.get(
             BASE,
-            {
-                q,
-                persons: persons || undefined,
-                mobility: mobility || undefined,
-                gender: gender || undefined,
-                read,
-                per_page: perPage,
-            },
+            { q, read, per_page: perPage },
             { preserveState: true, replace: true }
         )
     }
 
     const reset = () => {
-        setPersons('')
-        setMobility('')
-        setGender('')
         setRead('')
         setPerPage(25)
         router.get(BASE, { q }, { preserveState: true, replace: true })
@@ -111,53 +98,24 @@ export default function Index() {
                             <input
                                 value={q}
                                 onChange={(e) => setQ(e.target.value)}
-                                placeholder="Szukaj"
+                                placeholder="Szukaj (imię, telefon, miasto, kod)"
                                 className="w-full rounded-full border border-slate-300 bg-white px-4 py-2 pl-10 placeholder-slate-400"
                             />
                             <span className="pointer-events-none absolute left-3 top-2.5">🔎</span>
                         </div>
                     </form>
 
-                    <div className="relative">
-                        <button onClick={() => setFiltersOpen((v) => !v)} className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-slate-50" type="button">
+                    <div className="relative" ref={popRef}>
+                        <button
+                            onClick={() => setFiltersOpen((v) => !v)}
+                            className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-slate-50"
+                            type="button"
+                        >
                             <Filter className="h-4 w-4" />
                             <span>Filtry</span>
                         </button>
 
-                        <FilterPopover open={filtersOpen} setOpen={setFiltersOpen} onApply={() => submit()} onReset={reset} width="w-[22rem]">
-                            <FilterRow label="Ile osób jest na miejscu">
-                                <Select value={persons} onChange={(e) => setPersons(e.target.value)}>
-                                    <option value="">Kliknij aby wybrać</option>
-                                    {PEOPLE_OPTS.map((v) => (
-                                        <option key={v} value={v}>
-                                            {v}
-                                        </option>
-                                    ))}
-                                </Select>
-                            </FilterRow>
-
-                            <FilterRow label="Mobilność podopiecznego">
-                                <Select value={mobility} onChange={(e) => setMobility(e.target.value)}>
-                                    <option value="">Kliknij aby wybrać</option>
-                                    {MOBILITY_OPTS.map((v) => (
-                                        <option key={v} value={v}>
-                                            {v}
-                                        </option>
-                                    ))}
-                                </Select>
-                            </FilterRow>
-
-                            <FilterRow label="Płeć osoby do opieki">
-                                <Select value={gender} onChange={(e) => setGender(e.target.value)}>
-                                    <option value="">Kliknij aby wybrać</option>
-                                    {GENDER_OPTS.map((v) => (
-                                        <option key={v} value={v}>
-                                            {v}
-                                        </option>
-                                    ))}
-                                </Select>
-                            </FilterRow>
-
+                        <FilterPopover open={filtersOpen} setOpen={setFiltersOpen} onApply={() => submit()} onReset={reset} width="w-80">
                             <FilterRow label="Czy przeczytany">
                                 {/* backend: '', '1', '0' */}
                                 <TriStateRead value={read} onChange={setRead} map={{ all: '', yes: '1', no: '0' }} />
@@ -166,9 +124,7 @@ export default function Index() {
                             <FilterRow label="Na stronę">
                                 <Select value={perPage} onChange={(e) => setPerPage(Number(e.target.value))}>
                                     {[10, 25, 50, 100].map((n) => (
-                                        <option key={n} value={n}>
-                                            {n}
-                                        </option>
+                                        <option key={n} value={n}>{n}</option>
                                     ))}
                                 </Select>
                             </FilterRow>
@@ -191,85 +147,46 @@ export default function Index() {
                             <th className="w-28 px-4 py-3 text-right">AKCJE</th>
                         </tr>
                         </thead>
-
                         <tbody>
                         {forms.data.map((r) => (
                             <tr key={r.id} className="border-t">
                                 <td className="px-4">
                                     <div className="flex h-12 items-center leading-none">
-                                        <Link href={`${BASE}/${r.id}`} className="font-mono text-teal-600 hover:underline">
-                                            {r.id}
-                                        </Link>
+                                        <Link href={`${BASE}/${r.id}`} className="font-mono text-teal-600 hover:underline">{r.id}</Link>
                                     </div>
                                 </td>
-
-                                <td className="px-4">
-                                    <div className="flex h-12 items-center leading-none">{r.full_name}</div>
-                                </td>
-
-                                <td className="px-4">
-                                    <div className="flex h-12 items-center leading-none">{r.zip ?? '—'}</div>
-                                </td>
-
-                                <td className="px-4">
-                                    <div className="flex h-12 items-center leading-none">{r.city ?? '—'}</div>
-                                </td>
-
-                                <td className="px-4">
-                                    <div className="flex h-12 items-center leading-none">{r.phone ?? '—'}</div>
-                                </td>
-
-                                <td className="px-4">
-                                    <div className="flex h-12 items-center leading-none">{fmt(r.created_at)}</div>
-                                </td>
-
+                                <td className="px-4"><div className="flex h-12 items-center leading-none">{r.full_name}</div></td>
+                                <td className="px-4"><div className="flex h-12 items-center leading-none">{r.zip ?? r.zip_code ?? '—'}</div></td>
+                                <td className="px-4"><div className="flex h-12 items-center leading-none">{r.city ?? '—'}</div></td>
+                                <td className="px-4"><div className="flex h-12 items-center leading-none">{r.phone ?? '—'}</div></td>
+                                <td className="px-4"><div className="flex h-12 items-center leading-none">{fmt(r.created_at)}</div></td>
                                 <td className="px-4">
                                     <div className="flex h-12 items-center justify-center">
-                                        {r.is_read ? (
-                                            <CheckCircle2 className="block h-5 w-5 text-emerald-600" />
-                                        ) : (
-                                            <span className="text-slate-400">
-                          <XCircle className="h-5 w-5 text-rose-600" aria-hidden />
-                        </span>
-                                        )}
+                                        {r.is_read ? <CheckCircle2 className="block h-5 w-5 text-emerald-600" /> : <span className="text-slate-400"><XCircle className="h-5 w-5 text-rose-600" aria-hidden /></span>}
                                     </div>
                                 </td>
-
                                 <td className="px-4">
                                     <div className="flex h-12 items-center justify-end gap-2 leading-none">
-                                        <Link href={`${BASE}/${r.id}`} className={iconBtn} title="Podgląd">
-                                            <Eye className="h-4 w-4" />
-                                        </Link>
-                                        <Link href={`${BASE}/${r.id}/edit`} className={iconBtn} title="Edytuj">
-                                            <Pencil className="h-4 w-4" />
-                                        </Link>
-                                        <button onClick={() => destroyRow(r.id)} className={iconBtn} title="Usuń">
-                                            <Trash2 className="h-4 w-4" />
-                                        </button>
+                                        <Link href={`${BASE}/${r.id}`} className={iconBtn} title="Podgląd"><Eye className="h-4 w-4" /></Link>
+                                        <Link href={`${BASE}/${r.id}/edit`} className={iconBtn} title="Edytuj"><Pencil className="h-4 w-4" /></Link>
+                                        <button onClick={() => destroyRow(r.id)} className={iconBtn} title="Usuń"><Trash2 className="h-4 w-4" /></button>
                                     </div>
                                 </td>
                             </tr>
                         ))}
-
                         {forms.data.length === 0 && (
                             <tr>
-                                <td className="px-4 py-8 text-center text-slate-500" colSpan={8}>
-                                    Brak rekordów
-                                </td>
+                                <td className="px-4 py-8 text-center text-slate-500" colSpan={8}>Brak rekordów</td>
                             </tr>
                         )}
                         </tbody>
                     </table>
 
-                    {/* Paginacja – licznik centralny lub klasyczne linki, zostawiam jak było */}
                     <div className="flex items-center justify-between border-t px-4 py-3 text-sm text-slate-600">
                         <span className="text-slate-400">Poprzedni</span>
                         <span className="text-slate-600">
               {forms.total
-                  ? `${(forms.current_page - 1) * forms.per_page + 1}-${Math.min(
-                      forms.current_page * forms.per_page,
-                      forms.total
-                  )} z ${forms.total}`
+                  ? `${(forms.current_page - 1) * forms.per_page + 1}-${Math.min(forms.current_page * forms.per_page, forms.total)} z ${forms.total}`
                   : '0-0 z 0'}
             </span>
                         <span className="text-slate-400">Następny</span>

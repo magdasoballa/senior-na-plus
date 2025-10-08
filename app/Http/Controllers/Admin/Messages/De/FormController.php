@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\FormSubmission;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-
+use App\Models\DeForm;
 class FormController extends Controller
 {
     private string $locale = 'de';
@@ -16,29 +16,24 @@ class FormController extends Controller
     {
         $filters = [
             'q'        => $request->string('q')->toString(),
-            'level'    => $request->string('level')->toString(),
-            'read'     => $request->string('read')->toString(),
+            'read'     => $request->string('read')->toString(), // '', '1', '0'
             'per_page' => (int)($request->input('per_page', 25)),
-            'sort'     => $request->string('sort')->toString() ?: 'created_at',
-            'dir'      => $request->string('dir')->toString() ?: 'desc',
         ];
 
-        $sort = in_array($filters['sort'], $this->sortable, true) ? $filters['sort'] : 'created_at';
-        $dir  = $filters['dir'] === 'asc' ? 'asc' : 'desc';
-        $pp   = max(5, min(200, $filters['per_page'] ?: 25));
+        $pp = max(5, min(200, $filters['per_page'] ?: 25));
 
-        $rows = FormSubmission::query()
-            ->where('locale', $this->locale)
+        $rows = DeForm::query()
             ->when($filters['q'], function ($q, $term) {
                 $q->where(function ($x) use ($term) {
                     $x->where('full_name', 'like', "%{$term}%")
-                        ->orWhere('email', 'like', "%{$term}%")
-                        ->orWhere('phone', 'like', "%{$term}%");
+                        ->orWhere('phone', 'like', "%{$term}%")
+                        ->orWhere('city', 'like', "%{$term}%")
+                        ->orWhere('zip', 'like', "%{$term}%")
+                        ->orWhere('zip_code', 'like', "%{$term}%"); // w razie różnej nazwy kolumny
                 });
             })
-            ->when($filters['level'], fn($q, $level) => $q->where('language_level', $level))
-            ->when($filters['read'] !== '', fn($q) => $q->where('is_read', request('read') === '1'))
-            ->orderBy($sort, $dir)
+            ->when($filters['read'] !== '', fn($q) => $q->where('is_read', $filters['read'] === '1'))
+            ->orderByDesc('created_at')
             ->paginate($pp)
             ->withQueryString();
 

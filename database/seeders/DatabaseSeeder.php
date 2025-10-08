@@ -13,6 +13,11 @@ class DatabaseSeeder extends Seeder
             SiteContactsSeeder::class,
             SiteFormsSeeder::class,
 
+            DeSiteContactsSeeder::class,
+            DeFormsSeeder::class,
+
+            PageSeeder::class,
+
         ]);
     }
 }

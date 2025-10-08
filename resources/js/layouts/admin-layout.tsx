@@ -1,6 +1,8 @@
+// resources/js/layouts/admin-layout.tsx
 import AppLayout from '@/layouts/app-layout'
 import { Link, usePage } from '@inertiajs/react'
 import { useMemo, useState } from 'react'
+import * as React from 'react'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     return (
@@ -14,6 +16,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 }
 
 /** ---------------- Sidebar ---------------- */
+type NavItemBase = { label: string }
+type NavItemLink = NavItemBase & { kind?: 'link'; href: string; exact?: boolean }
+type NavItemLabel = NavItemBase & { kind: 'label' }
+type NavItem = NavItemLink | NavItemLabel
+type NavGroup = { title: string; items: NavItem[] }
+
 function AdminSidebar() {
     const groups: NavGroup[] = [
         {
@@ -67,7 +75,6 @@ function AdminSidebar() {
                 { label: 'Formularze (de)',      href: '/admin/messages/de/forms',          exact: true },
             ],
         },
-
         { title: 'Partnerzy', items: [{ label: 'Partnerzy', href: '/admin/partners' }] },
         { title: 'Użytkownicy', items: [{ label: 'Strona główna', href: '/admin/users' }] },
     ]
@@ -82,16 +89,15 @@ function AdminSidebar() {
 }
 
 /** ---------------- Pomocnicze ---------------- */
-type NavItemBase = { label: string }
-type NavItemLink = NavItemBase & { kind?: 'link'; href: string; badge?: number; exact?: boolean }
-type NavItemLabel = NavItemBase & { kind: 'label' }
-type NavItem = NavItemLink | NavItemLabel
-type NavGroup = { title: string; items: NavItem[] }
-
 function Section({ title, items }: { title: string; items: NavItem[] }) {
     const { url } = usePage()
-    const hasActive = useMemo(() => items.some((i) => 'href' in i && isActive(url, (i as NavItemLink).href)), [url, items])
-    const [open, setOpen] = useState<boolean>(hasActive || true)
+    const hasActive = useMemo(
+        () => items.some((i) => 'href' in i && isActive(url, (i as NavItemLink).href, (i as NavItemLink).exact)),
+        [url, items]
+    )
+
+    // jeśli chcesz mieć zawsze rozwinięte, użyj `true`; jeśli tylko aktywne – `hasActive`
+    const [open, setOpen] = useState<boolean>(hasActive)
 
     return (
         <div className="mt-4">
@@ -110,17 +116,8 @@ function Section({ title, items }: { title: string; items: NavItem[] }) {
 }
 
 function NavList({ items }: { items: NavItem[] }) {
-    const currentPath =
-        typeof window !== 'undefined'
-            ? window.location.pathname
-            : typeof location !== 'undefined'
-                ? location.pathname
-                : ''
-
-    const activeCheck = (href: string, exact?: boolean) => {
-        if (exact) return currentPath === href
-        return currentPath === href || currentPath.startsWith(href + '/')
-    }
+    const { url, props } = usePage()
+    const msg_badges = (props as any)?.msg_badges ?? {} as Record<string, number>
 
     return (
         <nav className="space-y-1 px-1">
@@ -132,8 +129,11 @@ function NavList({ items }: { items: NavItem[] }) {
                         </div>
                     )
                 }
+
                 const link = item as NavItemLink
-                const active = activeCheck(link.href, link.exact)
+                const active = isActive(url, link.href, link.exact)
+                const badge = Number(msg_badges[link.href] ?? 0)
+
                 return (
                     <Link
                         key={link.href + link.label}
@@ -144,9 +144,9 @@ function NavList({ items }: { items: NavItem[] }) {
                         }
                     >
                         <span>{link.label}</span>
-                        {typeof link.badge === 'number' && link.badge > 0 && (
+                        {badge > 0 && (
                             <span className="ml-2 inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-rose-100 px-1.5 text-[11px] font-semibold text-rose-600">
-                {link.badge}
+                {badge}
               </span>
                         )}
                     </Link>
@@ -156,6 +156,7 @@ function NavList({ items }: { items: NavItem[] }) {
     )
 }
 
-function isActive(currentUrl: string, href: string) {
+function isActive(currentUrl: string, href: string, exact?: boolean) {
+    if (exact) return currentUrl === href || currentUrl.startsWith(`${href}?`)
     return currentUrl === href || currentUrl.startsWith(`${href}/`) || currentUrl.startsWith(`${href}?`)
 }

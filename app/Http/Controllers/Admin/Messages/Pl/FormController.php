@@ -10,17 +10,22 @@ use Inertia\Inertia;
 class FormController extends Controller
 {
     private string $locale = 'pl';
-    private array $sortable = ['id','full_name','email','phone','language_level','created_at','is_read'];
+
+    // dodane 'experience' do sortowalnych kolumn
+    private array $sortable = [
+        'id','full_name','email','phone','language_level','experience','created_at','is_read'
+    ];
 
     public function index(Request $request)
     {
         $filters = [
-            'q'        => $request->string('q')->toString(),
-            'level'    => $request->string('level')->toString(),
-            'read'     => $request->string('read')->toString(), // '1'|'0'|''
-            'per_page' => (int)($request->input('per_page', 25)),
-            'sort'     => $request->string('sort')->toString() ?: 'created_at',
-            'dir'      => $request->string('dir')->toString() ?: 'desc',
+            'q'          => $request->string('q')->toString(),
+            'level'      => $request->string('level')->toString(),
+            'experience' => $request->string('experience')->toString(), // NOWE
+            'read'       => $request->string('read')->toString(),       // '' | '1' | '0'
+            'per_page'   => (int)($request->input('per_page', 25)),
+            'sort'       => $request->string('sort')->toString() ?: 'created_at',
+            'dir'        => $request->string('dir')->toString() ?: 'desc',
         ];
 
         $sort = in_array($filters['sort'], $this->sortable, true) ? $filters['sort'] : 'created_at';
@@ -36,8 +41,9 @@ class FormController extends Controller
                         ->orWhere('phone', 'like', "%{$term}%");
                 });
             })
-            ->when($filters['level'], fn($q, $level) => $q->where('language_level', $level))
-            ->when($filters['read'] !== '', fn($q) => $q->where('is_read', request('read') === '1'))
+            ->when($filters['level'] !== '', fn($q) => $q->where('language_level', $filters['level']))
+            ->when($filters['experience'] !== '', fn($q) => $q->where('experience', $filters['experience']))
+            ->when($filters['read'] !== '', fn($q) => $q->where('is_read', $filters['read'] === '1'))
             ->orderBy($sort, $dir)
             ->paginate($pp)
             ->withQueryString();
@@ -106,7 +112,7 @@ class FormController extends Controller
             'language_level'       => ['nullable','string','max:255'],
             'profession_trained'   => ['nullable','string','max:255'],
             'profession_performed' => ['nullable','string','max:255'],
-            'experience'           => ['nullable','string','max:255'],
+            'experience'           => ['nullable','string','max:255'], // NOWE
             'skills'               => ['nullable','array'],
             'skills.*'             => ['string','max:255'],
             'salary'               => ['nullable','string','max:255'],
