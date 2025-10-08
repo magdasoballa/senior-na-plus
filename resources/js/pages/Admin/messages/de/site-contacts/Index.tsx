@@ -1,8 +1,9 @@
 import { Link, router, usePage } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
 import { useState } from 'react'
-import { Eye, Pencil, Trash2, Filter, CheckCircle2, XCircle } from 'lucide-react';
+import { Eye, Pencil, Trash2, Filter, CheckCircle2, XCircle } from 'lucide-react'
 import * as React from 'react'
+import { FilterPopover, FilterRow, Select, TriStateRead } from '@/components/admin/FilterPopover'
 
 type Row = {
     id: number
@@ -26,12 +27,15 @@ type Paginated<T> = {
 const BASE = '/admin/messages/de/site-contacts'
 
 export default function Index() {
-    const { contacts, filters } = usePage<{ contacts: Paginated<Row>; filters: { q?: string } }>().props
+    const { contacts, filters } = usePage<{ contacts: Paginated<Row>; filters: any }>().props
     const [q, setQ] = useState(filters?.q ?? '')
+    const [read, setRead] = useState<'all' | 'yes' | 'no'>(filters?.read ?? 'all')
+    const [perPage, setPerPage] = useState<number>(Number(filters?.per_page) || contacts.per_page || 25)
+    const [filtersOpen, setFiltersOpen] = useState(false)
 
-    const submit = (e: React.FormEvent) => {
-        e.preventDefault()
-        router.get(BASE, { q }, { preserveState: true, replace: true })
+    const submit = (e?: React.FormEvent) => {
+        e?.preventDefault()
+        router.get(BASE, { q, read, per_page: perPage }, { preserveState: true, replace: true })
     }
 
     const destroyRow = (id: number) => {
@@ -54,24 +58,50 @@ export default function Index() {
                 <div className="text-sm text-slate-500">Wiadomości</div>
                 <p className="mt-1 text-2xl font-bold">Kontakty Strona (de)</p>
 
-                {/* Szukaj */}
-                <form onSubmit={submit} className="mt-4 flex max-w-md items-center gap-3">
-                    <div className="relative flex-1">
-                        <input
-                            value={q}
-                            onChange={(e) => setQ(e.target.value)}
-                            placeholder="Szukaj"
-                            className="w-full rounded-full border bg-white px-4 py-2 pl-10"
-                        />
-                        <span className="pointer-events-none absolute left-3 top-2.5">🔎</span>
+                {/* Szukaj + filtry */}
+                <div className="mt-4 flex max-w-full items-center gap-3">
+                    <form onSubmit={submit} className="flex w-full max-w-xl items-center gap-3">
+                        <div className="relative flex-1">
+                            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Szukaj" className="w-full rounded-full border bg-white px-4 py-2 pl-10" />
+                            <span className="pointer-events-none absolute left-3 top-2.5">🔎</span>
+                        </div>
+                    </form>
+
+                    <div className="relative">
+                        <button onClick={() => setFiltersOpen((v) => !v)} className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-slate-50" type="button">
+                            <Filter className="h-4 w-4" />
+                            <span>Filtry</span>
+                        </button>
+
+                        <FilterPopover
+                            open={filtersOpen}
+                            setOpen={setFiltersOpen}
+                            onApply={() => submit()}
+                            onReset={() => {
+                                setRead('all')
+                                setPerPage(25)
+                                router.get(BASE, { q }, { preserveState: true, replace: true })
+                            }}
+                        >
+                            <FilterRow label="Czy przeczytany">
+                                <TriStateRead value={read} onChange={(v) => setRead(v as any)} map={{ all: 'all', yes: 'yes', no: 'no' }} />
+                            </FilterRow>
+
+                            <FilterRow label="Na stronę">
+                                <Select value={perPage} onChange={(e) => setPerPage(Number(e.target.value))}>
+                                    {[10, 25, 50, 100].map((n) => (
+                                        <option key={n} value={n}>
+                                            {n}
+                                        </option>
+                                    ))}
+                                </Select>
+                            </FilterRow>
+                        </FilterPopover>
                     </div>
-                    <button className="rounded-xl border px-3 py-2" type="submit">
-                        <Filter className="h-4 w-4" />
-                    </button>
-                </form>
+                </div>
 
                 <div className="mt-4 overflow-x-auto rounded-xl border bg-white">
-                    <table className="w-full table-auto text-sm min-w-[1300px]">
+                    <table className="w-full table-auto text-sm min-w-[1100px]">
                         <thead className="bg-slate-50 text-slate-600">
                         <tr>
                             <th className="w-16 px-4">ID</th>
@@ -120,41 +150,21 @@ export default function Index() {
                                     <div className="flex h-12 items-center leading-none">{fmt(r.created_at)}</div>
                                 </td>
 
-                                {/* >>> TU tylko status przeczytany <<< */}
                                 <td className="px-4">
                                     <div className="flex h-12 items-center justify-center">
-                                        {r.is_read ? (
-                                            <CheckCircle2 className="block h-5 w-5 text-emerald-600" />
-                                        ) : (
-                                            <span className="text-slate-400"><XCircle className="h-5 w-5 text-rose-600" aria-hidden /></span>
-                                        )}
+                                        {r.is_read ? <CheckCircle2 className="block h-5 w-5 text-emerald-600" /> : <span className="text-slate-400"><XCircle className="h-5 w-5 text-rose-600" aria-hidden /></span>}
                                     </div>
                                 </td>
 
-                                {/* >>> OSTATNIA kolumna: AKCJE <<< */}
                                 <td className="px-4">
                                     <div className="flex h-12 items-center justify-end gap-2 leading-none">
-                                        <Link
-                                            href={`${BASE}/${r.id}`}
-                                            className="inline-flex h-8 w-8 items-center justify-center rounded border leading-none"
-                                            title="Podgląd"
-                                        >
+                                        <Link href={`${BASE}/${r.id}`} className="inline-flex h-8 w-8 items-center justify-center rounded border leading-none" title="Podgląd">
                                             <Eye className="block h-4 w-4" />
                                         </Link>
-
-                                        <Link
-                                            href={`${BASE}/${r.id}/edit`}
-                                            className="inline-flex h-8 w-8 items-center justify-center rounded border leading-none"
-                                            title="Edytuj"
-                                        >
+                                        <Link href={`${BASE}/${r.id}/edit`} className="inline-flex h-8 w-8 items-center justify-center rounded border leading-none" title="Edytuj">
                                             <Pencil className="block h-4 w-4" />
                                         </Link>
-
-                                        <button
-                                            onClick={() => destroyRow(r.id)}
-                                            className="inline-flex h-8 w-8 items-center justify-center rounded border leading-none"
-                                            title="Usuń"
-                                        >
+                                        <button onClick={() => destroyRow(r.id)} className="inline-flex h-8 w-8 items-center justify-center rounded border leading-none" title="Usuń">
                                             <Trash2 className="block h-4 w-4" />
                                         </button>
                                     </div>
@@ -177,14 +187,7 @@ export default function Index() {
                         <span>{rangeInfo(contacts)}</span>
                         <nav className="flex items-center gap-1">
                             {contacts.links.map((l, i) => (
-                                <Link
-                                    key={i}
-                                    href={l.url ?? '#'}
-                                    preserveScroll
-                                    className={`rounded-md px-3 py-1 ${
-                                        l.active ? 'bg-slate-200 font-semibold' : 'hover:bg-slate-50'
-                                    } ${!l.url && 'pointer-events-none opacity-40'}`}
-                                >
+                                <Link key={i} href={l.url ?? '#'} preserveScroll className={`rounded-md px-3 py-1 ${l.active ? 'bg-slate-200 font-semibold' : 'hover:bg-slate-50'} ${!l.url && 'pointer-events-none opacity-40'}`}>
                                     {sanitize(l.label)}
                                 </Link>
                             ))}
@@ -196,9 +199,7 @@ export default function Index() {
     )
 }
 
-function sanitize(s: string) {
-    return s.replace(/&laquo;|&raquo;/g, '').trim()
-}
+function sanitize(s: string) { return s.replace(/&laquo;|&raquo;/g, '').trim() }
 function rangeInfo(p: Paginated<any>) {
     if (p.total === 0) return '0-0 z 0'
     const a = (p.current_page - 1) * p.per_page + 1

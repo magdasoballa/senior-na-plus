@@ -1,17 +1,9 @@
-// resources/js/pages/Admin/messages/pl/forms/Index.tsx
 import { Link, router, usePage } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
 import * as React from 'react'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import {
-    Eye,
-    Pencil,
-    Trash2,
-    CheckCircle2,
-    Filter,
-    XCircle,
-    MinusCircle,
-} from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Eye, Pencil, Trash2, CheckCircle2, Filter, XCircle } from 'lucide-react'
+import { FilterPopover, FilterRow, Select, TriStateRead } from '@/components/admin/FilterPopover'
 
 type Row = {
     id: number
@@ -45,7 +37,6 @@ const fmtDate = (s?: string | null) =>
             minute: '2-digit',
         })
 
-// opcje (dopasuj do backendu jeśli masz inne wartości)
 const LEVEL_OPTS = ['Brak języka', 'Podstawowa', 'Komunikatywna', 'Bardzo dobra']
 const EXP_OPTS = ['brak', '1–2 lata', '3–5 lat', 'powyżej 5 lat']
 
@@ -63,15 +54,12 @@ export default function Index() {
     const [openFilters, setOpenFilters] = useState(false)
     const popRef = useRef<HTMLDivElement | null>(null)
 
-    // zamykaj popover na klik poza i na ESC
     useEffect(() => {
         const onClick = (e: MouseEvent) => {
             if (!popRef.current) return
             if (!popRef.current.contains(e.target as Node)) setOpenFilters(false)
         }
-        const onEsc = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') setOpenFilters(false)
-        }
+        const onEsc = (e: KeyboardEvent) => e.key === 'Escape' && setOpenFilters(false)
         document.addEventListener('mousedown', onClick)
         document.addEventListener('keydown', onEsc)
         return () => {
@@ -80,16 +68,11 @@ export default function Index() {
         }
     }, [])
 
-    // zamykaj po przeładowaniu listy
     useEffect(() => setOpenFilters(false), [forms?.current_page, forms?.data?.length])
 
     const submit = (e?: React.FormEvent) => {
         e?.preventDefault()
-        router.get(
-            BASE,
-            { q, level, experience, read, per_page: per, sort, dir },
-            { preserveState: true, replace: true }
-        )
+        router.get(BASE, { q, level, experience, read, per_page: per, sort, dir }, { preserveState: true, replace: true })
     }
 
     const resetFilters = () => {
@@ -115,9 +98,7 @@ export default function Index() {
     const H = ({ col, children }: { col: string; children: React.ReactNode }) => (
         <button onClick={() => changeSort(col)} className="inline-flex items-center gap-1">
             <span>{children}</span>
-            <span className="text-slate-400">
-        {sort === col ? (dir === 'asc' ? '▴' : '▾') : <span className="opacity-40">↕</span>}
-      </span>
+            <span className="text-slate-400">{sort === col ? (dir === 'asc' ? '▴' : '▾') : <span className="opacity-40">↕</span>}</span>
         </button>
     )
 
@@ -130,157 +111,56 @@ export default function Index() {
                 {/* Szukaj + filtry */}
                 <form onSubmit={submit} className="mt-4 flex items-center gap-3">
                     <div className="relative w-full max-w-xl">
-                        <input
-                            value={q}
-                            onChange={(e) => setQ(e.target.value)}
-                            placeholder="Szukaj"
-                            className="w-full rounded-full border bg-white px-4 py-2 pl-10"
-                        />
+                        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Szukaj" className="w-full rounded-full border bg-white px-4 py-2 pl-10" />
                         <span className="pointer-events-none absolute left-3 top-2.5">🔎</span>
                     </div>
 
-                    {/* Popover z filtrami */}
                     <div className="relative" ref={popRef}>
-                        <button
-                            type="button"
-                            onClick={() => setOpenFilters((v) => !v)}
-                            className="rounded-xl border px-3 py-2"
-                            aria-expanded={openFilters}
-                            aria-label="Pokaż filtry"
-                        >
+                        <button onClick={() => setOpenFilters(
+                            (v) => !v)} aria-expanded={openFilters} className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-slate-50">
                             <Filter className="h-4 w-4" />
+                            <span>Filtry</span>
                         </button>
 
-                        {openFilters && (
-                            <div className="absolute right-0 z-20 mt-2 w-80">
-                                {/* caret */}
-                                <div className="relative">
-                                    <div className="absolute -top-2 right-6 h-4 w-4 rotate-45 border-l border-t border-slate-200 bg-white" />
-                                </div>
+                        <FilterPopover open={openFilters} setOpen={setOpenFilters} onApply={() => submit()} onReset={resetFilters}>
+                            <FilterRow label="Poziom języka">
+                                <Select value={level} onChange={(e) => setLevel(e.target.value)}>
+                                    <option value="">Kliknij aby wybrać</option>
+                                    {LEVEL_OPTS.map((v) => (
+                                        <option key={v} value={v}>
+                                            {v}
+                                        </option>
+                                    ))}
+                                </Select>
+                            </FilterRow>
 
-                                <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-lg">
-                                    <div className="space-y-4">
-                                        {/* POZIOM JĘZYKA */}
-                                        <div>
-                                            <div className="mb-1 text-[11px] font-semibold uppercase text-slate-500">
-                                                Poziom języka
-                                            </div>
-                                            <select
-                                                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-200"
-                                                value={level}
-                                                onChange={(e) => setLevel(e.target.value)}
-                                            >
-                                                <option value="">{'Kliknij aby wybrać'}</option>
-                                                {LEVEL_OPTS.map((v) => (
-                                                    <option key={v} value={v}>
-                                                        {v}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
+                            <FilterRow label="Doświadczenie">
+                                <Select value={experience} onChange={(e) => setExperience(e.target.value)}>
+                                    <option value="">Kliknij aby wybrać</option>
+                                    {EXP_OPTS.map((v) => (
+                                        <option key={v} value={v}>
+                                            {v}
+                                        </option>
+                                    ))}
+                                </Select>
+                            </FilterRow>
 
-                                        {/* DOŚWIADCZENIE */}
-                                        <div>
-                                            <div className="mb-1 text-[11px] font-semibold uppercase text-slate-500">
-                                                Doświadczenie
-                                            </div>
-                                            <select
-                                                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-200"
-                                                value={experience}
-                                                onChange={(e) => setExperience(e.target.value)}
-                                            >
-                                                <option value="">{'Kliknij aby wybrać'}</option>
-                                                {EXP_OPTS.map((v) => (
-                                                    <option key={v} value={v}>
-                                                        {v}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
+                            <FilterRow label="Czy przeczytany">
+                                {/* backend: '', '1', '0' */}
+                                <TriStateRead value={read} onChange={setRead} map={{ all: '', yes: '1', no: '0' }} />
+                            </FilterRow>
 
-                                        {/* CZY PRZECZYTANY — tri-state ikonami */}
-                                        <div>
-                                            <div className="mb-1 text-[11px] font-semibold uppercase text-slate-500">
-                                                Czy przeczytany
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setRead('')}
-                                                    aria-pressed={read === ''}
-                                                    className={`inline-flex h-8 w-8 items-center justify-center rounded-full border ${
-                                                        read === '' ? 'border-slate-300 bg-slate-100 text-slate-600' : 'border-slate-300 text-slate-400 hover:bg-slate-50'
-                                                    }`}
-                                                    title="Wszystkie"
-                                                >
-                                                    <MinusCircle className="h-4 w-4" />
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setRead('1')}
-                                                    aria-pressed={read === '1'}
-                                                    className={`inline-flex h-8 w-8 items-center justify-center rounded-full border ${
-                                                        read === '1' ? 'border-emerald-300 bg-emerald-50 text-emerald-600' : 'border-slate-300 text-emerald-600 hover:bg-emerald-50/40'
-                                                    }`}
-                                                    title="Tak"
-                                                >
-                                                    <CheckCircle2 className="h-4 w-4" />
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setRead('0')}
-                                                    aria-pressed={read === '0'}
-                                                    className={`inline-flex h-8 w-8 items-center justify-center rounded-full border ${
-                                                        read === '0' ? 'border-rose-300 bg-rose-50 text-rose-600' : 'border-slate-300 text-rose-600 hover:bg-rose-50/40'
-                                                    }`}
-                                                    title="Nie"
-                                                >
-                                                    <XCircle className="h-4 w-4" />
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        {/* NA STRONĘ */}
-                                        <div>
-                                            <div className="mb-1 text-[11px] font-semibold uppercase text-slate-500">
-                                                Na stronę
-                                            </div>
-                                            <select
-                                                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-200"
-                                                value={per}
-                                                onChange={(e) => setPer(Number(e.target.value))}
-                                            >
-                                                {[10, 25, 50, 100].map((n) => (
-                                                    <option key={n} value={n}>
-                                                        {n}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        <div className="flex items-center justify-end gap-2">
-                                            <button
-                                                type="button"
-                                                onClick={resetFilters}
-                                                className="rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50"
-                                            >
-                                                Wyczyść
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => submit()}
-                                                className="rounded-md bg-teal-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-teal-600"
-                                            >
-                                                Zastosuj
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
+                            <FilterRow label="Na stronę">
+                                <Select value={per} onChange={(e) => setPer(Number(e.target.value))}>
+                                    {[10, 25, 50, 100].map((n) => (
+                                        <option key={n} value={n}>
+                                            {n}
+                                        </option>
+                                    ))}
+                                </Select>
+                            </FilterRow>
+                        </FilterPopover>
                     </div>
-
-
                 </form>
 
                 {/* Tabela */}
@@ -343,53 +223,24 @@ export default function Index() {
                                 </td>
 
                                 <td className="px-4">
-                                    <div className="flex h-12 items-center leading-none whitespace-nowrap">
-                                        {fmtDate(r.created_at)}
-                                    </div>
+                                    <div className="flex h-12 items-center leading-none whitespace-nowrap">{fmtDate(r.created_at)}</div>
                                 </td>
 
                                 <td className="px-4">
                                     <div className="flex h-12 items-center justify-center">
-                                        {r.is_read ? (
-                                            <CheckCircle2 className="block h-5 w-5 text-emerald-600" />
-                                        ) : (
-                                            <XCircle className="h-5 w-5 text-rose-600" aria-hidden />
-                                        )}
+                                        {r.is_read ? <CheckCircle2 className="block h-5 w-5 text-emerald-600" /> : <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}
                                     </div>
                                 </td>
 
                                 <td className="px-4">
                                     <div className="flex h-12 items-center justify-end gap-2 leading-none">
-                                        <Link
-                                            href={`${BASE}/${r.id}`}
-                                            className="inline-flex h-8 w-8 items-center justify-center rounded border leading-none"
-                                            title="Podgląd"
-                                        >
+                                        <Link href={`${BASE}/${r.id}`} className="inline-flex h-8 w-8 items-center justify-center rounded border leading-none" title="Podgląd">
                                             <Eye className="block h-4 w-4" />
                                         </Link>
-                                        <Link
-                                            href={`${BASE}/${r.id}/edit`}
-                                            className="inline-flex h-8 w-8 items-center justify-center rounded border leading-none"
-                                            title="Edytuj"
-                                        >
+                                        <Link href={`${BASE}/${r.id}/edit`} className="inline-flex h-8 w-8 items-center justify-center rounded border leading-none" title="Edytuj">
                                             <Pencil className="block h-4 w-4" />
                                         </Link>
-                                        <button
-                                            onClick={() =>
-                                                router.patch(`${BASE}/${r.id}/toggle-read`, {}, { preserveScroll: true })
-                                            }
-                                            className="inline-flex h-8 w-8 items-center justify-center rounded border leading-none"
-                                            title={r.is_read ? 'Oznacz jako nieprzeczytany' : 'Oznacz jako przeczytany'}
-                                        >
-                                            <CheckCircle2
-                                                className={`block h-4 w-4 ${r.is_read ? 'text-emerald-600' : 'text-slate-400'}`}
-                                            />
-                                        </button>
-                                        <button
-                                            onClick={() => destroyRow(r.id)}
-                                            className="inline-flex h-8 w-8 items-center justify-center rounded border leading-none"
-                                            title="Usuń"
-                                        >
+                                        <button onClick={() => destroyRow(r.id)} className="inline-flex h-8 w-8 items-center justify-center rounded border leading-none" title="Usuń">
                                             <Trash2 className="block h-4 w-4" />
                                         </button>
                                     </div>
@@ -412,14 +263,7 @@ export default function Index() {
                         <span>{rangeInfo(forms)}</span>
                         <nav className="flex items-center gap-1">
                             {forms.links.map((l, i) => (
-                                <Link
-                                    key={i}
-                                    href={l.url ?? '#'}
-                                    preserveScroll
-                                    className={`rounded-md px-3 py-1 ${
-                                        l.active ? 'bg-slate-200 font-semibold' : 'hover:bg-slate-50'
-                                    } ${!l.url && 'pointer-events-none opacity-40'}`}
-                                >
+                                <Link key={i} href={l.url ?? '#'} preserveScroll className={`rounded-md px-3 py-1 ${l.active ? 'bg-slate-200 font-semibold' : 'hover:bg-slate-50'} ${!l.url && 'pointer-events-none opacity-40'}`}>
                                     {sanitize(l.label)}
                                 </Link>
                             ))}
@@ -431,9 +275,7 @@ export default function Index() {
     )
 }
 
-function sanitize(s: string) {
-    return s.replace(/&laquo;|&raquo;/g, '').trim()
-}
+function sanitize(s: string) { return s.replace(/&laquo;|&raquo;/g, '').trim() }
 function rangeInfo(p: Paginated<any>) {
     if (p.total === 0) return '0-0 z 0'
     const a = (p.current_page - 1) * p.per_page + 1

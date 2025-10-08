@@ -1,9 +1,9 @@
-
+import AdminLayout from '@/layouts/admin-layout'
 import { Link, router, usePage } from '@inertiajs/react'
-import { useEffect, useRef, useState } from 'react'
-import { Eye, Trash2, Pencil, CheckCircle2, Filter, XCircle } from 'lucide-react';
 import * as React from 'react'
-import AdminLayout from '@/layouts/admin-layout';
+import { useEffect, useRef, useState } from 'react'
+import { Eye, Trash2, Pencil, CheckCircle2, Filter, XCircle } from 'lucide-react'
+import { FilterPopover, FilterRow, Select, TriStateRead } from '@/components/admin/FilterPopover'
 
 type Row = {
     id: number
@@ -118,8 +118,8 @@ export default function Index() {
 
                 {/* Pasek wyszukiwania + filtry */}
                 <div className="mt-4 flex flex-wrap items-center gap-3">
-                    <form onSubmit={submit} className="flex min-w-[280px] flex-1 items-center gap-3">
-                        <div className="relative flex-1 max-w-xl">
+                    <form onSubmit={submit} className="flex items-center gap-3">
+                        <div className="relative w-full md:w-[36rem] max-w-xl">
                             <input
                                 value={q}
                                 onChange={(e) => setQ(e.target.value)}
@@ -128,7 +128,6 @@ export default function Index() {
                             />
                             <span className="pointer-events-none absolute left-3 top-2.5">🔎</span>
                         </div>
-
                     </form>
 
                     {/* Filtry (popover) */}
@@ -143,64 +142,32 @@ export default function Index() {
                             <span>Filtry</span>
                         </button>
 
-                        {filtersOpen && (
-                            <div className="absolute right-0 z-20 mt-2 w-80 rounded-xl border bg-white p-4 shadow-lg">
-                                <div className="space-y-4">
-                                    <div>
-                                        <div className="mb-1 text-[11px] font-semibold uppercase text-slate-500">Poziom języka</div>
-                                        <select
-                                            value={level}
-                                            onChange={(e) => setLevel(e.target.value)}
-                                            className="w-full rounded-md border px-3 py-2 text-sm"
-                                        >
-                                            <option value="">Kliknij aby wybrać</option>
-                                            {LEVELS.map((lv) => (
-                                                <option key={lv} value={lv}>
-                                                    {lv}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
+                        <FilterPopover open={filtersOpen} setOpen={setFiltersOpen} onApply={() => submit()} onReset={resetFilters}>
+                            <FilterRow label="Poziom języka">
+                                <Select value={level} onChange={(e) => setLevel(e.target.value)}>
+                                    <option value="">Kliknij aby wybrać</option>
+                                    {LEVELS.map((lv) => (
+                                        <option key={lv} value={lv}>
+                                            {lv}
+                                        </option>
+                                    ))}
+                                </Select>
+                            </FilterRow>
 
-                                    <div>
-                                        <div className="mb-1 text-[11px] font-semibold uppercase text-slate-500">Czy przeczytany</div>
-                                        <select
-                                            value={read}
-                                            onChange={(e) => setRead(e.target.value as any)}
-                                            className="w-full rounded-md border px-3 py-2 text-sm"
-                                        >
-                                            <option value="all">—</option>
-                                            <option value="yes">Tak</option>
-                                            <option value="no">Nie</option>
-                                        </select>
-                                    </div>
+                            <FilterRow label="Czy przeczytany">
+                                <TriStateRead value={read} onChange={(v) => setRead(v as any)} map={{ all: 'all', yes: 'yes', no: 'no' }} />
+                            </FilterRow>
 
-                                    <div>
-                                        <div className="mb-1 text-[11px] font-semibold uppercase text-slate-500">Na stronę</div>
-                                        <select
-                                            value={perPage}
-                                            onChange={(e) => setPerPage(Number(e.target.value))}
-                                            className="w-full rounded-md border px-3 py-2 text-sm"
-                                        >
-                                            {[10, 25, 50, 100].map((n) => (
-                                                <option key={n} value={n}>
-                                                    {n}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-
-                                    <div className="flex items-center justify-end gap-2 pt-1">
-                                        <button onClick={resetFilters} className="rounded-md border px-3 py-1.5 text-sm hover:bg-slate-50" type="button">
-                                            Wyczyść
-                                        </button>
-                                        <button onClick={() => submit()} className="rounded-md bg-teal-500 px-3 py-1.5 text-sm font-semibold text-white" type="button">
-                                            Zastosuj
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
+                            <FilterRow label="Na stronę">
+                                <Select value={perPage} onChange={(e) => setPerPage(Number(e.target.value))}>
+                                    {[10, 25, 50, 100].map((n) => (
+                                        <option key={n} value={n}>
+                                            {n}
+                                        </option>
+                                    ))}
+                                </Select>
+                            </FilterRow>
+                        </FilterPopover>
                     </div>
                 </div>
 
@@ -269,11 +236,7 @@ export default function Index() {
                                         <Link href={`${BASE}/${r.id}/edit`} className="inline-flex h-8 w-8 items-center justify-center rounded border" title="Edytuj">
                                             <Pencil className="h-4 w-4" />
                                         </Link>
-                                        <button
-                                            onClick={() => destroyRow(r.id)}
-                                            className="inline-flex h-8 w-8 items-center justify-center rounded border"
-                                            title="Usuń"
-                                        >
+                                        <button onClick={() => destroyRow(r.id)} className="inline-flex h-8 w-8 items-center justify-center rounded border" title="Usuń">
                                             <Trash2 className="h-4 w-4" />
                                         </button>
                                     </div>
@@ -315,7 +278,6 @@ export default function Index() {
     )
 }
 
-/* helpers */
 function sanitize(s: string) {
     return s.replace(/&laquo;|&raquo;/g, '').trim()
 }

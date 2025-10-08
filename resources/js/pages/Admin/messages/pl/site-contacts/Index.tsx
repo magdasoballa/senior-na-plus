@@ -1,17 +1,9 @@
-// resources/js/pages/Admin/messages/pl/site-contacts/Index.tsx
 import AdminLayout from '@/layouts/admin-layout'
 import { Link, router, usePage } from '@inertiajs/react'
 import * as React from 'react'
 import { useEffect, useRef, useState } from 'react'
-import {
-    Eye,
-    Trash2,
-    Pencil,
-    CheckCircle2,
-    Filter,
-    XCircle,
-    MinusCircle,
-} from 'lucide-react'
+import { Eye, Trash2, Pencil, CheckCircle2, Filter, XCircle } from 'lucide-react'
+import { FilterPopover, FilterRow, Select, TriStateRead } from '@/components/admin/FilterPopover'
 
 type Row = {
     id: number
@@ -83,11 +75,7 @@ export default function Index() {
 
     const submit = (e?: React.FormEvent) => {
         e?.preventDefault()
-        router.get(
-            BASE,
-            { q, sort, dir, read, per_page: perPage },
-            { preserveState: true, replace: true }
-        )
+        router.get(BASE, { q, sort, dir, read, per_page: perPage }, { preserveState: true, replace: true })
     }
 
     const resetFilters = () => {
@@ -124,126 +112,34 @@ export default function Index() {
 
                 {/* Szukaj + filtry */}
                 <div className="mt-4 flex flex-wrap items-center gap-3">
-                    <form onSubmit={submit} className="flex min-w-[280px] flex-1 items-center gap-3">
-                        <div className="relative flex-1 max-w-xl">
-                            <input
-                                value={q}
-                                onChange={(e) => setQ(e.target.value)}
-                                placeholder="Szukaj"
-                                className="w-full rounded-full border bg-white px-4 py-2 pl-10"
-                            />
+                    <form onSubmit={submit} className="flex items-center gap-3">
+                        <div className="relative w-full md:w-[36rem] max-w-xl">
+                            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Szukaj" className="w-full rounded-full border bg-white px-4 py-2 pl-10" />
                             <span className="pointer-events-none absolute left-3 top-2.5">🔎</span>
                         </div>
-
                     </form>
 
                     <div className="relative" ref={popRef}>
-                        <button
-                            onClick={() => setFiltersOpen((v) => !v)}
-                            aria-expanded={filtersOpen}
-                            className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-slate-50"
-                        >
+                        <button onClick={() => setFiltersOpen((v) => !v)} aria-expanded={filtersOpen} className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-slate-50">
                             <Filter className="h-4 w-4" />
                             <span>Filtry</span>
                         </button>
 
-                        {filtersOpen && (
-                            <div className="absolute right-0 z-20 mt-2 w-80">
-                                {/* caret (ogonek) */}
-                                <div className="relative">
-                                    <div className="absolute -top-2 right-6 h-4 w-4 rotate-45 border-l border-t border-slate-200 bg-white" />
-                                </div>
+                        <FilterPopover open={filtersOpen} setOpen={setFiltersOpen} onApply={() => submit()} onReset={resetFilters}>
+                            <FilterRow label="Czy przeczytany">
+                                <TriStateRead value={read} onChange={(v) => setRead(v as any)} map={{ all: 'all', yes: 'yes', no: 'no' }} />
+                            </FilterRow>
 
-                                <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-lg">
-                                    <div className="space-y-4">
-                                        {/* CZY PRZECZYTANY – tri-state na ikonach */}
-                                        <div>
-                                            <div className="mb-2 text-[11px] font-semibold uppercase text-slate-500">
-                                                Czy przeczytany
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setRead('all')}
-                                                    aria-pressed={read === 'all'}
-                                                    title="Wszystkie"
-                                                    className={`inline-flex h-8 w-8 items-center justify-center rounded-full border ${
-                                                        read === 'all'
-                                                            ? 'border-slate-300 bg-slate-100 text-slate-600'
-                                                            : 'border-slate-300 text-slate-400 hover:bg-slate-50'
-                                                    }`}
-                                                >
-                                                    <MinusCircle className="h-4 w-4" />
-                                                </button>
-
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setRead('yes')}
-                                                    aria-pressed={read === 'yes'}
-                                                    title="Tak"
-                                                    className={`inline-flex h-8 w-8 items-center justify-center rounded-full border ${
-                                                        read === 'yes'
-                                                            ? 'border-emerald-300 bg-emerald-50 text-emerald-600'
-                                                            : 'border-slate-300 text-emerald-600 hover:bg-emerald-50/40'
-                                                    }`}
-                                                >
-                                                    <CheckCircle2 className="h-4 w-4" />
-                                                </button>
-
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setRead('no')}
-                                                    aria-pressed={read === 'no'}
-                                                    title="Nie"
-                                                    className={`inline-flex h-8 w-8 items-center justify-center rounded-full border ${
-                                                        read === 'no'
-                                                            ? 'border-rose-300 bg-rose-50 text-rose-600'
-                                                            : 'border-slate-300 text-rose-600 hover:bg-rose-50/40'
-                                                    }`}
-                                                >
-                                                    <XCircle className="h-4 w-4" />
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        {/* NA STRONĘ */}
-                                        <div>
-                                            <div className="mb-1 text-[11px] font-semibold uppercase text-slate-500">
-                                                Na stronę
-                                            </div>
-                                            <select
-                                                value={perPage}
-                                                onChange={(e) => setPerPage(Number(e.target.value))}
-                                                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-200"
-                                            >
-                                                {[10, 25, 50, 100].map((n) => (
-                                                    <option key={n} value={n}>
-                                                        {n}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        <div className="flex items-center justify-end gap-2">
-                                            <button
-                                                onClick={resetFilters}
-                                                type="button"
-                                                className="rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50"
-                                            >
-                                                Wyczyść
-                                            </button>
-                                            <button
-                                                onClick={() => submit()}
-                                                type="button"
-                                                className="rounded-md bg-teal-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-teal-600"
-                                            >
-                                                Zastosuj
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
+                            <FilterRow label="Na stronę">
+                                <Select value={perPage} onChange={(e) => setPerPage(Number(e.target.value))}>
+                                    {[10, 25, 50, 100].map((n) => (
+                                        <option key={n} value={n}>
+                                            {n}
+                                        </option>
+                                    ))}
+                                </Select>
+                            </FilterRow>
+                        </FilterPopover>
                     </div>
                 </div>
 
@@ -294,34 +190,18 @@ export default function Index() {
                                 <td className="px-5 py-3 whitespace-nowrap">{fmtDate(r.created_at)}</td>
                                 <td className="px-5 py-3">
                                     <div className="flex items-center justify-center">
-                                        {r.is_read ? (
-                                            <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-                                        ) : (
-                                            <XCircle className="h-5 w-5 text-rose-600" aria-hidden />
-                                        )}
+                                        {r.is_read ? <CheckCircle2 className="h-5 w-5 text-emerald-600" /> : <XCircle className="h-5 w-5 text-rose-600" aria-hidden />}
                                     </div>
                                 </td>
                                 <td className="px-5 py-3">
                                     <div className="flex items-center justify-end gap-2">
-                                        <Link
-                                            href={`${BASE}/${r.id}`}
-                                            className="inline-flex h-8 w-8 items-center justify-center rounded border"
-                                            title="Podgląd"
-                                        >
+                                        <Link href={`${BASE}/${r.id}`} className="inline-flex h-8 w-8 items-center justify-center rounded border" title="Podgląd">
                                             <Eye className="h-4 w-4" />
                                         </Link>
-                                        <Link
-                                            href={`${BASE}/${r.id}/edit`}
-                                            className="inline-flex h-8 w-8 items-center justify-center rounded border"
-                                            title="Edytuj"
-                                        >
+                                        <Link href={`${BASE}/${r.id}/edit`} className="inline-flex h-8 w-8 items-center justify-center rounded border" title="Edytuj">
                                             <Pencil className="h-4 w-4" />
                                         </Link>
-                                        <button
-                                            onClick={() => destroyRow(r.id)}
-                                            className="inline-flex h-8 w-8 items-center justify-center rounded border"
-                                            title="Usuń"
-                                        >
+                                        <button onClick={() => destroyRow(r.id)} className="inline-flex h-8 w-8 items-center justify-center rounded border" title="Usuń">
                                             <Trash2 className="h-4 w-4" />
                                         </button>
                                     </div>
@@ -346,9 +226,7 @@ export default function Index() {
                                     key={i}
                                     href={l.url ?? '#'}
                                     preserveScroll
-                                    className={`rounded-md px-3 py-1 ${
-                                        l.active ? 'bg-slate-200 font-semibold' : 'hover:bg-slate-50'
-                                    } ${!l.url && 'pointer-events-none opacity-40'}`}
+                                    className={`rounded-md px-3 py-1 ${l.active ? 'bg-slate-200 font-semibold' : 'hover:bg-slate-50'} ${!l.url && 'pointer-events-none opacity-40'}`}
                                 >
                                     {sanitize(l.label)}
                                 </Link>
@@ -361,9 +239,7 @@ export default function Index() {
     )
 }
 
-function sanitize(s: string) {
-    return s.replace(/&laquo;|&raquo;/g, '').trim()
-}
+function sanitize(s: string) { return s.replace(/&laquo;|&raquo;/g, '').trim() }
 function rangeInfo(p: Paginated<any>) {
     if (p.total === 0) return '0-0 z 0'
     const a = (p.current_page - 1) * p.per_page + 1
