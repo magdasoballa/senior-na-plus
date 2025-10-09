@@ -16,7 +16,7 @@ class FormController extends Controller
     {
         $filters = [
             'q'        => $request->string('q')->toString(),
-            'read'     => $request->string('read')->toString(), // '', '1', '0'
+            'read'     => $request->string('read')->toString(),
             'per_page' => (int)($request->input('per_page', 25)),
         ];
 
@@ -29,7 +29,7 @@ class FormController extends Controller
                         ->orWhere('phone', 'like', "%{$term}%")
                         ->orWhere('city', 'like', "%{$term}%")
                         ->orWhere('zip', 'like', "%{$term}%")
-                        ->orWhere('zip_code', 'like', "%{$term}%"); // w razie różnej nazwy kolumny
+                        ->orWhere('zip_code', 'like', "%{$term}%");
                 });
             })
             ->when($filters['read'] !== '', fn($q) => $q->where('is_read', $filters['read'] === '1'))

@@ -1,3 +1,4 @@
+// resources/js/pages/.../Index.tsx
 import { Link, router, usePage } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
 import { useState } from 'react'
@@ -28,14 +29,19 @@ const BASE = '/admin/messages/de/site-contacts'
 
 export default function Index() {
     const { contacts, filters } = usePage<{ contacts: Paginated<Row>; filters: any }>().props
-    const [q, setQ] = useState(filters?.q ?? '')
-    const [read, setRead] = useState<'all' | 'yes' | 'no'>(filters?.read ?? 'all')
+
+    const [q, setQ] = useState<string>(filters?.q ?? '')
+    // 👇 czytamy z filters.is_read (a nie filters.read)
+    const [read, setRead] = useState<'all' | '1' | '0'>(String(filters?.is_read ?? 'all') as 'all' | '1' | '0')
     const [perPage, setPerPage] = useState<number>(Number(filters?.per_page) || contacts.per_page || 25)
     const [filtersOpen, setFiltersOpen] = useState(false)
 
     const submit = (e?: React.FormEvent) => {
         e?.preventDefault()
-        router.get(BASE, { q, read, per_page: perPage }, { preserveState: true, replace: true })
+        const params: Record<string, any> = { q, per_page: perPage }
+        // 👇 wysyłamy tylko, gdy nie „Wszystkie”
+        if (read !== 'all') params.is_read = read // '1' albo '0'
+        router.get(BASE, params, { preserveState: true, replace: true })
     }
 
     const destroyRow = (id: number) => {
@@ -62,13 +68,22 @@ export default function Index() {
                 <div className="mt-4 flex max-w-full items-center gap-3">
                     <form onSubmit={submit} className="flex w-full max-w-xl items-center gap-3">
                         <div className="relative flex-1">
-                            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Szukaj" className="w-full rounded-full border bg-white px-4 py-2 pl-10" />
+                            <input
+                                value={q}
+                                onChange={(e) => setQ(e.target.value)}
+                                placeholder="Szukaj"
+                                className="w-full rounded-full border bg-white px-4 py-2 pl-10"
+                            />
                             <span className="pointer-events-none absolute left-3 top-2.5">🔎</span>
                         </div>
                     </form>
 
                     <div className="relative">
-                        <button onClick={() => setFiltersOpen((v) => !v)} className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-slate-50" type="button">
+                        <button
+                            onClick={() => setFiltersOpen((v) => !v)}
+                            className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-slate-50"
+                            type="button"
+                        >
                             <Filter className="h-4 w-4" />
                             <span>Filtry</span>
                         </button>
@@ -78,17 +93,27 @@ export default function Index() {
                             setOpen={setFiltersOpen}
                             onApply={() => submit()}
                             onReset={() => {
+                                setQ('')
                                 setRead('all')
                                 setPerPage(25)
-                                router.get(BASE, { q }, { preserveState: true, replace: true })
+                                // 👇 czyścimy query w URL
+                                router.get(BASE, {}, { preserveState: true, replace: true })
                             }}
                         >
                             <FilterRow label="Czy przeczytany">
-                                <TriStateRead value={read} onChange={(v) => setRead(v as any)} map={{ all: 'all', yes: 'yes', no: 'no' }} />
+                                <TriStateRead
+                                    value={read}
+                                    onChange={(v) => setRead(v as 'all' | '1' | '0')}
+                                    // 👇 mapowanie na wartości rozumiane przez backend
+                                    map={{ all: 'all', yes: '1', no: '0' }}
+                                />
                             </FilterRow>
 
                             <FilterRow label="Na stronę">
-                                <Select value={perPage} onChange={(e) => setPerPage(Number(e.target.value))}>
+                                <Select
+                                    value={String(perPage)}
+                                    onChange={(e) => setPerPage(Number(e.target.value))}
+                                >
                                     {[10, 25, 50, 100].map((n) => (
                                         <option key={n} value={n}>
                                             {n}
@@ -152,19 +177,37 @@ export default function Index() {
 
                                 <td className="px-4">
                                     <div className="flex h-12 items-center justify-center">
-                                        {r.is_read ? <CheckCircle2 className="block h-5 w-5 text-emerald-600" /> : <span className="text-slate-400"><XCircle className="h-5 w-5 text-rose-600" aria-hidden /></span>}
+                                        {r.is_read ? (
+                                            <CheckCircle2 className="block h-5 w-5 text-emerald-600" />
+                                        ) : (
+                                            <span className="text-slate-400">
+                          <XCircle className="h-5 w-5 text-rose-600" aria-hidden />
+                        </span>
+                                        )}
                                     </div>
                                 </td>
 
                                 <td className="px-4">
                                     <div className="flex h-12 items-center justify-end gap-2 leading-none">
-                                        <Link href={`${BASE}/${r.id}`} className="inline-flex h-8 w-8 items-center justify-center rounded border leading-none" title="Podgląd">
+                                        <Link
+                                            href={`${BASE}/${r.id}`}
+                                            className="inline-flex h-8 w-8 items-center justify-center rounded border leading-none"
+                                            title="Podgląd"
+                                        >
                                             <Eye className="block h-4 w-4" />
                                         </Link>
-                                        <Link href={`${BASE}/${r.id}/edit`} className="inline-flex h-8 w-8 items-center justify-center rounded border leading-none" title="Edytuj">
+                                        <Link
+                                            href={`${BASE}/${r.id}/edit`}
+                                            className="inline-flex h-8 w-8 items-center justify-center rounded border leading-none"
+                                            title="Edytuj"
+                                        >
                                             <Pencil className="block h-4 w-4" />
                                         </Link>
-                                        <button onClick={() => destroyRow(r.id)} className="inline-flex h-8 w-8 items-center justify-center rounded border leading-none" title="Usuń">
+                                        <button
+                                            onClick={() => destroyRow(r.id)}
+                                            className="inline-flex h-8 w-8 items-center justify-center rounded border leading-none"
+                                            title="Usuń"
+                                        >
                                             <Trash2 className="block h-4 w-4" />
                                         </button>
                                     </div>
@@ -187,7 +230,14 @@ export default function Index() {
                         <span>{rangeInfo(contacts)}</span>
                         <nav className="flex items-center gap-1">
                             {contacts.links.map((l, i) => (
-                                <Link key={i} href={l.url ?? '#'} preserveScroll className={`rounded-md px-3 py-1 ${l.active ? 'bg-slate-200 font-semibold' : 'hover:bg-slate-50'} ${!l.url && 'pointer-events-none opacity-40'}`}>
+                                <Link
+                                    key={i}
+                                    href={l.url ?? '#'}
+                                    preserveScroll
+                                    className={`rounded-md px-3 py-1 ${
+                                        l.active ? 'bg-slate-200 font-semibold' : 'hover:bg-slate-50'
+                                    } ${!l.url && 'pointer-events-none opacity-40'}`}
+                                >
                                     {sanitize(l.label)}
                                 </Link>
                             ))}
@@ -199,7 +249,10 @@ export default function Index() {
     )
 }
 
-function sanitize(s: string) { return s.replace(/&laquo;|&raquo;/g, '').trim() }
+function sanitize(s: string) {
+    return s.replace(/&laquo;|&raquo;/g, '').trim()
+}
+
 function rangeInfo(p: Paginated<any>) {
     if (p.total === 0) return '0-0 z 0'
     const a = (p.current_page - 1) * p.per_page + 1

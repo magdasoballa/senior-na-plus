@@ -11,30 +11,54 @@ class SiteContactController extends Controller
 {
     public function index(Request $request)
     {
-        $filters = [
-            'q'    => (string) $request->string('q'),
-            'sort' => (string) $request->string('sort') ?: 'created_at',
-            'dir'  => (string) $request->string('dir')  ?: 'desc',
-        ];
+        // wejściowe filtry
+        $q        = (string) $request->string('q');
+        $sortIn   = (string) ($request->string('sort') ?: 'created_at');
+        $dir      = (string) ($request->string('dir')  ?: 'desc');
 
-        // zamiana aliasu z UI
-        $requestedSort = $filters['sort'] === 'full_name' ? 'name' : $filters['sort'];
+        // nowość: parametry z UI
+        $perPage  = (int) $request->input('per_page', 25);
+        // sanity-check perPage
+        if (!in_array($perPage, [10, 25, 50, 100], true)) {
+            $perPage = 25;
+        }
+
+        // is_read może przyjść jako '1'/'0' lub bool
+        $isReadParam = $request->input('is_read', null); // '1'|'0'|1|0|true|false|null
+        $isRead = null;
+        if ($isReadParam !== null && $isReadParam !== '') {
+            $isRead = filter_var($isReadParam, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            // FILTER_VALIDATE_BOOLEAN zwraca true/false dla '1','0','true','false', 1,0 itp.
+            // jeśli dostał '1' => true, '0' => false
+        }
+
+        // sort whitelist
+        $requestedSort = $sortIn === 'full_name' ? 'name' : $sortIn;
         $allowedSorts  = ['id','name','email','phone','subject','created_at','is_read'];
         $sort = in_array($requestedSort, $allowedSorts, true) ? $requestedSort : 'created_at';
-        $dir  = $filters['dir'] === 'asc' ? 'asc' : 'desc';
+        $dir  = $dir === 'asc' ? 'asc' : 'desc';
 
         $rows = SiteContact::query()
             ->where('locale', 'de')
-            ->search($filters['q'] ?? null)     // Twój scope z modelu
+            ->when($q !== '', fn($qBuilder) => $qBuilder->search($q))                 // Twój scope
+            ->when($isRead !== null, fn($qBuilder) => $qBuilder->where('is_read', $isRead ? 1 : 0))
             ->orderBy($sort, $dir)
-            ->paginate(25)
+            ->paginate($perPage)
             ->withQueryString();
 
         return Inertia::render('Admin/messages/de/site-contacts/Index', [
             'contacts' => $rows,
-            'filters'  => $filters,
+            // zwróć wszystkie filtry, żeby UI mogło je ustawić
+            'filters'  => [
+                'q'        => $q,
+                'sort'     => $sortIn,
+                'dir'      => $dir,
+                'is_read'  => $isRead === null ? null : ($isRead ? '1' : '0'),
+                'per_page' => $perPage,
+            ],
         ]);
     }
+
 
     public function show(SiteContact $contact)
     {
