@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\Offers\PerkController;
 use App\Http\Controllers\Admin\Offers\RequirementController;
 use App\Http\Controllers\Admin\Offers\RequirementController as OfferRequirementController;
 use App\Http\Controllers\Admin\Offers\PerkController as OfferPerkController;
+use App\Http\Controllers\Admin\PartnerController;
 use App\Http\Controllers\Admin\Settings\BannerController;
 use App\Http\Controllers\Admin\Settings\PopupController;
 use App\Http\Controllers\Admin\Settings\PortalSettingsController;
@@ -337,10 +338,16 @@ Route::middleware(['auth', 'admin'])
             });
         });
 
-
-
         // ===== Partnerzy / Użytkownicy =====
-        Route::resource('partners', PartnerController::class)->only(['index', 'store', 'update', 'destroy']);
+        Route::get   ('partners',               [PartnerController::class, 'index'])->name('partners.index');
+        Route::get   ('partners/create',        [PartnerController::class, 'create'])->name('partners.create');
+        Route::post  ('partners',               [PartnerController::class, 'store'])->name('partners.store');
+        Route::get   ('partners/{partner}',     [PartnerController::class, 'show'])->whereNumber('partner')->name('partners.show');
+        Route::get   ('partners/{partner}/edit',[PartnerController::class, 'edit'])->whereNumber('partner')->name('partners.edit');
+        Route::put   ('partners/{partner}',     [PartnerController::class, 'update'])->whereNumber('partner')->name('partners.update');
+        Route::delete('partners/{partner}',     [PartnerController::class, 'destroy'])->whereNumber('partner')->name('partners.destroy');
+        Route::post  ('partners/{partner}/toggle-visible', [PartnerController::class, 'toggleVisible'])
+            ->whereNumber('partner')->name('partners.toggle-visible');
         Route::resource('users', UserController::class)->only(['index', 'show']);
     });
 
