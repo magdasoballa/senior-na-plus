@@ -1,6 +1,7 @@
 import { Link, router, useForm, usePage } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
 import { useRef, useState } from 'react'
+import * as React from 'react';
 
 type P = { id?:number; link?:string; image_url?:string|null; is_visible?:boolean } | null
 const BASE = '/admin/partners'
@@ -58,7 +59,7 @@ export default function Form(){
                         <span>Widoczny</span>
                     </label>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-end gap-3 border-t px-4 py-3">
                         <button disabled={processing} className="rounded-md bg-mint px-3 py-2 text-white text-sm">
                             {mode==='create' ? 'Utwórz Partner' : 'Aktualizuj Partner'}
                         </button>

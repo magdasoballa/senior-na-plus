@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\Settings\BannerController;
 use App\Http\Controllers\Admin\Settings\PopupController;
 use App\Http\Controllers\Admin\Settings\PortalSettingsController;
 use App\Http\Controllers\Admin\Settings\SocialLinkController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ContactMessageController;
 use App\Http\Controllers\Front\OfferController;
@@ -348,8 +349,13 @@ Route::middleware(['auth', 'admin'])
         Route::delete('partners/{partner}',     [PartnerController::class, 'destroy'])->whereNumber('partner')->name('partners.destroy');
         Route::post  ('partners/{partner}/toggle-visible', [PartnerController::class, 'toggleVisible'])
             ->whereNumber('partner')->name('partners.toggle-visible');
-        Route::resource('users', UserController::class)->only(['index', 'show']);
-    });
+        Route::get   ('users',             [UserController::class,'index'])->name('users.index');
+        Route::get   ('users/create',      [UserController::class,'create'])->name('users.create');
+        Route::post  ('users',             [UserController::class,'store'])->name('users.store');
+        Route::get   ('users/{user}',      [UserController::class,'show'])->whereNumber('user')->name('users.show');
+        Route::get   ('users/{user}/edit', [UserController::class,'edit'])->whereNumber('user')->name('users.edit');
+        Route::put   ('users/{user}',      [UserController::class,'update'])->whereNumber('user')->name('users.update');
+        Route::delete('users/{user}',      [UserController::class,'destroy'])->whereNumber('user')->name('users.destroy');    });
 
 /*
 |--------------------------------------------------------------------------
