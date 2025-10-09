@@ -1,7 +1,7 @@
 // resources/js/layouts/admin-layout.tsx
 import AppLayout from '@/layouts/app-layout'
 import { Link, usePage } from '@inertiajs/react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import * as React from 'react'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -26,7 +26,7 @@ function AdminSidebar() {
     const groups: NavGroup[] = [
         {
             title: 'Strona główna',
-            items: [{ label: 'Strona główna', href: '/admin' }], // zmień na '/dashboard' jeśli potrzeba
+            items: [{ label: 'Strona główna', href: '/admin' }],
         },
         {
             title: 'Ustawienia',
@@ -56,7 +56,7 @@ function AdminSidebar() {
                 { label: 'Obowiązki', href: '/admin/offers/duties' },
                 { label: 'Wymagania', href: '/admin/offers/requirements' },
                 { label: 'Oferujemy', href: '/admin/offers/perks' },
-                { label: 'Oferty', href: '/admin/offers', exact: true },
+                { label: 'Oferty', href: '/admin/offers' },
             ],
         },
         {
@@ -70,18 +70,17 @@ function AdminSidebar() {
             title: 'Wiadomości',
             items: [
                 { kind: 'label', label: 'WERSJA PL' },
-                { label: 'Kontakty Front (pl)', href: '/admin/messages/pl/front-contacts', exact: true },
-                { label: 'Kontakty Strona (pl)', href: '/admin/messages/pl/site-contacts', exact: true },
-                { label: 'Formularze (pl)', href: '/admin/messages/pl/forms', exact: true },
+                { label: 'Kontakty Front (pl)',  href: '/admin/messages/pl/front-contacts' },
+                { label: 'Kontakty Strona (pl)', href: '/admin/messages/pl/site-contacts' },
+                { label: 'Formularze (pl)',      href: '/admin/messages/pl/forms' },
 
                 { kind: 'label', label: 'WERSJA DE' },
-                { label: 'Kontakty Strona (de)', href: '/admin/messages/de/site-contacts', exact: true },
-                { label: 'Formularze (de)', href: '/admin/messages/de/forms', exact: true },
+                { label: 'Kontakty Strona (de)', href: '/admin/messages/de/site-contacts' },
+                { label: 'Formularze (de)',      href: '/admin/messages/de/forms' },
             ],
         },
-        // te dwie sekcje mają po jednym linku — dzięki logice w <Section/> będą renderowane jako pojedynczy link (bez „podwójnej zakładki”)
-        { title: 'Partnerzy',    items: [{ label: 'Partnerzy',    href: '/admin/partners' }] },
-        { title: 'Użytkownicy',  items: [{ label: 'Użytkownicy',  href: '/admin/users' }] },
+        { title: 'Partnerzy',   items: [{ label: 'Partnerzy',   href: '/admin/partners' }] },
+        { title: 'Użytkownicy', items: [{ label: 'Użytkownicy', href: '/admin/users' }] },
     ]
 
     return (
@@ -97,16 +96,34 @@ function AdminSidebar() {
 function Section({ title, items }: { title: string; items: NavItem[] }) {
     const { url } = usePage()
 
-    // tryb „pojedynczy link”: sekcja z dokładnie jednym linkiem o etykiecie jak tytuł
+    // Czy sekcja to „pojedynczy link” (bez caret)?
     const singleLink =
         items.length === 1 &&
         'href' in items[0] &&
         (items[0] as NavItemLink).label === title
 
+    // hasActive: dla singleLink sprawdzamy pojedynczy href,
+    // dla zwykłej sekcji — czy którykolwiek href jest prefiksem bieżącego URL
+    const hasActive = useMemo(() => {
+        if (singleLink) {
+            const link = items[0] as NavItemLink
+            return isActive(url, link.href)
+        }
+        return items.some((i) => 'href' in i && isActive(url, (i as NavItemLink).href))
+    }, [url, items, singleLink])
+
+    // stan rozwinięcia — hook zawsze wywołany
+    const [open, setOpen] = useState<boolean>(hasActive)
+
+    // auto-otwieranie po zmianie URL na pasujący — hook zawsze wywołany
+    useEffect(() => {
+        if (hasActive) setOpen(true)
+    }, [hasActive])
+
+    // render „pojedynczego linku”
     if (singleLink) {
         const link = items[0] as NavItemLink
-        const active = isActive(url, link.href, link.exact)
-
+        const active = isActive(url, link.href)
         return (
             <div className="mt-2">
                 <Link
@@ -122,14 +139,7 @@ function Section({ title, items }: { title: string; items: NavItem[] }) {
         )
     }
 
-    const hasActive = useMemo(
-        () => items.some((i) => 'href' in i && isActive(url, (i as NavItemLink).href, (i as NavItemLink).exact)),
-        [url, items]
-    )
-
-    // jeśli chcesz mieć zawsze rozwinięte, użyj `true`; jeśli tylko aktywne – `hasActive`
-    const [open, setOpen] = useState<boolean>(hasActive)
-
+    // zwykła sekcja
     return (
         <div className="mt-4">
             <button
@@ -165,7 +175,7 @@ function NavList({ items }: { items: NavItem[] }) {
                 }
 
                 const link = item as NavItemLink
-                const active = isActive(url, link.href, link.exact)
+                const active = isActive(url, link.href)
                 const badge = Number(msg_badges[link.href] ?? 0)
 
                 return (
@@ -190,7 +200,17 @@ function NavList({ items }: { items: NavItem[] }) {
     )
 }
 
-function isActive(currentUrl: string, href: string, exact?: boolean) {
-    if (exact) return currentUrl === href || currentUrl.startsWith(`${href}?`)
-    return currentUrl === href || currentUrl.startsWith(`${href}/`) || currentUrl.startsWith(`${href}?`)
+/** Aktywność linku: aktywny także dla /id, /id/edit, /create, query */
+function isActive(currentUrl: string, href: string) {
+    const cur = stripTrailingSlash(currentUrl)
+    const base = stripTrailingSlash(href)
+    return (
+        cur === base ||
+        cur.startsWith(base + '?') ||
+        cur.startsWith(base + '/')
+    )
+}
+
+function stripTrailingSlash(u: string) {
+    return u.replace(/\/+$/, '')
 }
