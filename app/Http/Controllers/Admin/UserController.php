@@ -12,119 +12,128 @@ use Inertia\Inertia;
 
 class UserController extends Controller
 {
-public function index(Request $request)
-{
-$q       = (string) $request->string('q');
-$perPage = (int) $request->input('per_page', 25);
-if (!in_array($perPage, [10,25,50,100], true)) $perPage = 25;
+    public function index(Request $request)
+    {
+        $q       = (string) $request->string('q');
+        $perPage = (int) $request->input('per_page', 25);
+        if (!in_array($perPage, [10,25,50,100], true)) $perPage = 25;
 
-$rows = User::query()
-->when($q !== '', function ($qq) use ($q) {
-$qq->where(function($w) use ($q){
-$w->where('name','like',"%{$q}%")
-->orWhere('email','like',"%{$q}%");
-});
-})
-->orderByDesc('id')
-->paginate($perPage)
-->withQueryString();
+        $rows = User::query()
+            ->when($q !== '', function ($qq) use ($q) {
+                $qq->where(function($w) use ($q){
+                    $w->where('name','like',"%{$q}%")
+                        ->orWhere('email','like',"%{$q}%");
+                });
+            })
+            ->orderByDesc('id')
+            ->paginate($perPage)
+            ->withQueryString();
 
-$rows->getCollection()->transform(function(User $u){
-return [
-'id'         => $u->id,
-'name'       => $u->name,
-'email'      => $u->email,
-'avatar_url' => $this->gravatar($u->email, 96),
-'created_at' => $u->created_at?->toIso8601String(),
-];
-});
+        $rows->getCollection()->transform(function(User $u){
+            return [
+                'id'         => $u->id,
+                'name'       => $u->name,
+                'email'      => $u->email,
+                'avatar_url' => $this->gravatar($u->email, 96),
+                'created_at' => $u->created_at?->toIso8601String(),
+            ];
+        });
 
-return Inertia::render('Admin/users/Index', [
-'users'   => $rows,
-'filters' => [
-'q'        => $q,
-'per_page' => $perPage,
-],
-]);
-}
+        return Inertia::render('Admin/users/Index', [
+            'users'   => $rows,
+            'filters' => [
+                'q'        => $q,
+                'per_page' => $perPage,
+            ],
+        ]);
+    }
 
-public function show(User $user)
-{
-return Inertia::render('Admin/users/Show', [
-'user' => [
-'id'         => $user->id,
-'name'       => $user->name,
-'email'      => $user->email,
-'avatar_url' => $this->gravatar($user->email, 128),
-],
-]);
-}
+    public function show(User $user)
+    {
+        return Inertia::render('Admin/users/Show', [
+            'user' => [
+                'id'         => $user->id,
+                'name'       => $user->name,
+                'email'      => $user->email,
+                'avatar_url' => $this->gravatar($user->email, 128),
+            ],
+        ]);
+    }
 
-public function create()
-{
-return Inertia::render('Admin/users/Form', [
-'mode' => 'create',
-'user' => null,
-]);
-}
+    public function create()
+    {
+        return Inertia::render('Admin/users/Form', [
+            'mode' => 'create',
+            'user' => null,
+        ]);
+    }
 
-public function store(UserStoreRequest $request)
-{
-$data = $request->validated();
+    public function store(UserStoreRequest $request)
+    {
+        $data = $request->validated();
 
-$user = new User();
-$user->name  = $data['name'];
-$user->email = $data['email'];
-$user->password = Hash::make($data['password']);
-$user->save();
+        $user = new User();
+        $user->name     = $data['name'];
+        $user->email    = $data['email'];
+        $user->password = Hash::make($data['password']);
+        $user->save();
 
-return to_route('admin.users.index')->with('success','Utworzono użytkownika.');
-}
+        // ANALOGICZNIE: jeśli "kontynuuj", idź na SHOW (lub EDIT, jeśli wolisz)
+        if ($request->boolean('stay')) {
+            return to_route('admin.users.show', $user)->with('success', 'Utworzono użytkownika.');
+            // ewentualnie:
+            // return to_route('admin.users.edit', $user)->with('success', 'Utworzono użytkownika.');
+        }
 
-public function edit(User $user)
-{
-return Inertia::render('Admin/users/Form', [
-'mode' => 'edit',
-'user' => [
-'id'    => $user->id,
-'name'  => $user->name,
-'email' => $user->email,
-],
-]);
-}
+        return to_route('admin.users.index')->with('success','Utworzono użytkownika.');
+    }
 
-public function update(UserUpdateRequest $request, User $user)
-{
-$data = $request->validated();
+    public function edit(User $user)
+    {
+        return Inertia::render('Admin/users/Form', [
+            'mode' => 'edit',
+            'user' => [
+                'id'    => $user->id,
+                'name'  => $user->name,
+                'email' => $user->email,
+            ],
+        ]);
+    }
 
-$user->name  = $data['name'];
-$user->email = $data['email'];
+    public function update(UserUpdateRequest $request, User $user)
+    {
+        $data = $request->validated();
 
-if (!empty($data['password'])) {
-$user->password = Hash::make($data['password']);
-}
+        $user->name  = $data['name'];
+        $user->email = $data['email'];
+        if (!empty($data['password'])) {
+            $user->password = \Hash::make($data['password']);
+        }
+        $user->save();
 
-$user->save();
+        if ($request->boolean('stay')) {
+            return redirect()->route('admin.users.edit', $user, 303)
+                ->with('success', 'Zapisano zmiany.');
+        }
 
-return $request->boolean('stay')
-? back()->with('success','Zaktualizowano.')
-: to_route('admin.users.index')->with('success','Zaktualizowano.');
-}
+        return redirect()->route('admin.users.index', status: 303)
+            ->with('success', 'Zapisano zmiany.');
+    }
 
-public function destroy(User $user)
-{
-// (opcjonalnie) zablokuj usunięcie samego siebie:
-if (auth()->id() === $user->id) {
-return back()->with('error','Nie możesz usunąć samego siebie.');
-}
 
-$user->delete();
-return back()->with('success','Usunięto użytkownika.');
-}
+    public function destroy(User $user)
+    {
+        if (auth()->id() === $user->id) {
+            return back()->with('error','Nie możesz usunąć samego siebie.');
+        }
 
-private function gravatar(string $email, int $size = 80): string
-{
-$hash = md5(strtolower(trim($email)));
-return "https://www.gravatar.com/avatar/{$hash}?s={$size}&d=identicon";
-}
+        $user->delete();
+        return back()->with('success','Usunięto użytkownika.');
+    }
+
+    private function gravatar(string $email, int $size = 80): string
+    {
+        $hash = md5(strtolower(trim($email)));
+        return "https://www.gravatar.com/avatar/{$hash}?s={$size}&d=identicon";
+    }
 }

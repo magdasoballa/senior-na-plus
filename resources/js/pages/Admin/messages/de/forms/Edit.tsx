@@ -2,6 +2,7 @@ import { Link, router, usePage } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
 import { useState } from 'react'
 import * as React from 'react'
+import { CheckCircle2 } from 'lucide-react'
 
 type Form = {
     id: number
@@ -15,7 +16,7 @@ type Form = {
     mobility: string | null
     gender: string | null
     sent_at: string | null
-    consents: string | null      // <= TU
+    consents: string | null
     is_read: boolean
 }
 
@@ -52,11 +53,33 @@ const MOBILITY_OPTIONS = [
 const GENDER_OPTIONS = ['Mężczyzna', 'Kobieta', 'Para', '—']
 
 export default function Edit() {
-    const { form: initial, errors } = usePage<{ form: Form; errors: Record<string, string> }>().props
+    const { form: initial, errors, flash } = usePage<{
+        form: Form
+        errors: Record<string, string>
+        flash?: { success?: string; error?: string }
+    }>().props
+
     const [form, setForm] = useState<Form>({ ...initial })
+    const [saved, setSaved] = useState(false)
     const set = <K extends keyof Form>(k: K) => (v: Form[K]) => setForm({ ...form, [k]: v })
 
-    const save = (stay = false) => router.put(`${BASE}/${form.id}`, { ...form, stay }, { preserveScroll: true })
+    const save = (stay = false) =>
+        router.put(
+            `${BASE}/${form.id}`,
+            { ...form, stay },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    if (stay) {
+                        setSaved(true)
+                        window.setTimeout(() => setSaved(false), 2500)
+                    } else {
+                        // po zwykłym zapisie wracamy do LISTY
+                        router.visit(BASE, { replace: true })
+                    }
+                },
+            }
+        )
 
     const sent =
         form.sent_at && !Number.isNaN(new Date(form.sent_at).getTime())
@@ -69,6 +92,21 @@ export default function Edit() {
         <AdminLayout>
             <main className="p-6">
                 <p className="text-2xl font-bold">Aktualizacja Formularz (de): {form.id}</p>
+
+                {/* Flash z backendu */}
+                {flash?.success && (
+                    <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-800">
+                        <CheckCircle2 className="h-4 w-4" />
+                        {flash.success}
+                    </div>
+                )}
+                {/* Lokalne potwierdzenie po „Aktualizuj i Kontynuuj Edycję” */}
+                {saved && !flash?.success && (
+                    <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-800">
+                        <CheckCircle2 className="h-4 w-4" />
+                        Zapisano zmiany
+                    </div>
+                )}
 
                 <div className="mt-4 overflow-hidden rounded-xl border bg-white">
                     <Row label="Imię i nazwisko *" error={errors?.full_name}>
@@ -114,7 +152,7 @@ export default function Edit() {
                         </select>
                     </Row>
 
-                    {/* ZGODY (read-only, jak na widoku szczegółów) */}
+                    {/* ZGODY (read-only) */}
                     <Row label="Zgody">
                         <input className={fieldClass} value={form.consents ?? '—'} readOnly />
                     </Row>
@@ -139,9 +177,14 @@ export default function Edit() {
                     </Row>
 
                     <div className="flex items-center justify-end gap-3 border-t px-4 py-3">
-                        <Link href={`${BASE}/${form.id}`} className="rounded-lg border px-4 py-2 hover:bg-slate-50">Anuluj</Link>
-                        <button onClick={()=>save(true)} className="rounded-lg bg-mint px-4 py-2 font-semibold cursor-pointer">Aktualizuj i Kontynuuj Edycję</button>
-                        <button onClick={()=>save(false)} className="rounded-lg bg-mint px-4 py-2 font-semibold cursor-pointer">Aktualizacja Formularz (de)</button>
+                        {/* Anuluj → LISTA */}
+                        <Link href={BASE} className="rounded-lg border px-4 py-2 hover:bg-slate-50">Anuluj</Link>
+                        <button onClick={()=>save(true)} className="rounded-lg bg-mint px-4 py-2 font-semibold cursor-pointer">
+                            Aktualizuj i Kontynuuj Edycję
+                        </button>
+                        <button onClick={()=>save(false)} className="rounded-lg bg-mint px-4 py-2 font-semibold cursor-pointer">
+                            Aktualizacja Formularz (de)
+                        </button>
                     </div>
                 </div>
             </main>

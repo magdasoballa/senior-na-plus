@@ -1,7 +1,8 @@
 import { Link, router, usePage } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
-import { useState } from 'react'
 import * as React from 'react'
+import { useState } from 'react'
+import { CheckCircle2 } from 'lucide-react'
 
 type Contact = {
     id: number
@@ -16,14 +17,31 @@ type Contact = {
 const BASE = '/admin/messages/pl/front-contacts'
 
 export default function Edit() {
-    const { contact, errors } = usePage<{ contact: Contact; errors: Record<string, string> }>().props
+    const { contact, errors, flash } = usePage<{
+        contact: Contact
+        errors: Record<string, string>
+        flash?: { success?: string; error?: string }
+    }>().props
+
     const [form, setForm] = useState<Contact>({ ...contact })
+    const [saved, setSaved] = useState(false)
 
     const save = (stay = false) => {
         router.put(
             `${BASE}/${contact.id}`,
             { ...form, stay },
-            { preserveScroll: true }
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    if (stay) {
+                        setSaved(true)
+                        setTimeout(() => setSaved(false), 2500)
+                    } else {
+                        // wymuś powrót do listy niezależnie od redirectu backendu
+                        router.visit(BASE, { replace: true })
+                    }
+                },
+            }
         )
     }
 
@@ -31,6 +49,21 @@ export default function Edit() {
         <AdminLayout>
             <main className="p-6">
                 <p className="mt-1 text-2xl font-bold">Edycja kontaktu #{contact.id}</p>
+
+                {/* Flash z backendu */}
+                {flash?.success && (
+                    <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-800">
+                        <CheckCircle2 className="h-4 w-4" />
+                        {flash.success}
+                    </div>
+                )}
+                {/* Lokalne „zapisano” po Zapisz i kontynuuj */}
+                {saved && !flash?.success && (
+                    <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-800">
+                        <CheckCircle2 className="h-4 w-4" />
+                        Zapisano zmiany
+                    </div>
+                )}
 
                 <div className="mt-4 overflow-hidden rounded-xl border bg-white">
                     <div className="divide-y">
@@ -89,18 +122,18 @@ export default function Edit() {
                     </div>
 
                     <div className="flex items-center justify-end gap-3 border-t px-4 py-3">
-                        <Link href={`${BASE}/${contact.id}`} className="text-slate-600 hover:underline">
+                        <Link href={BASE} className="text-slate-600 hover:underline">
                             Anuluj
                         </Link>
                         <button
                             onClick={() => save(true)}
-                            className="rounded-lg bg-mint px-3 py-2 font-semibold  hover:brightness-110"
+                            className="rounded-lg bg-mint px-3 py-2 font-semibold hover:brightness-110"
                         >
                             Zapisz i kontynuuj
                         </button>
                         <button
                             onClick={() => save(false)}
-                            className="rounded-lg bg-mint px-3 py-2 font-semibold  hover:brightness-110"
+                            className="rounded-lg bg-mint px-3 py-2 font-semibold hover:brightness-110"
                         >
                             Zapisz
                         </button>

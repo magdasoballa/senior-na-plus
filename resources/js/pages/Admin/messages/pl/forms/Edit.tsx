@@ -1,7 +1,8 @@
 import { Link, router, usePage } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import * as React from 'react'
+import { CheckCircle2 } from 'lucide-react'
 
 type Form = {
     id: number
@@ -22,10 +23,15 @@ type Form = {
 const BASE = '/admin/messages/pl/forms'
 
 export default function Edit() {
-    const { form: initial, errors } = usePage<{ form: Form; errors: Record<string, string> }>().props
+    const { form: initial, errors, flash } = usePage<{
+        form: Form
+        errors: Record<string, string>
+        flash?: { success?: string; error?: string }
+    }>().props
 
     const [form, setForm] = useState<Form>({ ...initial })
     const [skillsStr, setSkillsStr] = useState<string>((initial.skills ?? []).join(', '))
+    const [saved, setSaved] = useState(false)
 
     const save = (stay = false) => {
         const skillsArr = skillsStr
@@ -36,7 +42,15 @@ export default function Edit() {
         router.put(
             `${BASE}/${form.id}`,
             { ...form, skills: skillsArr, stay },
-            { preserveScroll: true }
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    if (stay) {
+                        setSaved(true)
+                        window.setTimeout(() => setSaved(false), 2500)
+                    }
+                },
+            }
         )
     }
 
@@ -55,6 +69,14 @@ export default function Edit() {
                     › Edycja
                 </div>
                 <p className="mt-1 text-2xl font-bold">Aktualizacja Formularz (pl): {form.full_name}</p>
+
+                {/* Flash z backendu lub lokalny „toast” po zapisie z pozostaniem */}
+                {(flash?.success || saved) && (
+                    <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-800">
+                        <CheckCircle2 className="h-4 w-4" />
+                        {flash?.success ?? 'Zapisano zmiany'}
+                    </div>
+                )}
 
                 <div className="mt-4 overflow-hidden rounded-xl border bg-white">
                     <div className="divide-y">
@@ -167,10 +189,16 @@ export default function Edit() {
                         <Link href={`${BASE}/${form.id}`} className="rounded-lg border px-4 py-2 hover:bg-slate-50">
                             Anuluj
                         </Link>
-                        <button onClick={() => save(true)} className="rounded-lg bg-mint px-4 py-2 font-semibold cursor-pointer">
+                        <button
+                            onClick={() => save(true)}
+                            className="rounded-lg bg-mint px-4 py-2 font-semibold cursor-pointer"
+                        >
                             Aktualizuj i Kontynuuj Edycję
                         </button>
-                        <button onClick={() => save(false)} className="rounded-lg bg-mint px-4 py-2 font-semibold cursor-pointer">
+                        <button
+                            onClick={() => save(false)}
+                            className="rounded-lg bg-mint px-4 py-2 font-semibold cursor-pointer"
+                        >
                             Aktualizacja Formularz (pl)
                         </button>
                     </div>
