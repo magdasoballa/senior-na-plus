@@ -139,9 +139,9 @@ export default function Edit() {
                     </Row>
 
                     <div className="flex items-center justify-end gap-3 border-t px-4 py-3">
-                        <Link href={`${BASE}/${form.id}`} className="text-slate-600 hover:underline">Anuluj</Link>
-                        <button onClick={()=>save(true)} className="rounded-lg bg-mint px-3 py-2">Aktualizuj i Kontynuuj Edycję</button>
-                        <button onClick={()=>save(false)} className="rounded-lg bg-mint px-3 py-2">Aktualizacja Formularz (de)</button>
+                        <Link href={`${BASE}/${form.id}`} className="rounded-lg border px-4 py-2 hover:bg-slate-50">Anuluj</Link>
+                        <button onClick={()=>save(true)} className="rounded-lg bg-mint px-4 py-2 font-semibold cursor-pointer">Aktualizuj i Kontynuuj Edycję</button>
+                        <button onClick={()=>save(false)} className="rounded-lg bg-mint px-4 py-2 font-semibold cursor-pointer">Aktualizacja Formularz (de)</button>
                     </div>
                 </div>
             </main>

@@ -60,7 +60,7 @@ export default function Form(){
                     </label>
 
                     <div className="flex items-center justify-end gap-3 border-t px-4 py-3">
-                        <button disabled={processing} className="rounded-md bg-mint px-3 py-2 text-white text-sm">
+                        <button disabled={processing} className="rounded-lg bg-mint px-4 py-2 font-semibold cursor-pointer">
                             {mode==='create' ? 'Utwórz Partner' : 'Aktualizuj Partner'}
                         </button>
                         {mode==='edit' && (
@@ -70,12 +70,12 @@ export default function Form(){
                                     setData('stay', true)
                                     router.post(`${BASE}/${partner?.id}`, {...data, _method:'PUT'}, { forceFormData:true })
                                 }}
-                                className="rounded-md border px-3 py-2 text-sm"
+                                className="rounded-lg bg-mint px-4 py-2 font-semibold cursor-pointer"
                             >
                                 Aktualizuj i Kontynuuj Edycję
                             </button>
                         )}
-                        <Link href={BASE} className="rounded-md border px-3 py-2 text-sm">Anuluj</Link>
+                        <Link href={BASE} className="rounded-lg border px-4 py-2 hover:bg-slate-50">Anuluj</Link>
                     </div>
                 </form>
             </main>

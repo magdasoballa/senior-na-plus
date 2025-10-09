@@ -107,13 +107,13 @@ export default function Edit() {
                     </div>
 
                     <div className="flex items-center justify-end gap-3 border-t px-4 py-3">
-                        <Link href={`${BASE}/${contact.id}`} className="text-slate-600 hover:underline">
+                        <Link href={`${BASE}/${contact.id}`} className="rounded-lg border px-4 py-2 hover:bg-slate-50">
                             Anuluj
                         </Link>
-                        <button onClick={() => save(true)} className="rounded-lg bg-mint px-3 py-2">
+                        <button onClick={() => save(true)} className="rounded-lg bg-mint px-4 py-2 font-semibold cursor-pointer">
                             Zapisz i kontynuuj
                         </button>
-                        <button onClick={() => save(false)} className="rounded-lg bg-mint px-3 py-2">
+                        <button onClick={() => save(false)} className="rounded-lg bg-mint px-4 py-2 font-semibold cursor-pointer">
                             Zapisz
                         </button>
                     </div>

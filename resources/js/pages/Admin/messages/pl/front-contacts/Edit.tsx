@@ -94,13 +94,13 @@ export default function Edit() {
                         </Link>
                         <button
                             onClick={() => save(true)}
-                            className="rounded-lg bg-mint px-3 py-2 font-semibold text-white hover:brightness-110"
+                            className="rounded-lg bg-mint px-3 py-2 font-semibold  hover:brightness-110"
                         >
                             Zapisz i kontynuuj
                         </button>
                         <button
                             onClick={() => save(false)}
-                            className="rounded-lg bg-mint px-3 py-2 font-semibold text-white hover:brightness-110"
+                            className="rounded-lg bg-mint px-3 py-2 font-semibold  hover:brightness-110"
                         >
                             Zapisz
                         </button>

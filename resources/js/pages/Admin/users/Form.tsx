@@ -50,8 +50,8 @@ export default function Form(){
                         {errors.password && <div className="text-sm text-rose-600 mt-1">{errors.password}</div>}
                     </div>
 
-                    <div className="flex items-center jutify-end gap-2">
-                        <button disabled={processing} className="rounded-md bg-mint px-3 py-2 text-white text-sm">
+                    <div className="flex items-center justify-end gap-3 border-t px-4 py-3">
+                        <button disabled={processing} className="rounded-lg bg-mint px-4 py-2 font-semibold cursor-pointer">
                             {mode==='create' ? 'Utwórz Użytkownik' : 'Aktualizuj Użytkownik'}
                         </button>
 
@@ -62,13 +62,13 @@ export default function Form(){
                                     setData('stay', true)
                                     router.post(`${BASE}/${user?.id}`, { ...data, _method: 'PUT' })
                                 }}
-                                className="rounded-md border px-3 py-2 text-sm"
+                                className="rounded-lg bg-mint px-4 py-2 font-semibold cursor-pointer"
                             >
                                 Aktualizuj i Kontynuuj Edycję
                             </button>
                         )}
 
-                        <Link href={BASE} className="rounded-md border px-3 py-2 text-sm">Anuluj</Link>
+                        <Link href={BASE} className="rounded-lg border px-4 py-2 hover:bg-slate-50">Anuluj</Link>
                     </div>
                 </form>
             </main>
