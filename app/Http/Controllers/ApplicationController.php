@@ -46,13 +46,22 @@ class ApplicationController extends Controller
                 FileRule::types(['pdf','doc','docx','jpg','jpeg','png'])->max(5 * 1024),
             ],
             'salary_expectations' => 'nullable|numeric|min:0|max:1000000',
+            // Zgody - tylko consent1 jest wymagana
             'consent1' => 'required|accepted',
-            'consent2' => 'required|accepted',
-            'consent3' => 'required|accepted',
+            'consent2' => 'sometimes|boolean',
+            'consent3' => 'sometimes|boolean',
+            'consent4' => 'sometimes|boolean',
+            'consent5' => 'sometimes|boolean',
+            'consent6' => 'sometimes|boolean',
+            'consent7' => 'sometimes|boolean',
+            'consent8' => 'sometimes|boolean',
+            'consent9' => 'sometimes|boolean',
+            'consent10' => 'sometimes|boolean',
             'offer_id' => 'required|exists:offers,id',
         ], [
             'references.max'   => 'Plik z referencjami jest za duży (max 5 MB).',
             'references.types' => 'Nieobsługiwany format. Dozwolone: PDF, DOC, DOCX, JPG, JPEG, PNG.',
+            'consent1.accepted' => 'Akceptacja Warunków Korzystania i Polityki Prywatności jest wymagana.',
         ]);
 
         $offer = Offer::findOrFail($validated['offer_id']);
@@ -77,9 +86,17 @@ class ApplicationController extends Controller
             'salary_expectations'     => $request->input('salary_expectations'),
             'offer_id'   => $offer->id,
             'offer_title'=> $offer->title,
+            // Zgody
             'consent1'   => $request->boolean('consent1'),
             'consent2'   => $request->boolean('consent2'),
             'consent3'   => $request->boolean('consent3'),
+            'consent4'   => $request->boolean('consent4'),
+            'consent5'   => $request->boolean('consent5'),
+            'consent6'   => $request->boolean('consent6'),
+            'consent7'   => $request->boolean('consent7'),
+            'consent8'   => $request->boolean('consent8'),
+            'consent9'   => $request->boolean('consent9'),
+            'consent10'  => $request->boolean('consent10'),
             'status'     => 'new',
         ]);
 
@@ -108,6 +125,7 @@ class ApplicationController extends Controller
         return back()->with('success', 'Aplikacja została pomyślnie wysłana! Dziękujemy.');
     }
 
+    // ... reszta metod pozostaje bez zmian
     /** Admin: lista z filtrami, sortowaniem i paginacją */
     public function index(Request $request)
     {
@@ -232,6 +250,13 @@ class ApplicationController extends Controller
                 'consent1' => $application->consent1,
                 'consent2' => $application->consent2,
                 'consent3' => $application->consent3,
+                'consent4' => $application->consent4,
+                'consent5' => $application->consent5,
+                'consent6' => $application->consent6,
+                'consent7' => $application->consent7,
+                'consent8' => $application->consent8,
+                'consent9' => $application->consent9,
+                'consent10' => $application->consent10,
                 'offer_id' => $application->offer_id,
                 'offer_title' => $application->offer_title,
                 'status' => $application->status,

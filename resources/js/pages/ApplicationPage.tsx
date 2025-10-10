@@ -36,6 +36,13 @@ type ApplicationFormData = {
     consent1: boolean;
     consent2: boolean;
     consent3: boolean;
+    consent4: boolean;
+    consent5: boolean;
+    consent6: boolean;
+    consent7: boolean;
+    consent8: boolean;
+    consent9: boolean;
+    consent10: boolean;
     offer_id?: string;
     offer_title?: string;
 };
@@ -64,57 +71,180 @@ export default function ApplicationPage() {
         consent1: false,
         consent2: false,
         consent3: false,
+        consent4: false,
+        consent5: false,
+        consent6: false,
+        consent7: false,
+        consent8: false,
+        consent9: false,
+        consent10: false,
         offer_id: offer?.id,
         offer_title: offer?.title,
     });
     const fileInputRef = React.useRef<HTMLInputElement>(null);
     const [fileError, setFileError] = React.useState<string | undefined>(undefined);
+    const [consentErrors, setConsentErrors] = React.useState<{[key: string]: string}>({});
+    const [showSuccessMessage, setShowSuccessMessage] = React.useState(false);
+
+    const validateForm = () => {
+        const newConsentErrors: {[key: string]: string} = {};
+
+        // Walidacja zgody 1 (wymagana)
+        if (!data.consent1) {
+            newConsentErrors.consent1 = 'Ta zgoda jest wymagana';
+        }
+
+        setConsentErrors(newConsentErrors);
+        return Object.keys(newConsentErrors).length === 0;
+    };
 
     const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const form = e.currentTarget;
+        console.log('Form submission started', data);
 
-        // HTML5: focus na pierwszym :invalid
-        const firstInvalid = form.querySelector<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(':invalid');
-        if (firstInvalid) {
-            firstInvalid.focus();
-            firstInvalid.reportValidity?.();
+        // Reset errors
+        setFileError(undefined);
+        setConsentErrors({});
+        setShowSuccessMessage(false);
+
+        // Walidacja podstawowych pól wymaganych
+        if (!data.name.trim()) {
+            console.error('Name is required');
+            return;
+        }
+        if (!data.email.trim()) {
+            console.error('Email is required');
+            return;
+        }
+        if (!data.phone.trim()) {
+            console.error('Phone is required');
+            return;
+        }
+        if (!data.language_level.trim()) {
+            console.error('Language level is required');
             return;
         }
 
-        // dodatkowy check pliku tuż przed wysyłką
+        // Walidacja pliku jeśli został wybrany
         if (data.references) {
             const ext = data.references.name.split('.').pop()?.toLowerCase() || '';
             if (!ALLOWED_EXTS.includes(ext)) {
                 setFileError('Nieobsługiwany format. Dozwolone: PNG, JPG, PDF, DOC, DOCX.');
-                fileInputRef.current?.focus();
+                console.error('Invalid file format');
                 return;
             }
             if (data.references.size > MAX_FILE_SIZE) {
                 setFileError('Plik jest za duży (max 5 MB).');
-                fileInputRef.current?.focus();
+                console.error('File too large');
                 return;
             }
         }
 
+        // Walidacja zgód
+        if (!validateForm()) {
+            console.error('Consent validation failed');
+            return;
+        }
+
+        console.log('All validations passed, submitting...');
+
+        // Przygotowanie danych do wysłania
+        const formData = new FormData();
+
+        // Podstawowe dane
+        formData.append('name', data.name);
+        formData.append('email', data.email);
+        formData.append('phone', data.phone);
+        formData.append('language_level', data.language_level);
+        formData.append('additional_language', data.additional_language);
+        formData.append('learned_profession', data.learned_profession);
+        formData.append('current_profession', data.current_profession);
+        formData.append('experience', data.experience);
+        formData.append('salary_expectations', data.salary_expectations);
+
+        // Checkboxy umiejętności
+        formData.append('first_aid_course', data.first_aid_course.toString());
+        formData.append('medical_caregiver_course', data.medical_caregiver_course.toString());
+        formData.append('care_experience', data.care_experience.toString());
+        formData.append('housekeeping_experience', data.housekeeping_experience.toString());
+        formData.append('cooking_experience', data.cooking_experience.toString());
+        formData.append('driving_license', data.driving_license.toString());
+        formData.append('smoker', data.smoker.toString());
+
+        // Zgody
+        formData.append('consent1', data.consent1.toString());
+        formData.append('consent2', data.consent2.toString());
+        formData.append('consent3', data.consent3.toString());
+        formData.append('consent4', data.consent4.toString());
+        formData.append('consent5', data.consent5.toString());
+        formData.append('consent6', data.consent6.toString());
+        formData.append('consent7', data.consent7.toString());
+        formData.append('consent8', data.consent8.toString());
+        formData.append('consent9', data.consent9.toString());
+        formData.append('consent10', data.consent10.toString());
+
+        // Plik
+        if (data.references) {
+            formData.append('references', data.references);
+        }
+
+        // Oferta
+        if (data.offer_id) {
+            formData.append('offer_id', data.offer_id);
+        }
+        if (data.offer_title) {
+            formData.append('offer_title', data.offer_title);
+        }
+
+        console.log('FormData prepared, sending request...');
+
         post('/aplikuj', {
+            data: formData,
             preserveScroll: true,
             forceFormData: true,
             onSuccess: () => {
+                console.log('Form submitted successfully');
                 setFileError(undefined);
-                // wyczyść input file fizycznie
+                setConsentErrors({});
+                setShowSuccessMessage(true);
                 if (fileInputRef.current) fileInputRef.current.value = '';
                 reset();
+
+                // Automatyczne ukrycie komunikatu po 5 sekundach
+                setTimeout(() => {
+                    setShowSuccessMessage(false);
+                }, 5000);
+            },
+            onError: (errors) => {
+                console.error('Form submission errors:', errors);
+            },
+            onFinish: () => {
+                console.log('Form submission finished');
             },
         });
     };
 
-    const acceptAll = () => setData((d) => ({ ...d, consent1: true, consent2: true, consent3: true }));
+    const acceptAll = () => {
+        setData((d) => ({
+            ...d,
+            consent1: true,
+            consent2: true,
+            consent3: true,
+            consent4: true,
+            consent5: true,
+            consent6: true,
+            consent7: true,
+            consent8: true,
+            consent9: true,
+            consent10: true
+        }));
+        // Clear consent errors when accepting all
+        setConsentErrors({});
+        console.log('All consents accepted');
+    };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] || null;
-
-        // reset poprzedniego błędu
         setFileError(undefined);
 
         if (!file) {
@@ -138,6 +268,16 @@ export default function ApplicationPage() {
         }
 
         setData('references', file);
+        console.log('File selected:', file.name);
+    };
+
+    // Funkcja do obsługi zmiany checkboxów zgód
+    const handleConsentChange = (consentKey: keyof ApplicationFormData, checked: boolean) => {
+        setData(consentKey, checked);
+        // Clear error when checkbox is checked
+        if (checked && consentErrors[consentKey]) {
+            setConsentErrors(prev => ({...prev, [consentKey]: ''}));
+        }
     };
 
     return (
@@ -152,15 +292,30 @@ export default function ApplicationPage() {
                 {/* tytuł */}
                 <p className="mt-2 text-center text-[40px] leading-tight font-extrabold tracking-[0.02em] text-[#2b4a44]">WYPEŁNIJ FORMULARZ</p>
 
-                <form onSubmit={submit} className="mt-6 space-y-8">
+                {/* Komunikat o sukcesie */}
+                {showSuccessMessage && (
+                    <div className="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg text-center">
+                        <p className="font-semibold">Formularz został pomyślnie wysłany!</p>
+                        <p className="text-sm mt-1">Dziękujemy za złożenie aplikacji. Skontaktujemy się z Tobą w najbliższym czasie.</p>
+                    </div>
+                )}
+
+                <form onSubmit={submit} className="mt-6 space-y-8" noValidate>
                     {/* PODSTAWOWE INFORMACJE */}
                     <Section title="PODSTAWOWE INFORMACJE">
                         <div className="space-y-4">
                             <Field>
-                                <InputFloat name="name" label="IMIĘ I NAZWISKO*" required value={data.name} onChange={(v) => setData('name', v)} />
+                                <InputFloat
+                                    name="name"
+                                    label="IMIĘ I NAZWISKO*"
+                                    required
+                                    value={data.name}
+                                    onChange={(v) => setData('name', v)}
+                                    error={errors.name}
+                                />
                             </Field>
 
-                            <Field label="E-MAIL*">
+                            <Field>
                                 <InputFloat
                                     name="email"
                                     label="E-MAIL*"
@@ -168,27 +323,30 @@ export default function ApplicationPage() {
                                     required
                                     value={data.email}
                                     onChange={(v) => setData('email', v)}
+                                    error={errors.email}
                                 />
                             </Field>
 
-                            <Field label="NUMER KONTAKTOWY*">
+                            <Field>
                                 <InputFloat
                                     name="phone"
-                                    label="NUMER KONTAKTOWY*"
+                                    label="NUMER TELEFONU*"
                                     type="tel"
                                     required
                                     value={data.phone}
                                     onChange={(v) => setData('phone', v)}
+                                    error={errors.phone}
                                 />
                             </Field>
 
-                            <Field label="ZNAJOMOŚĆ JĘZYKA*">
+                            <Field>
                                 <InputFloat
                                     name="language_level"
-                                    label="ZNAJOMOŚĆ JĘZYKA*"
+                                    label="ZNAJOMOŚĆ JĘZYKA NIEMIECKIEGO*"
                                     required
                                     value={data.language_level}
                                     onChange={(v) => setData('language_level', v)}
+                                    error={errors.language_level}
                                 />
                             </Field>
                         </div>
@@ -203,6 +361,7 @@ export default function ApplicationPage() {
                                     label="DODATKOWY JĘZYK"
                                     value={data.additional_language}
                                     onChange={(v) => setData('additional_language', v)}
+                                    error={errors.additional_language}
                                 />
                             </Field>
 
@@ -212,6 +371,7 @@ export default function ApplicationPage() {
                                     label="ZAWÓD WYUCZONY"
                                     value={data.learned_profession}
                                     onChange={(v) => setData('learned_profession', v)}
+                                    error={errors.learned_profession}
                                 />
                             </Field>
 
@@ -221,6 +381,7 @@ export default function ApplicationPage() {
                                     label="ZAWÓD WYKONYWANY"
                                     value={data.current_profession}
                                     onChange={(v) => setData('current_profession', v)}
+                                    error={errors.current_profession}
                                 />
                             </Field>
                         </div>
@@ -240,7 +401,7 @@ export default function ApplicationPage() {
                                                 value={option}
                                                 checked={data.experience === option}
                                                 onChange={(e) => setData('experience', e.currentTarget.value)}
-                                                className="control control-circle h-4 w-4 accent-coral"
+                                                className="h-4 w-4 rounded-full border-2 border-gray-300 text-coral focus:ring-coral"
                                             />
                                             <span className="text-foreground/90">{option}</span>
                                         </label>
@@ -255,18 +416,9 @@ export default function ApplicationPage() {
                                     {[
                                         { key: 'first_aid_course', label: 'kurs pierwszej pomocy' },
                                         { key: 'medical_caregiver_course', label: 'kurs opiekuna medycznego' },
-                                        {
-                                            key: 'care_experience',
-                                            label: 'doświadczenie w wykonywaniu czynności opiekuńczych',
-                                        },
-                                        {
-                                            key: 'housekeeping_experience',
-                                            label: 'doświadczenie w porządkach domowych',
-                                        },
-                                        {
-                                            key: 'cooking_experience',
-                                            label: 'doświadczenie w przygotowywaniu posiłków',
-                                        },
+                                        { key: 'care_experience', label: 'doświadczenie w wykonywaniu czynności opiekuńczych' },
+                                        { key: 'housekeeping_experience', label: 'doświadczenie w porządkach domowych' },
+                                        { key: 'cooking_experience', label: 'doświadczenie w przygotowywaniu posiłków' },
                                         { key: 'driving_license', label: 'prawo jazdy' },
                                         { key: 'smoker', label: 'osoba paląca' },
                                     ].map((item) => (
@@ -275,7 +427,7 @@ export default function ApplicationPage() {
                                                 type="checkbox"
                                                 checked={data[item.key as keyof ApplicationFormData] as boolean}
                                                 onChange={(e) => setData(item.key as any, e.currentTarget.checked)}
-                                                className="control control-circle"
+                                                className="h-4 w-4 rounded border-2 border-gray-300 text-coral focus:ring-coral"
                                             />
                                             <span className="text-foreground/90">{item.label}</span>
                                         </label>
@@ -292,47 +444,36 @@ export default function ApplicationPage() {
                                     inputMode="numeric"
                                     pattern="[0-9]+([,.][0-9]+)?"
                                     rightSlot="€"
+                                    error={errors.salary_expectations}
                                 />
                             </Field>
 
-                            {/* DODAJ REFERENCJE – wygląd jak na screenie */}
+                            {/* DODAJ REFERENCJE */}
                             <div className="mt-2">
-                                {/* DODAJ REFERENCJE – pigułka z ucięciem i pełnowysokim buttonem */}
-                                <div className="mt-2">
-                                    <div className="relative h-12 overflow-hidden rounded-full bg-white ring-1 ring-black/10">
-                                        {/* lewa etykieta */}
-                                        <span className="absolute top-1/2 left-6 -translate-y-1/2 text-[15px] font-extrabold tracking-wide text-[#2b4a44] uppercase">
-                                            DODAJ REFERENCJE
+                                <div className="relative h-12 overflow-hidden rounded-full bg-white ring-1 ring-black/10">
+                                    <span className="absolute top-1/2 left-6 -translate-y-1/2 text-[15px] font-extrabold tracking-wide text-[#2b4a44] uppercase">
+                                        DODAJ REFERENCJE
+                                    </span>
+                                    <label className="absolute top-0 right-0 h-full w-[150px]">
+                                        <input
+                                            ref={fileInputRef}
+                                            type="file"
+                                            onChange={handleFileChange}
+                                            accept=".png,.jpg,.jpeg,.pdf,.doc,.docx"
+                                            className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                                        />
+                                        <span className="grid h-full w-full place-items-center rounded-r-full bg-blush px-4 text-sm font-extrabold text-white">
+                                            DODAJ PLIK
                                         </span>
-
-                                        {/* prawy przycisk zajmuje CAŁĄ wysokość pigułki */}
-                                        <label className="absolute top-0 right-0 h-full w-[150px]">
-                                            <input
-                                                ref={fileInputRef}
-                                                type="file"
-                                                onChange={handleFileChange}
-                                                accept=".png,.jpg,.jpeg,.pdf,.doc,.docx"
-                                                className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-                                            />
-                                            {/* rounded tylko z prawej, lewa krawędź „ucięta” przez overflow kontenera */}
-                                            <span className="grid h-full w-full place-items-center rounded-r-full bg-blush px-4 text-sm font-extrabold text-white">
-                                                DODAJ PLIK
-                                            </span>
-                                        </label>
-
-                                        {/* mała rezerwa z prawej, żeby tekst nie wchodził pod przycisk */}
-                                        <span className="invisible pr-[150px]">.</span>
-                                    </div>
+                                    </label>
+                                    <span className="invisible pr-[150px]">.</span>
                                 </div>
-
-                                {/* nazwa pliku + opis formatów */}
                                 <div className="mt-1 flex items-center justify-between gap-3">
                                     <span className="max-w-[60%] truncate text-sm text-foreground/80">
                                         {data.references ? `${data.references.name} (${formatBytes(data.references.size)})` : ''}
                                     </span>
                                     <p className="text-right text-[11px] text-foreground/60">PNG, JPG, PDF, DOC, DOCX (MAX 5 MB).</p>
                                 </div>
-
                                 <ErrorText msg={fileError || errors.references} />
                             </div>
                         </div>
@@ -341,29 +482,95 @@ export default function ApplicationPage() {
                     {/* ZGODY */}
                     <Section>
                         <h3 className="mb-3 font-semibold">ZAAKCEPTUJ ZGODY</h3>
-
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             <ConsentRow
                                 checked={data.consent1}
-                                onChange={(v) => setData('consent1', v)}
-                                label="Wyrażam zgodę na przetwarzanie moich danych osobowych podanych powyżej przez Senior na Plus sp. z o.o..."
-                                error={errors.consent1}
+                                onChange={(checked) => handleConsentChange('consent1', checked)}
+                                label="Akceptuję Warunki Korzystania i Politykę Prywatności*"
+                                error={consentErrors.consent1}
+                                required
                             />
                             <ConsentRow
                                 checked={data.consent2}
-                                onChange={(v) => setData('consent2', v)}
-                                label="Wyrażam zgodę na przetwarzanie moich danych osobowych podanych powyżej przez Senior na Plus sp. z o.o..."
-                                error={errors.consent2}
+                                onChange={(checked) => handleConsentChange('consent2', checked)}
+                                label="Wyrażam zgodę na przetwarzanie moich danych osobowych w celu zaproponowania mi ofert pracy przez Senior na Plus Pflege sp. z o.o., a także dla potrzeb niezbędnych do udziału w prowadzonych przez Senior na Plus Pflege sp. z o.o. procesach rekrutacji. W tym celu zgadzam się też na przetwarzanie przez Senior na Plus Pflege sp. z o.o. moich danych osobowych podanych powyżej. Wiem, że każdą zgodę mogę wycofać w dowolnym momencie."
+                                error={consentErrors.consent2}
                             />
-                            <ConsentRow
-                                checked={data.consent3}
-                                onChange={(v) => setData('consent3', v)}
-                                label="Wyrażam zgodę na przetwarzanie moich danych osobowych podanych powyżej przez Administratora Danych..."
-                                error={errors.consent3}
-                            />
-
+                            <div className="space-y-2">
+                                <ConsentRow
+                                    checked={data.consent3}
+                                    onChange={(checked) => handleConsentChange('consent3', checked)}
+                                    label="Wyrażam zgodę na otrzymywanie od Senior na Plus Pflege sp. z o.o. informacji handlowych i innych treści marketingowych (newsletter, oferty, promocje, informacje o nowościach, informacje branżowe itp.):"
+                                    error={consentErrors.consent3}
+                                />
+                                <div className="ml-6 space-y-1">
+                                    <ConsentRow
+                                        checked={data.consent4}
+                                        onChange={(checked) => handleConsentChange('consent4', checked)}
+                                        label="na mój adres e-mail (w tym również z użyciem systemów do automatycznej wysyłki e-maili)"
+                                        error={consentErrors.consent4}
+                                        indent={true}
+                                    />
+                                    <ConsentRow
+                                        checked={data.consent5}
+                                        onChange={(checked) => handleConsentChange('consent5', checked)}
+                                        label="na mój numer telefonu w formie SMS/MMS (w tym również z użyciem systemów do automatycznej wysyłki SMS-ów),"
+                                        error={consentErrors.consent5}
+                                        indent={true}
+                                    />
+                                    <ConsentRow
+                                        checked={data.consent6}
+                                        onChange={(checked) => handleConsentChange('consent6', checked)}
+                                        label="w formie połączeń telefonicznych na mój numer telefonu (w tym również z użyciem systemów do automatycznego nawiązywania połączeń (automatycznych systemów wywołujących))."
+                                        error={consentErrors.consent6}
+                                        indent={true}
+                                    />
+                                </div>
+                                <p className="ml-6 text-xs text-foreground/70">
+                                    W tym celu zgadzam się też na przetwarzanie przez Senior na Plus Pflege sp. z o.o. moich danych osobowych podanych powyżej. Wiem, że każdą zgodę mogę wycofać w dowolnym momencie.
+                                </p>
+                            </div>
+                            <div className="space-y-2">
+                                <ConsentRow
+                                    checked={data.consent7}
+                                    onChange={(checked) => handleConsentChange('consent7', checked)}
+                                    label="Wyrażam zgodę na otrzymywanie od partnerów handlowych Senior na Plus Pflege sp. z o.o. informacji handlowych i innych treści marketingowych (newsletter, oferty, promocje, informacje o nowościach, informacje branżowe itp.):"
+                                    error={consentErrors.consent7}
+                                />
+                                <div className="ml-6 space-y-1">
+                                    <ConsentRow
+                                        checked={data.consent8}
+                                        onChange={(checked) => handleConsentChange('consent8', checked)}
+                                        label="na mój adres e-mail (w tym również z użyciem systemów do automatycznej wysyłki e-maili),"
+                                        error={consentErrors.consent8}
+                                        indent={true}
+                                    />
+                                    <ConsentRow
+                                        checked={data.consent9}
+                                        onChange={(checked) => handleConsentChange('consent9', checked)}
+                                        label="na mój numer telefonu w formie SMS/MMS (w tym również z użyciem systemów do automatycznej wysyłki SMS-ów),"
+                                        error={consentErrors.consent9}
+                                        indent={true}
+                                    />
+                                    <ConsentRow
+                                        checked={data.consent10}
+                                        onChange={(checked) => handleConsentChange('consent10', checked)}
+                                        label="w formie połączeń telefonicznych na mój numer telefonu (w tym również z użyciem systemów do automatycznego nawiązywania połączeń (automatycznych systemów wywołujących))."
+                                        error={consentErrors.consent10}
+                                        indent={true}
+                                    />
+                                </div>
+                                <p className="ml-6 text-xs text-foreground/70">
+                                    W tym celu zgadzam się też na przetwarzanie przez partnerów handlowych Senior na Plus Pflege sp. z o.o. moich danych osobowych podanych powyżej. Wiem, że każdą zgodę mogę wycofać w dowolnym momencie.
+                                </p>
+                            </div>
+                            <div className="mt-4 rounded-lg bg-gray-50 p-3 text-xs text-foreground/70">
+                                <p>
+                                    Administratorem podanych danych osobowych jest Senior na Plus Pflege sp. z o.o. z siedzibą w Warszawie (02-662) przy ul. Świeradowskiej 47, zarejestrowana w rejestrze przedsiębiorców Krajowego Rejestru Sądowego prowadzonego przez Sąd Rejonowy dla m.st. Warszawy w Warszawie, XIII Wydział Gospodarczy Krajowego Rejestru Sądowego pod numerem KRS: 0001155432, posiadająca NIP: 5214105615 oraz REGON: 540911002, o kapitale zakładowym 5.000 zł. Pełna treść obowiązku informacyjnego dostępna w Polityce Prywatności
+                                </p>
+                            </div>
                             <button type="button" onClick={acceptAll} className="text-sm font-semibold text-coral hover:underline">
-                                AKCEPTUJ WSZYSTKIE
+                                ZAZNACZ WSZYSTKO.
                             </button>
                         </div>
                     </Section>
@@ -392,7 +599,7 @@ export default function ApplicationPage() {
 function Section({ title, children }: React.PropsWithChildren<{ title?: string }>) {
     return (
         <section className="rounded-[1rem] p-4">
-            <h2 className="mb-4 text-center text-xl font-extrabold tracking-wide text-coral">{title}</h2>
+            {title && <h2 className="mb-4 text-center text-xl font-extrabold tracking-wide text-coral">{title}</h2>}
             <div>{children}</div>
         </section>
     );
@@ -403,19 +610,20 @@ function Field({ children }: React.PropsWithChildren<{ label?: string }>) {
 }
 
 function InputFloat({
-    id,
-    name,
-    label,
-    value,
-    onChange,
-    type = 'text',
-    required,
-    inputMode,
-    pattern,
-    autoComplete,
-    rightSlot,
-    maxLength,
-}: {
+                        id,
+                        name,
+                        label,
+                        value,
+                        onChange,
+                        type = 'text',
+                        required,
+                        inputMode,
+                        pattern,
+                        autoComplete,
+                        rightSlot,
+                        maxLength,
+                        error,
+                    }: {
     id?: string;
     name: string;
     label: string;
@@ -428,6 +636,7 @@ function InputFloat({
     autoComplete?: string;
     rightSlot?: React.ReactNode;
     maxLength?: number;
+    error?: string;
 }) {
     const inputId = id ?? name;
 
@@ -440,54 +649,60 @@ function InputFloat({
                 required={required}
                 value={value}
                 onChange={(e) => onChange(e.currentTarget.value)}
-                placeholder=" " // ważne dla :placeholder-shown
+                placeholder=" "
                 inputMode={inputMode}
                 pattern={pattern}
                 autoComplete={autoComplete}
                 maxLength={maxLength}
-                className={`peer h-12 w-full rounded-full bg-white px-5 pt-4 pb-1 focus:ring-2 focus:ring-mint focus:outline-none ${rightSlot ? 'pr-12' : ''}`}
+                className={`peer h-12 w-full rounded-full bg-white px-5 pt-4 pb-1 focus:ring-2 focus:ring-mint focus:outline-none ${error ? 'border-2 border-red-500' : ''} ${rightSlot ? 'pr-12' : ''}`}
             />
-
-            {/* label pływający */}
             <label
                 htmlFor={inputId}
                 className="pointer-events-none absolute top-1.5 left-5 z-10 text-xs font-semibold tracking-wide text-foreground/70 uppercase transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-[15px] peer-placeholder-shown:font-extrabold peer-placeholder-shown:text-black/80 peer-focus:top-1.5 peer-focus:translate-y-0 peer-focus:text-xs peer-focus:text-coral"
             >
                 {label}
             </label>
-
-            {/* sufiks, np. € */}
             {rightSlot && <span className="absolute top-1/2 right-4 -translate-y-1/2 text-sm font-semibold text-foreground/60">{rightSlot}</span>}
+            <ErrorText msg={error} />
         </div>
     );
 }
 
-function ConsentRow({ checked, onChange, label, error }: { checked: boolean; onChange: (v: boolean) => void; label: string; error?: string }) {
-    const [open, setOpen] = React.useState(false);
-
+function ConsentRow({
+                        checked,
+                        onChange,
+                        label,
+                        error,
+                        indent = false,
+                        required = false
+                    }: {
+    checked: boolean;
+    onChange: (checked: boolean) => void;
+    label: string;
+    error?: string;
+    indent?: boolean;
+    required?: boolean;
+}) {
     return (
-        <div className="text-sm">
-            <label className="flex cursor-pointer items-start gap-2 select-none">
+        <div className={`text-sm ${indent ? 'ml-6' : ''} ${error ? 'rounded-lg bg-red-50 p-3 border border-red-200' : ''}`}>
+            <label className={`flex cursor-pointer items-start gap-2 select-none ${error ? 'text-red-800' : 'text-foreground/80'}`}>
                 <input
                     type="checkbox"
                     checked={checked}
-                    onChange={(e) => onChange(e.currentTarget.checked)}
-                    className="control control-circle mt-1 h-4 w-4"
+                    onChange={(e) => onChange(e.target.checked)}
+                    className={`h-4 w-4 rounded border-2 focus:ring-coral ${error ? 'border-red-500 text-red-600' : 'border-gray-300 text-coral'}`}
+                    required={required}
                 />
-                <span className="text-foreground/80">{label}</span>
+                <span className={error ? 'text-red-800 font-medium' : (required ? 'font-semibold' : '')}>
+                    {label}
+                </span>
             </label>
-
-            <button type="button" onClick={() => setOpen((v) => !v)} className="ml-6 text-sm font-semibold text-coral hover:underline">
-                {open ? 'zwiń' : 'rozwiń'}
-            </button>
-
-            {open && (
-                <p className="mt-1 ml-6 text-xs text-muted-foreground">
-                    Tu wstaw treść zgody/klauzuli informacyjnej RODO. Możesz zalinkować do pełnej polityki prywatności lub pokazać dłuższy opis.
+            {error && (
+                <p className="mt-1 text-xs text-red-600 font-medium flex items-center gap-1">
+                    <span>⚠</span>
+                    {error}
                 </p>
             )}
-
-            <ErrorText msg={error} className="ml-6" />
         </div>
     );
 }
