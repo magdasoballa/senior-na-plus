@@ -333,3 +333,10 @@
  .green-text {
      color: #22423c
  }
+
+ol {
+    list-style-type: decimal;
+    a {
+        text-decoration: underline;
+    }
+}

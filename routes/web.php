@@ -85,6 +85,14 @@ Route::middleware(['auth', 'verified'])->get('/dashboard', function () {
     ]);
 })->name('dashboard');
 
+// PUBLIC section (poza grupą /admin)
+Route::get('/privacy-policy', function () {
+    return Inertia::render('privacy-policy');
+})->name('privacy');
+
+Route::get('/terms-of-use', function () {
+    return Inertia::render('terms-of-use');
+})->name('terms');
 /*
 |--------------------------------------------------------------------------
 | ADMIN
@@ -356,6 +364,7 @@ Route::middleware(['auth', 'admin'])
         Route::get   ('users/{user}/edit', [UserController::class,'edit'])->whereNumber('user')->name('users.edit');
         Route::put   ('users/{user}',      [UserController::class,'update'])->whereNumber('user')->name('users.update');
         Route::delete('users/{user}',      [UserController::class,'destroy'])->whereNumber('user')->name('users.destroy');    });
+
 
 /*
 |--------------------------------------------------------------------------
