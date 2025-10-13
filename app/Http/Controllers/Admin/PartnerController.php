@@ -11,128 +11,117 @@ use Inertia\Inertia;
 
 class PartnerController extends Controller
 {
-public function index(Request $request)
-{
-$q        = (string) $request->string('q');
-$visible  = $request->input('is_visible'); // '1'|'0'|null
-$perPage  = (int) $request->input('per_page', 25);
-if (!in_array($perPage, [10,25,50,100], true)) $perPage = 25;
+    public function index()
+    {
+        $partners = Partner::query()
+            ->where('is_visible', true)
+            ->orderBy('position')
+            ->get()
+            ->map(function (Partner $p) {
+                $host = parse_url($p->link, PHP_URL_HOST);
 
-$rows = Partner::query()
-->search($q)
-->when($visible !== null && $visible !== '', fn($qq) =>
-$qq->where('is_visible', $visible === '1' || $visible === 1 || $visible === true)
-)
-->orderBy('position')->orderByDesc('id')
-->paginate($perPage)->withQueryString();
+                return [
+                    'id'          => (string) $p->id,
+                    'name'        => $host ?: $p->link, // prosta nazwa z hosta
+                    'website'     => $p->link,          // do kliknięcia
+                    'logo'        => $p->image_url,     // accessor z modelu
+                    'description' => null,
+                    'category'    => null,
+                ];
+            });
 
-// zamieniamy modele na tablice + image_url
-$rows->getCollection()->transform(function(Partner $p) {
-return [
-'id'         => $p->id,
-'link'       => $p->link,
-'image_url'  => $p->image_url,
-'is_visible' => $p->is_visible,
-'created_at' => $p->created_at?->toIso8601String(),
-];
-});
+        return Inertia::render('partnersList', [
+            'partners' => $partners,
+            'isAdmin'  => (bool) optional(auth()->user())->is_admin,
+        ]);
+    }
 
-return Inertia::render('Admin/partners/Index', [
-'partners' => $rows,
-'filters'  => [
-'q'        => $q,
-'is_visible' => $visible,
-'per_page' => $perPage,
-],
-]);
-}
+    public function show(Partner $partner)
+    {
+        return Inertia::render('Admin/partners/Show', [
+            'partner' => [
+                'id' => $partner->id,
+                'link' => $partner->link,
+                'image_url' => $partner->image_url,
+                'image_path' => $partner->image_path,
+                'is_visible' => $partner->is_visible,
+                'created_at' => $partner->created_at?->toIso8601String(),
+            ],
+        ]);
+    }
 
-public function show(Partner $partner)
-{
-return Inertia::render('Admin/partners/Show', [
-'partner' => [
-'id'         => $partner->id,
-'link'       => $partner->link,
-'image_url'  => $partner->image_url,
-'image_path' => $partner->image_path,
-'is_visible' => $partner->is_visible,
-'created_at' => $partner->created_at?->toIso8601String(),
-],
-]);
-}
+    public function create()
+    {
+        return Inertia::render('Admin/partners/Form', [
+            'partner' => null,
+            'mode' => 'create',
+        ]);
+    }
 
-public function create()
-{
-return Inertia::render('Admin/partners/Form', [
-'partner' => null,
-'mode'    => 'create',
-]);
-}
-
-public function store(PartnerRequest $request)
-{
-$data = $request->validated();
-$partner = new Partner();
-$partner->fill([
-'link'       => $data['link'],
-'is_visible' => (bool) ($data['is_visible'] ?? true),
-]);
+    public function store(PartnerRequest $request)
+    {
+        $data = $request->validated();
+        $partner = new Partner();
+        $partner->fill([
+            'link' => $data['link'],
+            'is_visible' => (bool)($data['is_visible'] ?? true),
+        ]);
 
 // upload
-if ($request->hasFile('image')) {
-$partner->image_path = $request->file('image')->store('partners', 'public');
-}
+        if ($request->hasFile('image')) {
+            $partner->image_path = $request->file('image')->store('partners', 'public');
+        }
 
 // pozycja na koniec
-$partner->position = (int) (Partner::max('position') + 1);
-$partner->save();
+        $partner->position = (int)(Partner::max('position') + 1);
+        $partner->save();
 
-return to_route('admin.partners.index')->with('success', 'Utworzono partnera.');
-}
+        return to_route('admin.partners.index')->with('success', 'Utworzono partnera.');
+    }
 
-public function edit(Partner $partner)
-{
-return Inertia::render('Admin/partners/Form', [
-'partner' => [
-'id'         => $partner->id,
-'link'       => $partner->link,
-'image_url'  => $partner->image_url,
-'is_visible' => $partner->is_visible,
-],
-'mode'    => 'edit',
-]);
-}
+    public function edit(Partner $partner)
+    {
+        return Inertia::render('Admin/partners/Form', [
+            'partner' => [
+                'id' => $partner->id,
+                'link' => $partner->link,
+                'image_url' => $partner->image_url,
+                'is_visible' => $partner->is_visible,
+            ],
+            'mode' => 'edit',
+        ]);
+    }
 
-public function update(PartnerRequest $request, Partner $partner)
-{
-$data = $request->validated();
+    public function update(PartnerRequest $request, Partner $partner)
+    {
+        $data = $request->validated();
 
-$partner->link       = $data['link'];
-$partner->is_visible = (bool) ($data['is_visible'] ?? false);
+        $partner->link = $data['link'];
+        $partner->is_visible = (bool)($data['is_visible'] ?? false);
 
 // nowy upload (opcjonalny)
-if ($request->hasFile('image')) {
-if ($partner->image_path) Storage::disk('public')->delete($partner->image_path);
-$partner->image_path = $request->file('image')->store('partners', 'public');
-}
+        if ($request->hasFile('image')) {
+            if ($partner->image_path) Storage::disk('public')->delete($partner->image_path);
+            $partner->image_path = $request->file('image')->store('partners', 'public');
+        }
 
-$partner->save();
+        $partner->save();
 
-return $request->boolean('stay')
-? back()->with('success', 'Zaktualizowano.')
-: to_route('admin.partners.index')->with('success', 'Zaktualizowano.');
-}
+        return $request->boolean('stay')
+            ? back()->with('success', 'Zaktualizowano.')
+            : to_route('admin.partners.index')->with('success', 'Zaktualizowano.');
+    }
 
-public function destroy(Partner $partner)
-{
-if ($partner->image_path) Storage::disk('public')->delete($partner->image_path);
-$partner->delete();
-return back()->with('success', 'Usunięto.');
-}
+    public function destroy(Partner $partner)
+    {
+        if ($partner->image_path) Storage::disk('public')->delete($partner->image_path);
+        $partner->delete();
+        return back()->with('success', 'Usunięto.');
+    }
 
-public function toggleVisible(Partner $partner)
-{
-$partner->update(['is_visible' => ! $partner->is_visible]);
-return back(303);
-}
+    public function toggleVisible(Partner $partner)
+    {
+        $partner->update(['is_visible' => !$partner->is_visible]);
+        return back(303);
+    }
 }

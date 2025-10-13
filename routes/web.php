@@ -25,6 +25,7 @@ use App\Http\Controllers\ContactMessageController;
 use App\Http\Controllers\Front\OfferController;
 use App\Http\Controllers\QuickApplicationController;
 use App\Models\Offer;
+use App\Models\Partner;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -366,28 +367,25 @@ Route::middleware(['auth', 'admin'])
         Route::delete('users/{user}',      [UserController::class,'destroy'])->whereNumber('user')->name('users.destroy');    });
 
 Route::get('/partnerzy', function () {
+    $partners = Partner::query()
+        ->where('is_visible', true)
+        ->orderBy('position')
+        ->get()
+        ->map(function (Partner $p) {
+            $host = parse_url($p->link, PHP_URL_HOST);
+            return [
+                'id'          => (string) $p->id,
+                'name'        => $host ?: $p->link, // prosty label z hosta
+                'website'     => $p->link,
+                'logo'        => $p->image_url,     // accessor z modelu
+                'description' => null,
+                'category'    => null,
+            ];
+        });
+
     return Inertia::render('partnersList', [
-        'partners' => [
-            [
-                'id' => '1',
-                'name' => 'Pflege GmbH',
-                'description' => 'Niemiecka firma specjalizująca się w opiece nad osobami starszymi',
-                'website' => 'https://example.com'
-            ],
-            [
-                'id' => '2',
-                'name' => 'Care Solutions',
-                'description' => 'Dostawca nowoczesnych rozwiązań w opiece zdrowotnej',
-                'website' => 'https://example.com'
-            ],
-            [
-                'id' => '3',
-                'name' => 'Senior Home',
-                'description' => 'Sieć domów opieki dla seniorów w całej Europie',
-                'website' => 'https://example.com'
-            ],
-            // ... dodaj więcej partnerów według potrzeb
-        ]
+        'partners' => $partners,
+        'isAdmin'  => (bool) optional(auth()->user())->is_admin,
     ]);
 })->name('partners');
 /*
