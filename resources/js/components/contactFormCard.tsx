@@ -172,7 +172,19 @@ export default function ContactFormCard() {
                     <ConsentRow
                         checked={data.consent1}
                         onChange={(v) => setData('consent1', v)}
-                        label="Akceptuję Warunki Korzystania i Politykę Prywatności*"
+                        label={
+                            <span>
+                                Akceptuję{' '}
+                                <a href="/terms-of-use" target="_blank" rel="noopener noreferrer" className="text-coral underline hover:no-underline">
+                                    Warunki Korzystania
+                                </a>{' '}
+                                i{' '}
+                                <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-coral underline hover:no-underline">
+                                    Politykę Prywatności
+                                </a>
+                                *
+                            </span>
+                        }
                         error={errors.consent1}
                         required
                     />
@@ -262,7 +274,15 @@ export default function ContactFormCard() {
                                 <ConsentRow
                                     checked={data.consent7}
                                     onChange={(v) => setData('consent7', v)}
-                                    label="Wyrażam zgodę na otrzymywanie od partnerów handlowych i Senior na Plus Pflege sp. z o.o. informacji handlowych i innych treści marketingowych (newsletter, oferty, promocje, informacje o nowościach, informacje branżowe itp.):"
+                                    label={
+                                        <span>
+                                            Wyrażam zgodę na otrzymywanie od{' '}
+                                            <a href="/partnerzy" target="_blank" rel="noopener noreferrer" className="text-coral underline hover:no-underline">
+                                                partnerów handlowych
+                                            </a>{' '}
+                                            i Senior na Plus Pflege sp. z o.o. informacji handlowych i innych treści marketingowych (newsletter, oferty, promocje, informacje o nowościach, informacje branżowe itp.):
+                                        </span>
+                                    }
                                     error={errors.consent7}
                                 />
                                 <div className="ml-6 space-y-1">
@@ -297,7 +317,11 @@ export default function ContactFormCard() {
 
                     <div className="mt-4 rounded-lg bg-gray-50 p-3 text-xs text-foreground/70">
                         <p>
-                            Administratorem podanych danych osobowych jest Senior na Plus Pflege sp. z o.o. z siedzibą w Warszawie (02-662) przy ul. Świeradowskiej 47, zarejestrowana w rejestrze przedsiębiorców Krajowego Rejestru Sądowego prowadzonego przez Sąd Rejonowy dla m.st. Warszawy w Warszawie, XIII Wydział Gospodarczy Krajowego Rejestru Sądowego pod numerem KRS: 0001155432, posiadająca NIP: 5214105615 oraz REGON: 540911002, o kapitale zakładowym 5.000 zł. Pełna treść obowiązku informacyjnego dostępna w Polityce Prywatności
+                            Administratorem podanych danych osobowych jest Senior na Plus Pflege sp. z o.o. z siedzibą w Warszawie (02-662) przy ul. Świeradowskiej 47, zarejestrowana w rejestrze przedsiębiorców Krajowego Rejestru Sądowego prowadzonego przez Sąd Rejonowy dla m.st. Warszawy w Warszawie, XIII Wydział Gospodarczy Krajowego Rejestru Sądowego pod numerem KRS: 0001155432, posiadająca NIP: 5214105615 oraz REGON: 540911002, o kapitale zakładowym 5.000 zł. Pełna treść obowiązku informacyjnego dostępna w{' '}
+                            <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-coral underline hover:no-underline">
+                                Polityce Prywatności
+                            </a>
+                            .
                         </p>
                     </div>
                 </div>
@@ -424,6 +448,7 @@ function FieldUnderline({
     );
 }
 
+// Zaktualizowany komponent ConsentRow do obsługi JSX w label
 function ConsentRow({
                         checked,
                         onChange,
@@ -434,7 +459,7 @@ function ConsentRow({
                     }: {
     checked: boolean
     onChange: (v: boolean) => void
-    label: string
+    label: string | React.ReactNode
     error?: string
     indent?: boolean
     required?: boolean

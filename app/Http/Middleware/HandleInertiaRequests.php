@@ -22,6 +22,8 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
+        $user = $request->user();
+
         return [
             ...parent::share($request),
 
@@ -31,42 +33,37 @@ class HandleInertiaRequests extends Middleware
                 'author'  => trim($author),
             ],
 
+            // 👇 udostępniamy zarówno całego usera (jeśli potrzebny),
+            // jak i prostą flagę isAdmin do szybkiego użycia na froncie
             'auth' => [
-                'user' => $request->user(),
+                'user'    => $user ? $user->only(['id', 'name', 'email', 'is_admin']) : null,
+                'isAdmin' => (bool) optional($user)->is_admin,
             ],
 
             'sidebarOpen' => ! $request->hasCookie('sidebar_state')
                 || $request->cookie('sidebar_state') === 'true',
 
-            // 👇 to czyta AdminLayout
             'msg_badges' => Cache::remember('admin.msg_badges', 5, function () {
                 return $this->messageBadgesSafe();
             }),
         ];
     }
 
-    /** Zwraca liczby nieprzeczytanych pod kluczami dokładnie takimi jak href w menu */
     protected function messageBadgesSafe(): array
     {
         try {
             // PL
-            $plFront = (int) DB::table('front_contacts')
-                ->where('is_read', 0)
-                ->count();
+            $plFront = (int) DB::table('front_contacts')->where('is_read', 0)->count();
 
             $plSiteQ = DB::table('site_contacts')->where('is_read', 0);
-            if (Schema::hasColumn('site_contacts', 'locale')) {
-                $plSiteQ->where('locale', 'pl');
-            }
+            if (Schema::hasColumn('site_contacts', 'locale')) $plSiteQ->where('locale', 'pl');
             $plSite = (int) $plSiteQ->count();
 
             $plFormsQ = DB::table('site_forms')->where('is_read', 0);
-            if (Schema::hasColumn('site_forms', 'locale')) {
-                $plFormsQ->where('locale', 'pl');
-            }
+            if (Schema::hasColumn('site_forms', 'locale')) $plFormsQ->where('locale', 'pl');
             $plForms = (int) $plFormsQ->count();
 
-            // DE – preferuj osobne tabele, a jeśli ich nie ma, filtruj po locale
+            // DE
             $deSite = Schema::hasTable('de_site_contacts')
                 ? (int) DB::table('de_site_contacts')->where('is_read', 0)->count()
                 : (Schema::hasColumn('site_contacts', 'locale')
@@ -80,17 +77,15 @@ class HandleInertiaRequests extends Middleware
                     : 0);
 
             return [
-                // PL
                 '/admin/messages/pl/front-contacts' => $plFront,
                 '/admin/messages/pl/site-contacts'  => $plSite,
                 '/admin/messages/pl/forms'          => $plForms,
-                // DE
                 '/admin/messages/de/site-contacts'  => $deSite,
                 '/admin/messages/de/forms'          => $deForms,
             ];
         } catch (\Throwable $e) {
             \Log::error('msg_badges error: ' . $e->getMessage());
-            return []; // nie blokuj UI gdy są migracje w trakcie
+            return [];
         }
     }
 }
