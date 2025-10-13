@@ -10,6 +10,8 @@ type Props = {
     facebookUrl?: string;
     instagramUrl?: string;
     linkedinUrl?: string;
+    privacyPolicyUrl?: string;
+    termsOfServiceUrl?: string;
 };
 
 export default function FooterCard({
@@ -20,6 +22,8 @@ export default function FooterCard({
                                        facebookUrl = "#",
                                        instagramUrl = "#",
                                        linkedinUrl = "#",
+                                       privacyPolicyUrl = "/privacy-policy",
+                                       termsOfServiceUrl = "/terms-of-use",
                                    }: Props) {
     const footerRef = React.useRef<HTMLElement>(null);
 
@@ -91,6 +95,22 @@ export default function FooterCard({
                             {email}
                         </a>
                     </div>
+                </div>
+
+                {/* Linki do Polityki Prywatności i Warunków Korzystania */}
+                <div className="mt-4 flex flex-wrap justify-center gap-4 text-sm text-gray-600">
+                    <a
+                        href={privacyPolicyUrl}
+                        className="underline underline-offset-2 hover:opacity-80 transition-opacity"
+                    >
+                        Polityka Prywatności
+                    </a>
+                    <a
+                        href={termsOfServiceUrl}
+                        className="underline underline-offset-2 hover:opacity-80 transition-opacity"
+                    >
+                        Warunki Korzystania
+                    </a>
                 </div>
 
                 <div className="mt-4 flex items-center justify-center gap-3">

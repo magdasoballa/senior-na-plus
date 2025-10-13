@@ -365,7 +365,31 @@ Route::middleware(['auth', 'admin'])
         Route::put   ('users/{user}',      [UserController::class,'update'])->whereNumber('user')->name('users.update');
         Route::delete('users/{user}',      [UserController::class,'destroy'])->whereNumber('user')->name('users.destroy');    });
 
-
+Route::get('/partnerzy', function () {
+    return Inertia::render('partnersList', [
+        'partners' => [
+            [
+                'id' => '1',
+                'name' => 'Pflege GmbH',
+                'description' => 'Niemiecka firma specjalizująca się w opiece nad osobami starszymi',
+                'website' => 'https://example.com'
+            ],
+            [
+                'id' => '2',
+                'name' => 'Care Solutions',
+                'description' => 'Dostawca nowoczesnych rozwiązań w opiece zdrowotnej',
+                'website' => 'https://example.com'
+            ],
+            [
+                'id' => '3',
+                'name' => 'Senior Home',
+                'description' => 'Sieć domów opieki dla seniorów w całej Europie',
+                'website' => 'https://example.com'
+            ],
+            // ... dodaj więcej partnerów według potrzeb
+        ]
+    ]);
+})->name('partners');
 /*
 |--------------------------------------------------------------------------
 | Auth scaffolding
