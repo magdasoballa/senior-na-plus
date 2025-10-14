@@ -1,0 +1,23 @@
+module.exports = {
+    multipass: true,
+    plugins: [
+        'removeDoctype',
+        'removeXMLProcInst',
+        'removeComments',
+        'removeMetadata',
+        'removeEditorsNSData',
+        'cleanupAttrs',
+        'minifyStyles',
+        'convertStyleToAttrs',
+        'cleanupIDs',
+        'removeUselessDefs',
+        'cleanupNumericValues',
+        'collapseGroups',
+        'convertShapeToPath',
+        'mergePaths',
+        ['convertPathData', { floatPrecision: 2 }],
+        'removeDimensions',
+        { name: 'removeAttrs', params: { attrs: '(xmlns|xmlns:xlink|xmlnsXlink|xlink:href)' } },
+        'prefixIds',
+    ],
+};

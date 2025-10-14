@@ -37,7 +37,7 @@ const AboutSection = () => {
 
                 {/* Hero obraz */}
                 <div className="mt-6 flex justify-center">
-                   <ONasBanner />
+                   <ONasBanner width='600px' height='300px'/>
                 </div>
 
                 {/* Tekst */}
@@ -54,7 +54,7 @@ const AboutSection = () => {
 
                 {/* Drugi hero + lista ofert */}
                 <div className="mt-10">
-                  <OferujemyBanner />
+                  <OferujemyBanner width='600px' height='300px'/>
 
                     <div className="mt-6 justify-center items-center  flex flex-col">
                         <h3 className="font-extrabold tracking-tight text-green">OFERUJEMY:</h3>
