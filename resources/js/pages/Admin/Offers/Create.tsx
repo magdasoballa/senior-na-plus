@@ -4,6 +4,8 @@ import * as React from 'react'
 
 type BasicItem = { id:number; name:string }
 type SkillItem  = { id:number; name_pl:string; name_de:string; is_visible_pl:boolean; is_visible_de:boolean }
+type MobilityItem = { id:number; code:string; name?:string; name_pl?:string }
+type GenderItem = { id:number; code:string; name?:string; name_pl?:string }
 
 type PageProps = {
     dict: {
@@ -11,22 +13,24 @@ type PageProps = {
         requirements: BasicItem[];
         perks: BasicItem[];
         skills: SkillItem[];
-        // nowe — opcjonalne (jeśli backend je dośle, użyjemy ich)
         care_targets?: BasicItem[];
-        mobilities?: BasicItem[];                 // np. [{id:1,name:'mobilny'}] – opcjonalne
-        experience?: BasicItem[];                 // pojedynczy wybór doświadczenia
-        recruitment_requirements?: BasicItem[];   // multi
+        mobilities?: MobilityItem[];
+        experience?: BasicItem[];
+        recruitment_requirements?: BasicItem[];
+        genders?: GenderItem[];
+
     }
 }
 
 const BASE = '/admin/offers'
 
-// etykieta wspólna: obsłuży {name} i {name_pl}
+// wspólna etykieta: obsłuży {name} i {name_pl}
 const labelOf = (it:any) => it?.name ?? it?.name_pl ?? ''
 
 export default function Create(){
     const { dict } = usePage<PageProps>().props
-console.log(dict)
+    console.log(dict)
+
     const form = useForm({
         // podstawowe
         title: '', description: '',
@@ -38,9 +42,9 @@ console.log(dict)
         hero_image: null as File | null,
 
         // nowe pola
-        care_target: '',                  // input
+        care_target: '',                    // teraz select (string)
         experience_id: null as number|null, // select (single)
-        experiences: '',                  // input (free text / doprecyzowanie)
+        experiences: '',                    // input (free text)
         recruitment_requirements: [] as number[], // select (multi)
 
         // słowniki (tablice ID)
@@ -55,21 +59,6 @@ console.log(dict)
         form.post(`${BASE}`, { forceFormData: true, preserveScroll:true })
     }
 
-    // fallback dla mobilności (gdy nie ma dict.mobilities)
-    const mobilityOptions: {value:string; label:string}[] =
-        dict.mobilities?.map(m => ({ value: String(m.id), label: labelOf(m) })) ?? [
-            { value: '',         label: '—' },
-            { value: 'mobile',   label: 'mobilny' },
-            { value: 'limited',  label: 'ograniczona' },
-            { value: 'immobile', label: 'niemobilny' },
-        ]
-
-    // płeć — zawsze stałe
-    const genderOptions = [
-        { value: '',        label: '—' },
-        { value: 'female',  label: 'kobieta' },
-        { value: 'male',    label: 'mężczyzna' },
-    ]
 
     return (
         <AdminLayout>
@@ -150,7 +139,7 @@ console.log(dict)
                                 <Err msg={form.errors.bonus} />
                             </Field>
 
-                            <Field label="Zdjęcie (hero)">
+                            <Field label="Zdjęcie">
                                 <input type="file" accept="image/*"
                                        onChange={e=>form.setData('hero_image', e.target.files?.[0] ?? null)} />
                                 <Err msg={form.errors.hero_image} />
@@ -168,24 +157,19 @@ console.log(dict)
                     {/* Nowe: target / doświadczenia / rekrutacja */}
                     <section className="rounded-xl border bg-white p-5">
                         <div className="grid gap-4 md:grid-cols-3">
-                            {/* care_target input */}
-                            <Field label="Grupa podopiecznych (care_target)">
-                                <input className="w-full rounded border px-3 py-2"
-                                       placeholder="np. senior, para, osoba z demencją"
-                                       value={form.data.care_target}
-                                       onChange={e=>form.setData('care_target', e.target.value)} />
-                                <Err msg={(form.errors as any).care_target} />
-                                {/* opcjonalnie: podpowiedzi z dict.care_targets */}
-                                {Array.isArray(dict.care_targets) && dict.care_targets.length > 0 && (
-                                    <div className="mt-2 text-xs text-gray-500">
-                                        Propozycje: {dict.care_targets.slice(0,6).map(ct=>labelOf(ct)).join(', ')}{dict.care_targets.length>6?'…':''}
-                                    </div>
-                                )}
-                            </Field>
+                            {/* care_target jako SELECT (string) */}
+                            <StringSelect
+                                label="Osoba do opieki"
+                                items={dict.care_targets ?? []}
+                                value={form.data.care_target}
+                                onChange={(val)=>form.setData('care_target', val)}
+                                placeholder="—"
+                            />
+                            <Err msg={(form.errors as any).care_target} />
 
                             {/* experience (select single) */}
                             <SingleSelect
-                                label="Doświadczenie (kategoria)"
+                                label="Doświadczenie"
                                 items={dict.experience ?? []}
                                 value={form.data.experience_id}
                                 onChange={(id)=>form.setData('experience_id', id)}
@@ -193,7 +177,7 @@ console.log(dict)
                             />
 
                             {/* experiences (free text) */}
-                            <Field label="Szczegóły doświadczenia (experiences)">
+                            <Field label="Szczegóły doświadczenia">
                                 <input className="w-full rounded border px-3 py-2"
                                        placeholder="np. 2 lata, praca z osobą leżącą"
                                        value={form.data.experiences}
@@ -214,28 +198,40 @@ console.log(dict)
                         </div>
                     </section>
 
-                    {/* Parametry opieki (selecty) */}
+                    {/* Parametry opieki */}
                     <section className="rounded-xl border bg-white p-5">
                         <div className="grid gap-4 md:grid-cols-3">
-                            {/* Płeć (select) */}
+                            {/* Płeć */}
+                            {/* Płeć podopiecznego (z bazy) */}
                             <Field label="Płeć podopiecznego">
-                                <select className="w-full rounded border px-3 py-2"
-                                        value={form.data.care_recipient_gender}
-                                        onChange={e=>form.setData('care_recipient_gender', e.target.value as any)}>
-                                    {genderOptions.map(opt=>(
-                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                <select
+                                    className="w-full rounded border px-3 py-2"
+                                    value={form.data.care_recipient_gender}
+                                    onChange={e=>form.setData('care_recipient_gender', e.target.value as any)}
+                                >
+                                    <option value="">—</option>
+                                    {(dict.genders ?? []).map(g => (
+                                        <option key={g.id} value={g.code}>
+                                            {labelOf(g)}
+                                        </option>
                                     ))}
                                 </select>
                                 <Err msg={form.errors.care_recipient_gender} />
                             </Field>
 
-                            {/* Mobilność (select) */}
+
+                            {/* Mobilność */}
                             <Field label="Mobilność">
-                                <select className="w-full rounded border px-3 py-2"
-                                        value={form.data.mobility}
-                                        onChange={e=>form.setData('mobility', e.target.value as any)}>
-                                    {mobilityOptions.map(opt=>(
-                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                <select
+                                    className="w-full rounded border px-3 py-2"
+                                    value={form.data.mobility}
+                                    onChange={e=>form.setData('mobility', e.target.value as any)}
+                                >
+                                    <option value="">—</option>
+                                    {(dict.mobilities ?? []).map((m)=>(
+                                        <option key={m.id} value={m.code}>
+                                            {labelOf(m)}
+                                        </option>
                                     ))}
                                 </select>
                                 <Err msg={form.errors.mobility} />
@@ -378,6 +374,33 @@ function SingleSelect({
                 {(items ?? []).map(it=>(
                     <option key={it.id} value={it.id}>{labelOf(it)}</option>
                 ))}
+            </select>
+        </Field>
+    )
+}
+
+/** Select, który zapisuje STRING (etykietę) do pola (np. care_target) */
+function StringSelect({
+                          label, items, value, onChange, placeholder='—'
+                      }:{
+    label: string;
+    items: any[];
+    value: string;
+    onChange: (val:string)=>void;
+    placeholder?: string;
+}) {
+    return (
+        <Field label={label}>
+            <select
+                className="w-full rounded border px-3 py-2"
+                value={value ?? ''}
+                onChange={e=>onChange(e.target.value)}
+            >
+                <option value="">{placeholder}</option>
+                {(items ?? []).map(it=>{
+                    const lbl = labelOf(it)
+                    return <option key={it.id} value={lbl}>{lbl}</option>
+                })}
             </select>
         </Field>
     )
