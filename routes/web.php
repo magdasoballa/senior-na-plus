@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\Consents\FormController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\Dictionaries\CareTargetController;
 use App\Http\Controllers\Admin\Dictionaries\DutyController;
 use App\Http\Controllers\Admin\Dictionaries\ExperienceController;
@@ -73,17 +74,11 @@ Route::get('/offers', [OfferController::class, 'index'])->name('offers.index');
 Route::get('/aplikacja/{offer}', [ApplicationController::class, 'create'])->name('application.create');
 Route::post('/aplikuj', [ApplicationController::class, 'store'])->name('application.store');
 
-Route::middleware(['auth', 'verified'])->get('/dashboard', function () {
-    $user = Auth::user();
-    $isAdmin = (bool)($user->is_admin ?? false);
+Route::middleware(['auth', 'verified'])->get('/admin', [DashboardController::class, 'index'])
+    ->name('admin.dashboard');
 
-    return Inertia::render('dashboard', [
-        'isAdmin' => $isAdmin,
-        'stats' => $isAdmin ? [
-            'offers' => \App\Models\Offer::count(),
-            'applications' => \App\Models\Application::count(),
-        ] : null,
-    ]);
+Route::middleware(['auth', 'verified'])->get('/dashboard', function () {
+    return redirect()->route('admin.dashboard');
 })->name('dashboard');
 
 // PUBLIC section (poza grupą /admin)

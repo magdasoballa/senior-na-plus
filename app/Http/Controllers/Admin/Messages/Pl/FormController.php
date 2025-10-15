@@ -3,49 +3,62 @@
 namespace App\Http\Controllers\Admin\Messages\Pl;
 
 use App\Http\Controllers\Controller;
-use App\Models\FormSubmission;
+use App\Models\Application;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class FormController extends Controller
 {
-    private string $locale = 'pl';
-
-    // dodane 'experience' do sortowalnych kolumn
-    private array $sortable = [
-        'id','full_name','email','phone','language_level','experience','created_at','is_read'
+    // aliasy z frontu -> realne kolumny w DB
+    private array $colMap = [
+        'id'             => 'applications.id',
+        'full_name'      => 'applications.name',
+        'email'          => 'applications.email',
+        'phone'          => 'applications.phone',
+        'language_level' => 'applications.language_level',
+        'experience'     => 'applications.experience',
+        'created_at'     => 'applications.created_at',
+        // 'is_read' — nie istnieje w DB; nie sortujemy po nim
     ];
 
     public function index(Request $request)
     {
         $filters = [
-            'q'          => $request->string('q')->toString(),
-            'level'      => $request->string('level')->toString(),
-            'experience' => $request->string('experience')->toString(), // NOWE
-            'read'       => $request->string('read')->toString(),       // '' | '1' | '0'
-            'per_page'   => (int)($request->input('per_page', 25)),
-            'sort'       => $request->string('sort')->toString() ?: 'created_at',
-            'dir'        => $request->string('dir')->toString() ?: 'desc',
+            'q'          => (string)$request->query('q', ''),
+            'level'      => (string)$request->query('level', ''),
+            'experience' => (string)$request->query('experience', ''),
+            'read'       => (string)$request->query('read', ''),   // ignorujemy – brak kolumny
+            'per_page'   => (int)$request->query('per_page', 25),
+            'sort'       => (string)$request->query('sort', 'created_at'),
+            'dir'        => strtolower((string)$request->query('dir', 'desc')) === 'asc' ? 'asc' : 'desc',
         ];
 
-        $sort = in_array($filters['sort'], $this->sortable, true) ? $filters['sort'] : 'created_at';
-        $dir  = $filters['dir'] === 'asc' ? 'asc' : 'desc';
-        $pp   = max(5, min(200, $filters['per_page'] ?: 25));
+        $sortCol = $this->colMap[$filters['sort']] ?? 'applications.created_at';
 
-        $rows = FormSubmission::query()
-            ->where('locale', $this->locale)
-            ->when($filters['q'], function ($q, $term) {
-                $q->where(function ($x) use ($term) {
-                    $x->where('full_name', 'like', "%{$term}%")
-                        ->orWhere('email', 'like', "%{$term}%")
-                        ->orWhere('phone', 'like', "%{$term}%");
+        $rows = Application::query()
+            ->selectRaw("
+                applications.id,
+                applications.name as full_name,
+                applications.email,
+                applications.phone,
+                applications.language_level,
+                applications.experience,
+                applications.created_at,
+                0 as is_read
+            ")
+            ->when($filters['q'] !== '', function ($q) use ($filters) {
+                $t = $filters['q'];
+                $q->where(function ($qq) use ($t) {
+                    $qq->where('applications.name',  'like', "%{$t}%")
+                        ->orWhere('applications.email', 'like', "%{$t}%")
+                        ->orWhere('applications.phone', 'like', "%{$t}%");
                 });
             })
-            ->when($filters['level'] !== '', fn($q) => $q->where('language_level', $filters['level']))
-            ->when($filters['experience'] !== '', fn($q) => $q->where('experience', $filters['experience']))
-            ->when($filters['read'] !== '', fn($q) => $q->where('is_read', $filters['read'] === '1'))
-            ->orderBy($sort, $dir)
-            ->paginate($pp)
+            ->when($filters['level'] !== '', fn($q) => $q->where('applications.language_level', $filters['level']))
+            ->when($filters['experience'] !== '', fn($q) => $q->where('applications.experience', $filters['experience']))
+            // UWAGA: brak kolumny is_read — filtr 'read' ignorujemy.
+            ->orderBy($sortCol, $filters['dir'])
+            ->paginate(max(5, min(200, $filters['per_page'])))
             ->withQueryString();
 
         return Inertia::render('Admin/messages/pl/forms/Index', [
@@ -54,92 +67,78 @@ class FormController extends Controller
         ]);
     }
 
-    public function show(FormSubmission $form)
+    public function show(Application $form)
     {
-        abort_unless($form->locale === $this->locale, 404);
-
+        // dopasowane pola do widoku Show (możesz rozszerzyć według potrzeb)
         return Inertia::render('Admin/messages/pl/forms/Show', [
             'form' => [
                 'id'                   => $form->id,
-                'full_name'            => $form->full_name,
+                'full_name'            => $form->name,
                 'email'                => $form->email,
                 'phone'                => $form->phone,
                 'language_level'       => $form->language_level,
-                'profession_trained'   => $form->profession_trained,
-                'profession_performed' => $form->profession_performed,
+                'profession_trained'   => $form->education ?? null,           // jeśli masz inne nazwy – podmień
+                'profession_performed' => $form->current_profession ?? null,
                 'experience'           => $form->experience,
-                'skills'               => $form->skills,
-                'salary'               => $form->salary,
-                'references'           => $form->references,
-                'consents'             => $form->consents,
-                'is_read'              => (bool)$form->is_read,
+                'skills'               => null,                                // brak w DB – zostaw null/[] jeśli potrzebne
+                'salary'               => $form->salary_expectations ?? null,
+                'references'           => $form->references_path ?? null,
+                'is_read'              => false,                               // brak kolumny
                 'created_at'           => optional($form->created_at)->toIso8601String(),
             ],
         ]);
     }
 
-    public function edit(FormSubmission $form)
+    public function edit(Application $form)
     {
-        abort_unless($form->locale === $this->locale, 404);
-
         return Inertia::render('Admin/messages/pl/forms/Edit', [
             'form' => [
                 'id'                   => $form->id,
-                'full_name'            => $form->full_name,
+                'full_name'            => $form->name,
                 'email'                => $form->email,
                 'phone'                => $form->phone,
                 'language_level'       => $form->language_level,
-                'profession_trained'   => $form->profession_trained,
-                'profession_performed' => $form->profession_performed,
+                'profession_trained'   => $form->education ?? null,
+                'profession_performed' => $form->current_profession ?? null,
                 'experience'           => $form->experience,
-                'skills'               => $form->skills ?? [],
-                'salary'               => $form->salary,
-                'references'           => $form->references,
-                'is_read'              => (bool)$form->is_read,
+                'skills'               => [],   // brak kolumny — dostosuj, jeśli dodasz
+                'salary'               => $form->salary_expectations ?? null,
+                'references'           => $form->references_path ?? null,
+                'is_read'              => false,
                 'created_at'           => optional($form->created_at)->toIso8601String(),
             ],
         ]);
     }
 
-    public function update(Request $request, FormSubmission $form)
+    public function update(Request $request, Application $form)
     {
-        abort_unless($form->locale === $this->locale, 404);
-
+        // minimalna walidacja pod dane, które realnie istnieją
         $data = $request->validate([
             'full_name'            => ['required','string','max:255'],
             'email'                => ['required','email','max:255'],
             'phone'                => ['nullable','string','max:255'],
             'language_level'       => ['nullable','string','max:255'],
-            'profession_trained'   => ['nullable','string','max:255'],
-            'profession_performed' => ['nullable','string','max:255'],
-            'experience'           => ['nullable','string','max:255'], // NOWE
-            'skills'               => ['nullable','array'],
-            'skills.*'             => ['string','max:255'],
+            'experience'           => ['nullable','string','max:255'],
             'salary'               => ['nullable','string','max:255'],
-            'references'           => ['nullable','string'],
-            'is_read'              => ['sometimes','boolean'],
         ]);
 
-        $form->update($data);
+        // mapowanie z aliasów do kolumn
+        $form->update([
+            'name'               => $data['full_name'],
+            'email'              => $data['email'],
+            'phone'              => $data['phone'] ?? null,
+            'language_level'     => $data['language_level'] ?? null,
+            'experience'         => $data['experience'] ?? null,
+            'salary_expectations'=> $data['salary'] ?? null,
+        ]);
 
-        return $request->boolean('stay')
-            ? back()->with('success','Zaktualizowano.')
-            : to_route('admin.msg.pl.forms.index')->with('success','Zaktualizowano.');
+        return to_route('admin.msg.pl.forms.index')->with('success','Zaktualizowano.');
     }
 
-    public function destroy(FormSubmission $form)
+    public function destroy(Application $form)
     {
-        abort_unless($form->locale === $this->locale, 404);
         $form->delete();
-
         return to_route('admin.msg.pl.forms.index')->with('success','Usunięto.');
     }
 
-    public function toggleRead(FormSubmission $form)
-    {
-        abort_unless($form->locale === $this->locale, 404);
-        $form->update(['is_read' => ! $form->is_read]);
-
-        return back(303);
-    }
 }

@@ -16,7 +16,7 @@ export function AppContent({ variant = 'header', children, ...props }: AppConten
     // widoki publiczne – modal zamontowany globalnie
     return (
         <div className="flex min-h-screen flex-col">
-            <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-4 rounded-xl" {...props}>
+            <main className="mx-auto flex w-full max-w-8xl flex-1 flex-col gap-4 rounded-xl" {...props}>
                 {children}
             </main>
 

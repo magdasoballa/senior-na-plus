@@ -14,6 +14,7 @@ use App\Models\CareTarget;
 use App\Models\Mobility;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use App\Models\Gender;
@@ -23,25 +24,30 @@ class OfferController extends Controller
     public function index(Request $request)
     {
         $search  = trim((string) $request->query('search', ''));
-        $perPage = (int) $request->query('per_page', 20);
-        $perPage = in_array($perPage, [10, 20, 50, 100], true) ? $perPage : 20;
+        $perPage = in_array((int)$request->query('per_page', 20), [10,20,50,100], true) ? (int)$request->query('per_page', 20) : 20;
+        $allowedSorts = ['created_at','title','city','country','language'];
+        $sort = in_array($request->query('sort', 'created_at'), $allowedSorts, true) ? $request->query('sort', 'created_at') : 'created_at';
+        $dir  = strtolower((string)$request->query('dir', 'desc')) === 'asc' ? 'asc' : 'desc';
 
-        $allowedSorts = ['created_at', 'title', 'city', 'country', 'language'];
-        $sort = $request->query('sort', 'created_at');
-        $sort = in_array($sort, $allowedSorts, true) ? $sort : 'created_at';
-
-        $dir = strtolower((string) $request->query('dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+        // licz tylko to, co na pewno masz w DB
+        $counts = ['duties','requirements','perks'];
+        if (Schema::hasTable('offer_skill')) {
+            $counts[] = 'skills';
+        }
+        if (Schema::hasTable('offer_recruitment_requirement')) {
+            $counts[] = 'recruitmentRequirements';
+        }
 
         $offers = Offer::query()
             ->when($search !== '', function ($q) use ($search) {
                 $q->where(function ($qq) use ($search) {
-                    $qq->where('title', 'like', "%{$search}%")
-                        ->orWhere('city', 'like', "%{$search}%")
-                        ->orWhere('country', 'like', "%{$search}%")
-                        ->orWhere('language', 'like', "%{$search}%");
+                    $qq->where('title','like',"%{$search}%")
+                        ->orWhere('city','like',"%{$search}%")
+                        ->orWhere('country','like',"%{$search}%")
+                        ->orWhere('language','like',"%{$search}%");
                 });
             })
-            ->withCount(['duties','requirements','perks','skills','recruitmentRequirements'])
+            ->withCount($counts)
             ->orderBy($sort, $dir)
             ->paginate($perPage)
             ->withQueryString();
@@ -56,11 +62,14 @@ class OfferController extends Controller
                     'language' => $o->language,
                     'wage'     => $o->wage,
                     'created_at' => $o->created_at,
-                    'duties_count'                  => $o->duties_count,
-                    'requirements_count'            => $o->requirements_count,
-                    'perks_count'                   => $o->perks_count,
-                    'skills_count'                  => $o->skills_count,
-                    'recruitment_requirements_count'=> $o->recruitment_requirements_count,
+
+                    'duties_count'       => $o->duties_count,
+                    'requirements_count' => $o->requirements_count,
+                    'perks_count'        => $o->perks_count,
+
+                    // jeżeli pivotów nie ma, te pola będą null — daj fallback 0
+                    'skills_count'                   => $o->skills_count ?? 0,
+                    'recruitment_requirements_count' => $o->recruitment_requirements_count ?? 0,
                 ];
             }),
             'filters' => [

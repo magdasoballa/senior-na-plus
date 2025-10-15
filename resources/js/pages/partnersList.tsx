@@ -2,6 +2,7 @@ import * as React from "react";
 import AppLayout from "@/layouts/app-layout";
 import { Link, usePage } from "@inertiajs/react";
 import { ArrowLeft } from "lucide-react";
+import AdminLayout from '@/layouts/admin-layout';
 
 type Partner = {
     id: string;
@@ -46,7 +47,7 @@ export default function PartnersList({
         : null;
 
     return (
-        <AppLayout>
+        <AdminLayout>
             <div className={`bg-white py-12 ${className}`}>
                 <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
                     {/* Strzałka powrotu */}
@@ -128,7 +129,7 @@ export default function PartnersList({
                     </div>
                 </div>
             </div>
-        </AppLayout>
+        </AdminLayout>
     );
 }
 

@@ -340,3 +340,7 @@ ol {
         text-decoration: underline;
     }
 }
+
+html, body {
+    overflow-x: hidden;
+}

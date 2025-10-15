@@ -164,8 +164,10 @@ export default function Index() {
                 </form>
 
                 {/* Tabela */}
-                <div className="mt-4 overflow-x-auto rounded-xl border bg-white">
-                    <table className="min-w-[1300px] w-full table-auto text-sm">
+                <div className="mt-4 rounded-xl border bg-white">
+                    <div className="w-full max-w-full overflow-x-auto">     {/* WĄSKI wrapper na scroll */}
+
+                        <table className="min-w-[1300px] w-full table-auto text-sm">
                         <thead className="bg-slate-50 text-slate-600">
                         <tr>
                             <th className="w-16 px-4">
@@ -257,7 +259,7 @@ export default function Index() {
                         )}
                         </tbody>
                     </table>
-
+                    </div>
                     {/* Paginacja */}
                     <div className="flex items-center justify-between border-t px-4 py-3 text-sm text-slate-600">
                         <span>{rangeInfo(forms)}</span>

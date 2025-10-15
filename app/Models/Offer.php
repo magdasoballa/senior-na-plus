@@ -36,19 +36,19 @@ class Offer extends Model
         'lives_alone' => 'boolean',
     ];
 
-    public function duties(): BelongsToMany
+    public function duties()
     {
-        return $this->belongsToMany(\App\Models\Duty::class, 'offer_duty', 'offer_id', 'duty_id');
+        return $this->belongsToMany(Duty::class, 'offer_duty', 'offer_id', 'duty_id');
     }
 
-    public function requirements(): BelongsToMany
+    public function requirements()
     {
-        return $this->belongsToMany(\App\Models\OfferRequirement::class, 'offer_requirement', 'offer_id', 'offer_requirement_id');
+        return $this->belongsToMany(OfferRequirement::class, 'offer_requirement', 'offer_id', 'offer_requirement_id');
     }
 
-    public function perks(): BelongsToMany
+    public function perks()
     {
-        return $this->belongsToMany(\App\Models\OfferPerk::class, 'offer_perk', 'offer_id', 'offer_perk_id');
+        return $this->belongsToMany(OfferPerk::class, 'offer_perk', 'offer_id', 'offer_perk_id');
     }
 
     public function applications()
@@ -59,5 +59,12 @@ class Offer extends Model
     public function skills()
     {
         return $this->belongsToMany(Skill::class);
+    }
+
+    public function recruitmentRequirements()
+    {
+
+        return $this->belongsToMany(RecruitmentRequirement::class)
+            ->withTimestamps();
     }
 }

@@ -9,7 +9,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <AppLayout>
             <div className="flex min-h-[calc(100vh-64px)]">
                 <AdminSidebar />
-                <main className="flex-1 p-6">{children}</main>
+                {/* <- to zmieniamy */}
+                <main className="flex-1 min-w-0 overflow-x-hidden p-6">
+                    {children}
+                </main>
             </div>
         </AppLayout>
     )
@@ -70,13 +73,13 @@ function AdminSidebar() {
             title: 'Wiadomości',
             items: [
                 { kind: 'label', label: 'WERSJA PL' },
-                { label: 'Kontakty Front (pl)',  href: '/admin/messages/pl/front-contacts' },
+                // { label: 'Kontakty Front (pl)',  href: '/admin/messages/pl/front-contacts' },
                 { label: 'Kontakty Strona (pl)', href: '/admin/messages/pl/site-contacts' },
                 { label: 'Formularze (pl)',      href: '/admin/messages/pl/forms' },
 
-                { kind: 'label', label: 'WERSJA DE' },
-                { label: 'Kontakty Strona (de)', href: '/admin/messages/de/site-contacts' },
-                { label: 'Formularze (de)',      href: '/admin/messages/de/forms' },
+                // { kind: 'label', label: 'WERSJA DE' },
+                // { label: 'Kontakty Strona (de)', href: '/admin/messages/de/site-contacts' },
+                // { label: 'Formularze (de)',      href: '/admin/messages/de/forms' },
             ],
         },
         { title: 'Partnerzy',   items: [{ label: 'Partnerzy',   href: '/admin/partners' }] },

@@ -208,7 +208,8 @@ class HandleInertiaRequests extends Middleware
             'sidebarOpen' => ! $request->hasCookie('sidebar_state')
                 || $request->cookie('sidebar_state') === 'true',
 
-            'msg_badges' => Cache::remember('admin.msg_badges', 5, fn () => $this->messageBadgesSafe()),
+
+            'msg_badges' => Cache::remember('admin.msg_badges_v2', 5, fn () => $this->messageBadgesSafe()),
 
             // --> dane do frontu (Footer itp.)
             'portal' => [
@@ -232,39 +233,40 @@ class HandleInertiaRequests extends Middleware
     protected function messageBadgesSafe(): array
     {
         try {
-            // PL
-            $plFront = (int) DB::table('front_contacts')->where('is_read', 0)->count();
+            // --- Kontakty Strona (PL) ---
+            // Preferuj nową tabelę contact_messages; jeśli jej nie ma, fallback do site_contacts.
+            if (\Illuminate\Support\Facades\Schema::hasTable('contact_messages')) {
+                $plSite = (int) \Illuminate\Support\Facades\DB::table('contact_messages')->count();
+            } else {
+                $q = \Illuminate\Support\Facades\DB::table('site_contacts');
+                if (\Illuminate\Support\Facades\Schema::hasColumn('site_contacts', 'locale')) {
+                    $q->where('locale', 'pl');
+                }
+                // jeśli nie masz kolumny is_read – usuń ten warunek
+                if (\Illuminate\Support\Facades\Schema::hasColumn('site_contacts', 'is_read')) {
+                    // jeśli chcesz liczyć wszystkie, usuń tę linię:
+                    // $q->where('is_read', 0);
+                }
+                $plSite = (int) $q->count();
+            }
 
-            $plSiteQ = DB::table('site_contacts')->where('is_read', 0);
-            if (Schema::hasColumn('site_contacts', 'locale')) $plSiteQ->where('locale', 'pl');
-            $plSite = (int) $plSiteQ->count();
-
-            $plFormsQ = DB::table('site_forms')->where('is_read', 0);
-            if (Schema::hasColumn('site_forms', 'locale')) $plFormsQ->where('locale', 'pl');
+            // --- Formularze (PL) -> applications (jak w liście) ---
+            $plFormsQ = \Illuminate\Support\Facades\DB::table('applications');
+            if (\Illuminate\Support\Facades\Schema::hasColumn('applications', 'status')) {
+                $plFormsQ->where('status', 'new'); // jeżeli lista pokazuje „new”; usuń jeśli ma być total
+            }
             $plForms = (int) $plFormsQ->count();
 
-            // DE
-            $deSite = Schema::hasTable('de_site_contacts')
-                ? (int) DB::table('de_site_contacts')->where('is_read', 0)->count()
-                : (Schema::hasColumn('site_contacts', 'locale')
-                    ? (int) DB::table('site_contacts')->where('locale', 'de')->where('is_read', 0)->count()
-                    : 0);
-
-            $deForms = Schema::hasTable('de_forms')
-                ? (int) DB::table('de_forms')->where('is_read', 0)->count()
-                : (Schema::hasColumn('site_forms', 'locale')
-                    ? (int) DB::table('site_forms')->where('locale', 'de')->where('is_read', 0)->count()
-                    : 0);
-
             return [
-                '/admin/messages/pl/front-contacts' => $plFront,
-                '/admin/messages/pl/site-contacts'  => $plSite,
-                '/admin/messages/pl/forms'          => $plForms,
-                '/admin/messages/de/site-contacts'  => $deSite,
-                '/admin/messages/de/forms'          => $deForms,
+                '/admin/messages/pl/site-contacts' => $plSite,
+                '/admin/messages/pl/forms'         => $plForms,
             ];
         } catch (\Throwable $e) {
             return [];
         }
     }
+
+
+
+
 }
