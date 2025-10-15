@@ -32,7 +32,6 @@ function normalizeUrl(v?: string | null): string | null {
 
 export default function FooterCard(props: Props) {
     const { portal } = usePage().props as any;
-    console.log(props.facebookUrl);
 
     // 1) Najpierw baza (portal), potem propsy; brak twardych defaultów dla linków
     const brand = props.brand ?? portal?.brand ?? "Senior na plus";

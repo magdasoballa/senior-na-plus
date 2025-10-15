@@ -7,6 +7,7 @@ use App\Models\Offer;
 use App\Models\Duty;
 use App\Models\OfferRequirement;
 use App\Models\OfferPerk;
+use App\Models\Skill;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -72,6 +73,10 @@ class OfferController extends Controller
                 'duties'       => Duty::orderBy('position')->get(['id','name']),
                 'requirements' => OfferRequirement::orderBy('position')->get(['id','name']),
                 'perks'        => OfferPerk::orderBy('position')->get(['id','name']),
+                'skills'       => Skill::select('id','name_pl','name_de','is_visible_pl','is_visible_de')
+                    ->where('is_visible_pl', true)
+                    ->orderBy('position')
+                    ->get(),
             ],
         ]);
     }

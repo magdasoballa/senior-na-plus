@@ -93,10 +93,8 @@ class HandleInertiaRequests extends Middleware
         */
         // === SOCIAL LINKS z bazy -> props.portal.socials ===
         $socials = Cache::remember("portal.social_links.$locale", 300, function () use ($locale) {
-            \Log::info('=== SOCIAL LINKS PROCESSING START ===');
 
             if (!Schema::hasTable('social_links')) {
-                \Log::warning('Social links table does not exist');
                 return ['facebook' => null, 'instagram' => null, 'linkedin' => null];
             }
 
@@ -104,36 +102,28 @@ class HandleInertiaRequests extends Middleware
                 ->when(Schema::hasColumn('social_links', 'position'), fn($q) => $q->orderBy('position'))
                 ->get();
 
-            \Log::info('Raw social links data from database:', [
-                'row_count' => $rows->count(),
-                'rows' => $rows->toArray()
-            ]);
+
 
             $normUrl = function (?string $u): ?string {
                 $u = trim((string) $u);
                 if ($u === '') {
-                    \Log::debug('URL is empty');
                     return null;
                 }
                 if (!preg_match('#^https?://#i', $u)) {
                     $u = 'https://' . ltrim($u, '/');
-                    \Log::debug('URL normalized to: ' . $u);
                 }
                 return $u;
             };
 
             $resolvePlatform = function ($row, string $url): ?string {
                 $platform = strtolower(trim((string) ($row->name ?? '')));
-                \Log::debug('Platform from name: "' . $platform . '"');
 
                 if ($platform === '') {
                     $platform = strtolower(trim((string) ($row->icon ?? '')));
-                    \Log::debug('Platform from icon: "' . $platform . '"');
                 }
 
                 if ($platform === '') {
                     $host = strtolower((string) parse_url($url, PHP_URL_HOST));
-                    \Log::debug('Platform from host: "' . $host . '"');
                     if (str_contains($host, 'facebook.com'))      $platform = 'facebook';
                     elseif (str_contains($host, 'instagram.com')) $platform = 'instagram';
                     elseif (str_contains($host, 'linkedin.com'))  $platform = 'linkedin';
@@ -145,12 +135,10 @@ class HandleInertiaRequests extends Middleware
                     'ln' => 'linkedin', 'linked-in' => 'linkedin', 'linkedin' => 'linkedin',
                 ];
                 $result = $aliases[$platform] ?? ($platform ?: null);
-                \Log::debug('Final platform: "' . $result . '"');
                 return $result;
             };
 
             $visibleCol = $locale === 'de' ? 'visible_de' : 'visible_pl';
-            \Log::info('Using visibility column: ' . $visibleCol);
 
             $pickVisible = ['facebook' => null, 'instagram' => null, 'linkedin' => null];
             $pickAny     = ['facebook' => null, 'instagram' => null, 'linkedin' => null];
@@ -163,24 +151,20 @@ class HandleInertiaRequests extends Middleware
 
                 // ZMIANA TUTAJ - sprawdzaj czy platforma jest poprawna
                 if ($platform === null || !in_array($platform, ['facebook', 'instagram', 'linkedin'])) {
-                    \Log::warning('Platform not allowed: ' . ($platform ?? 'NULL'));
                     continue;
                 }
 
                 if ($pickAny[$platform] === null) {
                     $pickAny[$platform] = $url;
-                    \Log::debug('Added to pickAny: ' . $platform . ' -> ' . $url);
                 }
 
                 $isVisible = true;
                 if (Schema::hasColumn('social_links', 'visible_pl') && Schema::hasColumn('social_links', 'visible_de')) {
                     $isVisible = (bool) ($r->{$visibleCol} ?? false);
-                    \Log::debug('Visibility for ' . $platform . ': ' . ($isVisible ? 'VISIBLE' : 'HIDDEN'));
                 }
 
                 if ($isVisible && $pickVisible[$platform] === null) {
                     $pickVisible[$platform] = $url;
-                    \Log::info('ADDED TO VISIBLE: ' . $platform . ' -> ' . $url);
                 }
             }
 
@@ -190,11 +174,7 @@ class HandleInertiaRequests extends Middleware
                 'linkedin' => $pickVisible['linkedin'] ,
             ];
 
-            \Log::info('=== SOCIAL LINKS FINAL RESULT ===', [
-                'pickVisible' => $pickVisible,
-                'pickAny' => $pickAny,
-                'final_socials' => $finalResult
-            ]);
+
 
             return $finalResult;
         });
@@ -284,7 +264,6 @@ class HandleInertiaRequests extends Middleware
                 '/admin/messages/de/forms'          => $deForms,
             ];
         } catch (\Throwable $e) {
-            \Log::error('msg_badges error: ' . $e->getMessage());
             return [];
         }
     }

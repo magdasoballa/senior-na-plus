@@ -20,4 +20,9 @@ class Skill extends Model
     {
         return (string) ($this->name_pl ?? '');
     }
+
+    public function offers()
+    {
+        return $this->belongsToMany(Offer::class);
+    }
 }

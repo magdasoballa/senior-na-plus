@@ -2,14 +2,31 @@ import AdminLayout from '@/layouts/admin-layout'
 import { Link, useForm, usePage } from '@inertiajs/react'
 import * as React from 'react'
 
-type DictItem = { id:number; name:string }
-type PageProps = { dict: { duties:DictItem[]; requirements:DictItem[]; perks:DictItem[] } }
+type BasicItem = { id:number; name:string }
+type SkillItem  = { id:number; name_pl:string; name_de:string; is_visible_pl:boolean; is_visible_de:boolean }
+
+type PageProps = {
+    dict: {
+        duties: BasicItem[];
+        requirements: BasicItem[];
+        perks: BasicItem[];
+        skills: SkillItem[];
+        // nowe — opcjonalne (jeśli backend je dośle, użyjemy ich)
+        care_targets?: BasicItem[];
+        mobilities?: BasicItem[];                 // np. [{id:1,name:'mobilny'}] – opcjonalne
+        experience?: BasicItem[];                 // pojedynczy wybór doświadczenia
+        recruitment_requirements?: BasicItem[];   // multi
+    }
+}
 
 const BASE = '/admin/offers'
 
+// etykieta wspólna: obsłuży {name} i {name_pl}
+const labelOf = (it:any) => it?.name ?? it?.name_pl ?? ''
+
 export default function Create(){
     const { dict } = usePage<PageProps>().props
-
+console.log(dict)
     const form = useForm({
         // podstawowe
         title: '', description: '',
@@ -20,10 +37,17 @@ export default function Create(){
         lives_alone: false,
         hero_image: null as File | null,
 
+        // nowe pola
+        care_target: '',                  // input
+        experience_id: null as number|null, // select (single)
+        experiences: '',                  // input (free text / doprecyzowanie)
+        recruitment_requirements: [] as number[], // select (multi)
+
         // słowniki (tablice ID)
         duties: [] as number[],
         requirements: [] as number[],
         perks: [] as number[],
+        skills: [] as number[],
     })
 
     const submit = (e:React.FormEvent)=>{
@@ -31,11 +55,21 @@ export default function Create(){
         form.post(`${BASE}`, { forceFormData: true, preserveScroll:true })
     }
 
-    const toggleId = (field:'duties'|'requirements'|'perks', id:number, checked:boolean)=>{
-        const set = new Set(form.data[field])
-        checked ? set.add(id) : set.delete(id)
-        form.setData(field, Array.from(set))
-    }
+    // fallback dla mobilności (gdy nie ma dict.mobilities)
+    const mobilityOptions: {value:string; label:string}[] =
+        dict.mobilities?.map(m => ({ value: String(m.id), label: labelOf(m) })) ?? [
+            { value: '',         label: '—' },
+            { value: 'mobile',   label: 'mobilny' },
+            { value: 'limited',  label: 'ograniczona' },
+            { value: 'immobile', label: 'niemobilny' },
+        ]
+
+    // płeć — zawsze stałe
+    const genderOptions = [
+        { value: '',        label: '—' },
+        { value: 'female',  label: 'kobieta' },
+        { value: 'male',    label: 'mężczyzna' },
+    ]
 
     return (
         <AdminLayout>
@@ -131,64 +165,131 @@ export default function Create(){
                         </Field>
                     </section>
 
-                    {/* Parametry opieki */}
+                    {/* Nowe: target / doświadczenia / rekrutacja */}
                     <section className="rounded-xl border bg-white p-5">
                         <div className="grid gap-4 md:grid-cols-3">
+                            {/* care_target input */}
+                            <Field label="Grupa podopiecznych (care_target)">
+                                <input className="w-full rounded border px-3 py-2"
+                                       placeholder="np. senior, para, osoba z demencją"
+                                       value={form.data.care_target}
+                                       onChange={e=>form.setData('care_target', e.target.value)} />
+                                <Err msg={(form.errors as any).care_target} />
+                                {/* opcjonalnie: podpowiedzi z dict.care_targets */}
+                                {Array.isArray(dict.care_targets) && dict.care_targets.length > 0 && (
+                                    <div className="mt-2 text-xs text-gray-500">
+                                        Propozycje: {dict.care_targets.slice(0,6).map(ct=>labelOf(ct)).join(', ')}{dict.care_targets.length>6?'…':''}
+                                    </div>
+                                )}
+                            </Field>
+
+                            {/* experience (select single) */}
+                            <SingleSelect
+                                label="Doświadczenie (kategoria)"
+                                items={dict.experience ?? []}
+                                value={form.data.experience_id}
+                                onChange={(id)=>form.setData('experience_id', id)}
+                                placeholder="—"
+                            />
+
+                            {/* experiences (free text) */}
+                            <Field label="Szczegóły doświadczenia (experiences)">
+                                <input className="w-full rounded border px-3 py-2"
+                                       placeholder="np. 2 lata, praca z osobą leżącą"
+                                       value={form.data.experiences}
+                                       onChange={e=>form.setData('experiences', e.target.value)} />
+                                <Err msg={(form.errors as any).experiences} />
+                            </Field>
+                        </div>
+
+                        {/* recruitment requirements (multi) */}
+                        <div className="mt-6">
+                            <MultiSelect
+                                label="Wymagania rekrutacyjne"
+                                items={dict.recruitment_requirements ?? []}
+                                value={form.data.recruitment_requirements}
+                                onChange={ids => form.setData('recruitment_requirements', ids)}
+                            />
+                            <Err msg={(form.errors as any).recruitment_requirements} />
+                        </div>
+                    </section>
+
+                    {/* Parametry opieki (selecty) */}
+                    <section className="rounded-xl border bg-white p-5">
+                        <div className="grid gap-4 md:grid-cols-3">
+                            {/* Płeć (select) */}
                             <Field label="Płeć podopiecznego">
-                                <div className="flex gap-3">
-                                    <label className="inline-flex items-center gap-2">
-                                        <input type="radio" name="gender"
-                                               checked={form.data.care_recipient_gender==='female'}
-                                               onChange={()=>form.setData('care_recipient_gender','female')} />
-                                        kobieta
-                                    </label>
-                                    <label className="inline-flex items-center gap-2">
-                                        <input type="radio" name="gender"
-                                               checked={form.data.care_recipient_gender==='male'}
-                                               onChange={()=>form.setData('care_recipient_gender','male')} />
-                                        mężczyzna
-                                    </label>
-                                </div>
+                                <select className="w-full rounded border px-3 py-2"
+                                        value={form.data.care_recipient_gender}
+                                        onChange={e=>form.setData('care_recipient_gender', e.target.value as any)}>
+                                    {genderOptions.map(opt=>(
+                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                    ))}
+                                </select>
                                 <Err msg={form.errors.care_recipient_gender} />
                             </Field>
 
+                            {/* Mobilność (select) */}
                             <Field label="Mobilność">
                                 <select className="w-full rounded border px-3 py-2"
                                         value={form.data.mobility}
                                         onChange={e=>form.setData('mobility', e.target.value as any)}>
-                                    <option value="">—</option>
-                                    <option value="mobile">mobilny</option>
-                                    <option value="limited">ograniczona</option>
-                                    <option value="immobile">niemobilny</option>
+                                    {mobilityOptions.map(opt=>(
+                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                    ))}
                                 </select>
                                 <Err msg={form.errors.mobility} />
                             </Field>
 
+                            {/* Mieszka sam */}
                             <Field label="Mieszka sam">
-                                <label className="inline-flex items-center gap-2">
-                                    <input type="checkbox"
-                                           checked={form.data.lives_alone}
-                                           onChange={e=>form.setData('lives_alone', e.target.checked)} />
-                                    {form.data.lives_alone ? 'Tak' : 'Nie'}
-                                </label>
+                                <select className="w-full rounded border px-3 py-2"
+                                        value={form.data.lives_alone ? '1':'0'}
+                                        onChange={e=>form.setData('lives_alone', e.target.value==='1')}>
+                                    <option value="0">Nie</option>
+                                    <option value="1">Tak</option>
+                                </select>
                                 <Err msg={form.errors.lives_alone} />
                             </Field>
                         </div>
                     </section>
 
-                    {/* Słowniki: obowiązki / wymagania / oferujemy */}
+                    {/* Słowniki: wszystko jako selecty (multi) */}
                     <section className="rounded-xl border bg-white p-5">
-                        <h2 className="mb-3 text-lg font-semibold">Obowiązki</h2>
-                        <GridChecks list={dict.duties} selected={form.data.duties}
-                                    onToggle={(id,checked)=>toggleId('duties',id,checked)} />
+                        <div className="grid gap-6 md:grid-cols-3">
+                            <MultiSelect
+                                label="Obowiązki"
+                                items={dict.duties}
+                                value={form.data.duties}
+                                onChange={ids => form.setData('duties', ids)}
+                            />
 
-                        <h2 className="mt-6 mb-3 text-lg font-semibold">Wymagania</h2>
-                        <GridChecks list={dict.requirements} selected={form.data.requirements}
-                                    onToggle={(id,checked)=>toggleId('requirements',id,checked)} />
+                            <MultiSelect
+                                label="Wymagania"
+                                items={dict.requirements}
+                                value={form.data.requirements}
+                                onChange={ids => form.setData('requirements', ids)}
+                            />
 
-                        <h2 className="mt-6 mb-3 text-lg font-semibold">Oferujemy</h2>
-                        <GridChecks list={dict.perks} selected={form.data.perks}
-                                    onToggle={(id,checked)=>toggleId('perks',id,checked)} />
+                            <MultiSelect
+                                label="Oferujemy"
+                                items={dict.perks}
+                                value={form.data.perks}
+                                onChange={ids => form.setData('perks', ids)}
+                            />
+                        </div>
+
+                        <div className="mt-6">
+                            <MultiSelect
+                                label="Umiejętności"
+                                items={dict.skills}
+                                value={form.data.skills}
+                                onChange={ids => form.setData('skills', ids)}
+                                filter={(s:any)=>s.is_visible_pl}
+                                hint="Filtr: tylko widoczne PL. Przytrzymaj Ctrl/Cmd, aby wybrać wiele."
+                            />
+                            <Err msg={form.errors.skills} />
+                        </div>
                     </section>
 
                     {/* Akcje */}
@@ -205,6 +306,8 @@ export default function Create(){
     )
 }
 
+/* ————— helpers ————— */
+
 function Field({label, children, required=false, wide=false}:{label:string; children:React.ReactNode; required?:boolean; wide?:boolean}){
     return (
         <div className={wide ? 'md:col-span-2' : ''}>
@@ -213,20 +316,69 @@ function Field({label, children, required=false, wide=false}:{label:string; chil
         </div>
     )
 }
+
 function Err({msg}:{msg?:string}){ return msg ? <p className="mt-1 text-sm text-rose-600">{msg}</p> : null }
 
-function GridChecks({list, selected, onToggle}:{list:{id:number;name:string}[]; selected:number[]; onToggle:(id:number,checked:boolean)=>void}){
+function MultiSelect({
+                         label, items, value, onChange, hint, filter
+                     }:{
+    label: string;
+    items: any[];
+    value: number[];
+    onChange: (ids:number[])=>void;
+    hint?: string;
+    filter?: (it:any)=>boolean;
+}) {
+    const list = (filter ? items?.filter(filter) : items) ?? []
     return (
-        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {list.map(it=>(
-                <label key={it.id} className="inline-flex items-center gap-2 rounded border bg-[#F5F5F4] px-3 py-2">
-                    <input type="checkbox"
-                           checked={selected.includes(it.id)}
-                           onChange={e=>onToggle(it.id, e.target.checked)} />
-                    <span>{it.name}</span>
-                </label>
-            ))}
-            {list.length===0 && <p className="text-sm text-slate-500">Brak elementów</p>}
-        </div>
+        <Field label={label}>
+            <select
+                multiple
+                className="w-full rounded border px-3 py-2 min-h-[120px]"
+                value={value?.map(String)}
+                onChange={e => {
+                    const selected = Array.from(e.target.selectedOptions, o => parseInt(o.value))
+                    onChange(selected)
+                }}
+            >
+                {list.map(it => (
+                    <option key={it.id} value={it.id}>
+                        {labelOf(it)}
+                    </option>
+                ))}
+            </select>
+            <div className="mt-1 text-xs text-gray-500">
+                {hint ?? 'Przytrzymaj Ctrl (Cmd na Mac), aby wybrać wiele.'}
+            </div>
+        </Field>
+    )
+}
+
+function SingleSelect({
+                          label, items, value, onChange, placeholder='—'
+                      }:{
+    label: string;
+    items: any[];
+    value: number|null;
+    onChange: (id:number|null)=>void;
+    placeholder?: string;
+}) {
+    const v = value===null ? '' : String(value)
+    return (
+        <Field label={label}>
+            <select
+                className="w-full rounded border px-3 py-2"
+                value={v}
+                onChange={e=>{
+                    const val = e.target.value
+                    onChange(val === '' ? null : parseInt(val))
+                }}
+            >
+                <option value="">{placeholder}</option>
+                {(items ?? []).map(it=>(
+                    <option key={it.id} value={it.id}>{labelOf(it)}</option>
+                ))}
+            </select>
+        </Field>
     )
 }
