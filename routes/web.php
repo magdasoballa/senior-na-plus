@@ -383,6 +383,36 @@ Route::get('/partnerzy', function () {
         'isAdmin'  => (bool) optional(auth()->user())->is_admin,
     ]);
 })->name('partners');
+
+Route::get('/debug/offers', function() {
+    $offer = \App\Models\Offer::latest()->first();
+
+    if (!$offer) {
+        return "Brak ofert";
+    }
+
+    $result = [
+        'offer_id' => $offer->id,
+        'title' => $offer->title,
+        'duties_count' => $offer->duties()->count(),
+        'requirements_count' => $offer->requirements()->count(),
+        'perks_count' => $offer->perks()->count(),
+    ];
+
+    // Sprawdź tabele pivot
+    $result['offer_duty'] = \Illuminate\Support\Facades\DB::table('offer_duty')
+        ->where('offer_id', $offer->id)->get()->toArray();
+
+    $result['offer_requirement'] = \Illuminate\Support\Facades\DB::table('offer_requirement')
+        ->where('offer_id', $offer->id)->get()->toArray();
+
+    $result['offer_perk'] = \Illuminate\Support\Facades\DB::table('offer_perk')
+        ->where('offer_id', $offer->id)->get()->toArray();
+
+    return $result;
+});
+
+
 /*
 |--------------------------------------------------------------------------
 | Auth scaffolding

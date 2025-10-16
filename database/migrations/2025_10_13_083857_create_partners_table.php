@@ -6,20 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
+    public function up()
     {
-        Schema::create('partners', function (Blueprint $table) {
-            $table->id();
-            $table->string('link');
-            $table->string('image_path')->nullable();
-            $table->boolean('is_visible')->default(true)->index();
-            $table->unsignedInteger('position')->default(0)->index();
-            $table->timestamps();
-
-        });
+        if (!Schema::hasTable('partners')) {
+            Schema::create('partners', function (Blueprint $table) {
+                $table->id();
+                $table->string('link');
+                $table->string('image_path')->nullable();
+                $table->boolean('is_visible')->default(true);
+                $table->unsignedInteger('position')->default(0);
+                $table->timestamps();
+            });
+        }
     }
 
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('partners');
     }

@@ -4,8 +4,10 @@ import * as React from 'react'
 
 type BasicItem = { id:number; name:string }
 type SkillItem  = { id:number; name_pl:string; name_de:string; is_visible_pl:boolean; is_visible_de:boolean }
-type MobilityItem = { id:number; code:string; name?:string; name_pl?:string }
-type GenderItem = { id:number; code:string; name?:string; name_pl?:string }
+type MobilityItem = { id:number; name_pl:string; name_de:string; is_visible_pl:boolean; is_visible_de:boolean }
+type GenderItem = { id:number; name_pl:string; name_de:string; is_visible_pl:boolean; is_visible_de:boolean }
+type ExperienceItem = { id:number; name_pl:string; is_visible_pl:boolean; is_visible_de:boolean }
+type CareTargetItem = { id:number; name_pl:string; name_de:string; is_visible_pl:boolean; is_visible_de:boolean }
 
 type PageProps = {
     dict: {
@@ -13,52 +15,59 @@ type PageProps = {
         requirements: BasicItem[];
         perks: BasicItem[];
         skills: SkillItem[];
-        care_targets?: BasicItem[];
-        mobilities?: MobilityItem[];
-        experience?: BasicItem[];
-        recruitment_requirements?: BasicItem[];
-        genders?: GenderItem[];
-
+        care_targets: CareTargetItem[];
+        mobilities: MobilityItem[];
+        experience: ExperienceItem[];
+        recruitment_requirements: BasicItem[];
+        genders: GenderItem[];
     }
 }
 
 const BASE = '/admin/offers'
 
-// wspólna etykieta: obsłuży {name} i {name_pl}
 const labelOf = (it:any) => it?.name ?? it?.name_pl ?? ''
 
 export default function Create(){
     const { dict } = usePage<PageProps>().props
-    console.log(dict)
 
     const form = useForm({
         // podstawowe
-        title: '', description: '',
-        country: '', city: '', postal_code: '', start_date: '', duration: '',
-        language: '', wage: '', bonus: '',
-        care_recipient_gender: '' as ''|'female'|'male',
-        mobility: '' as ''|'mobile'|'limited'|'immobile',
+        title: '',
+        description: '',
+        country: '',
+        city: '',
+        postal_code: '',
+        start_date: '',
+        duration: '',
+        language: '',
+        wage: '',
+        bonus: '',
+        care_recipient_gender: '',
+        mobility: '',
         lives_alone: false,
         hero_image: null as File | null,
 
         // nowe pola
-        care_target: '',                    // teraz select (string)
-        experience_id: null as number|null, // select (single)
-        experiences: '',                    // input (free text)
-        recruitment_requirements: [] as number[], // select (multi)
+        care_target: '',
+        experience_id: null as number|null,
+        experiences: '',
 
-        // słowniki (tablice ID)
-        duties: [] as number[],
-        requirements: [] as number[],
-        perks: [] as number[],
-        skills: [] as number[],
+        // Array z nazwami (stringami) zamiast ID
+        duties: [] as string[],
+        requirements: [] as string[],
+        perks: [] as string[],
     })
 
     const submit = (e:React.FormEvent)=>{
         e.preventDefault()
-        form.post(`${BASE}`, { forceFormData: true, preserveScroll:true })
+        console.log('Form data before submit:', form.data)
+        form.post(`${BASE}`, {
+            forceFormData: true,
+            preserveScroll: true,
+            onSuccess: () => console.log('Success!'),
+            onError: (errors) => console.log('Errors:', errors)
+        })
     }
-
 
     return (
         <AdminLayout>
@@ -147,97 +156,78 @@ export default function Create(){
                         </div>
 
                         <Field label="Opis" required wide>
-              <textarea className="w-full rounded border px-3 py-2 min-h-[140px]"
-                        value={form.data.description}
-                        onChange={e=>form.setData('description', e.target.value)} />
+                            <textarea className="w-full rounded border px-3 py-2 min-h-[140px]"
+                                      value={form.data.description}
+                                      onChange={e=>form.setData('description', e.target.value)} />
                             <Err msg={form.errors.description} />
                         </Field>
                     </section>
 
-                    {/* Nowe: target / doświadczenia / rekrutacja */}
+                    {/* Nowe: target / doświadczenia */}
                     <section className="rounded-xl border bg-white p-5">
                         <div className="grid gap-4 md:grid-cols-3">
-                            {/* care_target jako SELECT (string) */}
                             <StringSelect
                                 label="Osoba do opieki"
-                                items={dict.care_targets ?? []}
+                                items={dict.care_targets}
                                 value={form.data.care_target}
                                 onChange={(val)=>form.setData('care_target', val)}
                                 placeholder="—"
                             />
-                            <Err msg={(form.errors as any).care_target} />
+                            <Err msg={form.errors.care_target} />
 
-                            {/* experience (select single) */}
                             <SingleSelect
                                 label="Doświadczenie"
-                                items={dict.experience ?? []}
+                                items={dict.experience}
                                 value={form.data.experience_id}
                                 onChange={(id)=>form.setData('experience_id', id)}
                                 placeholder="—"
                             />
 
-                            {/* experiences (free text) */}
                             <Field label="Szczegóły doświadczenia">
                                 <input className="w-full rounded border px-3 py-2"
                                        placeholder="np. 2 lata, praca z osobą leżącą"
                                        value={form.data.experiences}
                                        onChange={e=>form.setData('experiences', e.target.value)} />
-                                <Err msg={(form.errors as any).experiences} />
+                                <Err msg={form.errors.experiences} />
                             </Field>
-                        </div>
-
-                        {/* recruitment requirements (multi) */}
-                        <div className="mt-6">
-                            <MultiSelect
-                                label="Wymagania rekrutacyjne"
-                                items={dict.recruitment_requirements ?? []}
-                                value={form.data.recruitment_requirements}
-                                onChange={ids => form.setData('recruitment_requirements', ids)}
-                            />
-                            <Err msg={(form.errors as any).recruitment_requirements} />
                         </div>
                     </section>
 
                     {/* Parametry opieki */}
                     <section className="rounded-xl border bg-white p-5">
                         <div className="grid gap-4 md:grid-cols-3">
-                            {/* Płeć */}
-                            {/* Płeć podopiecznego (z bazy) */}
                             <Field label="Płeć podopiecznego">
                                 <select
                                     className="w-full rounded border px-3 py-2"
                                     value={form.data.care_recipient_gender}
-                                    onChange={e=>form.setData('care_recipient_gender', e.target.value as any)}
+                                    onChange={e=>form.setData('care_recipient_gender', e.target.value)}
                                 >
                                     <option value="">—</option>
-                                    {(dict.genders ?? []).map(g => (
-                                        <option key={g.id} value={g.code}>
-                                            {labelOf(g)}
+                                    {dict.genders.map(g => (
+                                        <option key={g.id} value={g.name_pl}>
+                                            {g.name_pl}
                                         </option>
                                     ))}
                                 </select>
                                 <Err msg={form.errors.care_recipient_gender} />
                             </Field>
 
-
-                            {/* Mobilność */}
                             <Field label="Mobilność">
                                 <select
                                     className="w-full rounded border px-3 py-2"
                                     value={form.data.mobility}
-                                    onChange={e=>form.setData('mobility', e.target.value as any)}
+                                    onChange={e=>form.setData('mobility', e.target.value)}
                                 >
                                     <option value="">—</option>
-                                    {(dict.mobilities ?? []).map((m)=>(
-                                        <option key={m.id} value={m.code}>
-                                            {labelOf(m)}
+                                    {dict.mobilities.map((m)=>(
+                                        <option key={m.id} value={m.name_pl}>
+                                            {m.name_pl}
                                         </option>
                                     ))}
                                 </select>
                                 <Err msg={form.errors.mobility} />
                             </Field>
 
-                            {/* Mieszka sam */}
                             <Field label="Mieszka sam">
                                 <select className="w-full rounded border px-3 py-2"
                                         value={form.data.lives_alone ? '1':'0'}
@@ -250,41 +240,29 @@ export default function Create(){
                         </div>
                     </section>
 
-                    {/* Słowniki: wszystko jako selecty (multi) */}
+                    {/* Słowniki: array z nazwami */}
                     <section className="rounded-xl border bg-white p-5">
                         <div className="grid gap-6 md:grid-cols-3">
                             <MultiSelect
                                 label="Obowiązki"
                                 items={dict.duties}
                                 value={form.data.duties}
-                                onChange={ids => form.setData('duties', ids)}
+                                onChange={(names) => form.setData('duties', names)}
                             />
 
                             <MultiSelect
                                 label="Wymagania"
                                 items={dict.requirements}
                                 value={form.data.requirements}
-                                onChange={ids => form.setData('requirements', ids)}
+                                onChange={(names) => form.setData('requirements', names)}
                             />
 
                             <MultiSelect
                                 label="Oferujemy"
                                 items={dict.perks}
                                 value={form.data.perks}
-                                onChange={ids => form.setData('perks', ids)}
+                                onChange={(names) => form.setData('perks', names)}
                             />
-                        </div>
-
-                        <div className="mt-6">
-                            <MultiSelect
-                                label="Umiejętności"
-                                items={dict.skills}
-                                value={form.data.skills}
-                                onChange={ids => form.setData('skills', ids)}
-                                filter={(s:any)=>s.is_visible_pl}
-                                hint="Filtr: tylko widoczne PL. Przytrzymaj Ctrl/Cmd, aby wybrać wiele."
-                            />
-                            <Err msg={form.errors.skills} />
                         </div>
                     </section>
 
@@ -293,7 +271,7 @@ export default function Create(){
                         <Link href={BASE} className="rounded-full border px-4 py-2">Anuluj</Link>
                         <button type="submit" disabled={form.processing}
                                 className="rounded-full bg-coral px-5 py-2 font-semibold text-white">
-                            Zapisz
+                            {form.processing ? 'Zapisywanie...' : 'Zapisz'}
                         </button>
                     </div>
                 </form>
@@ -316,29 +294,27 @@ function Field({label, children, required=false, wide=false}:{label:string; chil
 function Err({msg}:{msg?:string}){ return msg ? <p className="mt-1 text-sm text-rose-600">{msg}</p> : null }
 
 function MultiSelect({
-                         label, items, value, onChange, hint, filter
+                         label, items, value, onChange, hint
                      }:{
     label: string;
     items: any[];
-    value: number[];
-    onChange: (ids:number[])=>void;
+    value: string[];
+    onChange: (names:string[])=>void;
     hint?: string;
-    filter?: (it:any)=>boolean;
 }) {
-    const list = (filter ? items?.filter(filter) : items) ?? []
     return (
         <Field label={label}>
             <select
                 multiple
                 className="w-full rounded border px-3 py-2 min-h-[120px]"
-                value={value?.map(String)}
+                value={value}
                 onChange={e => {
-                    const selected = Array.from(e.target.selectedOptions, o => parseInt(o.value))
+                    const selected = Array.from(e.target.selectedOptions, o => o.text)
                     onChange(selected)
                 }}
             >
-                {list.map(it => (
-                    <option key={it.id} value={it.id}>
+                {items.map(it => (
+                    <option key={it.id} value={labelOf(it)}>
                         {labelOf(it)}
                     </option>
                 ))}
@@ -371,7 +347,7 @@ function SingleSelect({
                 }}
             >
                 <option value="">{placeholder}</option>
-                {(items ?? []).map(it=>(
+                {items.map(it=>(
                     <option key={it.id} value={it.id}>{labelOf(it)}</option>
                 ))}
             </select>
@@ -379,7 +355,6 @@ function SingleSelect({
     )
 }
 
-/** Select, który zapisuje STRING (etykietę) do pola (np. care_target) */
 function StringSelect({
                           label, items, value, onChange, placeholder='—'
                       }:{
@@ -397,7 +372,7 @@ function StringSelect({
                 onChange={e=>onChange(e.target.value)}
             >
                 <option value="">{placeholder}</option>
-                {(items ?? []).map(it=>{
+                {items.map(it=>{
                     const lbl = labelOf(it)
                     return <option key={it.id} value={lbl}>{lbl}</option>
                 })}

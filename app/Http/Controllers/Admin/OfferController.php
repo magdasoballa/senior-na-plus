@@ -29,15 +29,6 @@ class OfferController extends Controller
         $sort = in_array($request->query('sort', 'created_at'), $allowedSorts, true) ? $request->query('sort', 'created_at') : 'created_at';
         $dir  = strtolower((string)$request->query('dir', 'desc')) === 'asc' ? 'asc' : 'desc';
 
-        // licz tylko to, co na pewno masz w DB
-        $counts = ['duties','requirements','perks'];
-        if (Schema::hasTable('offer_skill')) {
-            $counts[] = 'skills';
-        }
-        if (Schema::hasTable('offer_recruitment_requirement')) {
-            $counts[] = 'recruitmentRequirements';
-        }
-
         $offers = Offer::query()
             ->when($search !== '', function ($q) use ($search) {
                 $q->where(function ($qq) use ($search) {
@@ -47,7 +38,6 @@ class OfferController extends Controller
                         ->orWhere('language','like',"%{$search}%");
                 });
             })
-            ->withCount($counts)
             ->orderBy($sort, $dir)
             ->paginate($perPage)
             ->withQueryString();
@@ -63,13 +53,13 @@ class OfferController extends Controller
                     'wage'     => $o->wage,
                     'created_at' => $o->created_at,
 
-                    'duties_count'       => $o->duties_count,
-                    'requirements_count' => $o->requirements_count,
-                    'perks_count'        => $o->perks_count,
+                    // Liczby elementów w array
+                    'duties_count'       => !empty($o->duties) ? count($o->duties) : 0,
+                    'requirements_count' => !empty($o->requirements) ? count($o->requirements) : 0,
+                    'perks_count'        => !empty($o->benefits) ? count($o->benefits) : 0,
 
-                    // jeżeli pivotów nie ma, te pola będą null — daj fallback 0
-                    'skills_count'                   => $o->skills_count ?? 0,
-                    'recruitment_requirements_count' => $o->recruitment_requirements_count ?? 0,
+                    'skills_count' => 0,
+                    'recruitment_requirements_count' => 0,
                 ];
             }),
             'filters' => [
@@ -88,16 +78,13 @@ class OfferController extends Controller
                 'duties'       => Duty::orderBy('position')->get(['id','name']),
                 'requirements' => OfferRequirement::orderBy('position')->get(['id','name']),
                 'perks'        => OfferPerk::orderBy('position')->get(['id','name']),
-                // skills: alias etykiety dla spójności na froncie
                 'skills'       => Skill::select('id','name_pl','is_visible_pl','name_de','is_visible_de')
                     ->where('is_visible_pl', true)
                     ->orderBy('position')
                     ->get(),
-                // mobilities: zgodnie z Twoją tabelą
                 'mobilities'   => Mobility::select('id','name_pl','name_de','is_visible_pl','is_visible_de')
                     ->orderBy('position')
                     ->get(),
-
                 'recruitment_requirements' => RecruitmentRequirement::orderBy('position')->get(['id','title as name']),
                 'experience' => Experience::select('id','name_pl','is_visible_pl','is_visible_de')
                     ->where('is_visible_pl', true)
@@ -111,34 +98,31 @@ class OfferController extends Controller
                     ->where('is_visible_pl', true)
                     ->orderBy('position')
                     ->get(),
-                ],
+            ],
         ]);
     }
 
     public function store(Request $request)
     {
+        \Log::info('=== OFFER STORE (ARRAY VERSION) ===');
+        \Log::info('Raw request data:', $request->all());
+
         $validated = $request->validate([
             'title'       => 'required|string|max:255',
             'description' => 'required|string',
 
-            // many-to-many
+            // Array z nazwami (stringami)
             'duties'         => 'array',
-            'duties.*'       => 'integer|exists:duties,id',
+            'duties.*'       => 'string|max:255',
             'requirements'   => 'array',
-            'requirements.*' => 'integer|exists:offer_requirements,id',
+            'requirements.*' => 'string|max:255',
             'perks'          => 'array',
-            'perks.*'        => 'integer|exists:offer_perks,id',
-            'skills'         => 'array',
-            'skills.*'       => 'integer|exists:skills,id',
-            'recruitment_requirements'   => 'array',
-            'recruitment_requirements.*' => 'integer|exists:recruitment_requirements,id',
+            'perks.*'        => 'string|max:255',
 
-            // single + inputy
             'experience_id' => 'nullable|integer|exists:experiences,id',
             'experiences'   => 'nullable|string|max:255',
             'care_target'   => 'nullable|string|max:255',
 
-            // meta oferty
             'country'     => 'nullable|string|max:100',
             'city'        => 'nullable|string|max:100',
             'postal_code' => 'nullable|string|max:20',
@@ -149,15 +133,20 @@ class OfferController extends Controller
             'bonus'       => 'nullable|string|max:50',
 
             'hero_image'  => 'nullable|file|image|max:4096',
-            'care_recipient_gender' => 'nullable|in:female,male',
-            // uwaga: to dalej enum string; słownik mobilities jest tylko do etykiet
-            'mobility'              => 'nullable|in:mobile,limited,immobile',
+            'care_recipient_gender' => 'nullable|string|max:50',
+            'mobility'              => 'nullable|string|max:50',
             'lives_alone'           => 'nullable|boolean',
         ]);
+
+        \Log::info('Validated data:', $validated);
 
         $payload = [
             'title'       => $validated['title'],
             'description' => $validated['description'],
+            // Zapisujemy jako array
+            'duties'       => $validated['duties'] ?? [],
+            'requirements' => $validated['requirements'] ?? [],
+            'benefits'     => $validated['perks'] ?? [], // Uwaga: benefits zamiast perks
             'country'     => $validated['country']     ?? null,
             'city'        => $validated['city']        ?? null,
             'postal_code' => $validated['postal_code'] ?? null,
@@ -169,27 +158,20 @@ class OfferController extends Controller
 
             'care_recipient_gender' => $validated['care_recipient_gender'] ?? null,
             'mobility'              => $validated['mobility'] ?? null,
-            'lives_alone'           => $validated['lives_alone'] ?? null,
+            'lives_alone'           => $validated['lives_alone'] ?? false,
 
             'experience_id' => $validated['experience_id'] ?? null,
-            'experience' => Experience::select('id','name_pl as name','is_visible_pl','is_visible_de')
-                ->where('is_visible_pl', true)
-                ->orderBy('position')
-                ->get(),            'care_target'   => $validated['care_target']   ?? null,
+            'experiences'   => $validated['experiences']   ?? null,
+            'care_target'   => $validated['care_target']   ?? null,
         ];
 
         if ($file = $request->file('hero_image')) {
             $payload['hero_image'] = $file->store('offers', 'public');
         }
 
+        \Log::info('Creating offer with payload:', $payload);
         $offer = Offer::create($payload);
-
-        // pivoty
-        $offer->duties()->sync($validated['duties'] ?? []);
-        $offer->requirements()->sync($validated['requirements'] ?? []);
-        $offer->perks()->sync($validated['perks'] ?? []);
-        $offer->skills()->sync($validated['skills'] ?? []);
-        $offer->recruitmentRequirements()->sync($validated['recruitment_requirements'] ?? []);
+        \Log::info('Offer created with ID:', ['id' => $offer->id]);
 
         return redirect()->route('admin.offers.index')
             ->with('success', 'Oferta została dodana.');
@@ -197,70 +179,35 @@ class OfferController extends Controller
 
     public function edit(Offer $offer)
     {
-        $offer->load([
-            'duties:id',
-            'requirements:id',
-            'perks:id',
-            'skills:id',
-            'recruitmentRequirements:id',
-            'experience:id,name',
-        ]);
-
         return Inertia::render('Admin/Offers/Edit', [
             'offer' => array_merge($offer->only([
                 'id','title','city','country','language','wage','start_date','region','new_city',
                 'description','is_visible','care_recipient_gender','mobility','lives_alone',
-                'experience_id','experiences','care_target',
+                'experience_id','experiences','care_target','postal_code','duration','bonus','hero_image',
+                'duties','requirements','benefits' // Dodajemy array fields
             ]), [
-                'duties'                   => $offer->duties()->pluck('duties.id')->values(),
-                'requirements'             => $offer->requirements()->pluck('offer_requirements.id')->values(),
-                'perks'                    => $offer->perks()->pluck('offer_perks.id')->values(),
-                'skills'                   => $offer->skills()->pluck('skills.id')->values(),
-                'recruitment_requirements' => $offer->recruitmentRequirements()->pluck('recruitment_requirements.id')->values(),
+                'perks' => $offer->benefits, // Map benefits to perks for frontend
+                'skills' => [],
+                'recruitment_requirements' => [],
             ]),
-            'dict' => [
-                'duties'       => Duty::orderBy('position')->get(['id','name']),
-                'requirements' => OfferRequirement::orderBy('position')->get(['id','name']),
-                'perks'        => OfferPerk::orderBy('position')->get(['id','name']),
-                'skills'       => Skill::select('id','name_pl','is_visible_pl','name_de','is_visible_de')
-                    ->where('is_visible_pl', true)
-                    ->orderBy('position')->get(),
-                'mobilities'   => Mobility::select('id','name_pl','name_de','is_visible_pl','is_visible_de')
-                    ->orderBy('position')->get(),
-
-                'recruitment_requirements' => RecruitmentRequirement::orderBy('position')->get(['id','title as name']),
-                'experience' => Experience::select('id','name_pl','is_visible_pl','is_visible_de')
-                    ->where('is_visible_pl', true)   // jeśli chcesz tylko PL widoczne
-                    ->orderBy('position')
-                    ->get(),
-                'care_targets' => CareTarget::select('id','name_pl','name_de','is_visible_pl','is_visible_de')
-                    ->where('is_visible_pl', true)
-                    ->orderBy('position')
-                    ->get(),
-                'genders' => Gender::select('id','name_pl ','is_visible_pl','is_visible_de')
-                    ->where('is_visible_pl', true)
-                    ->orderBy('position')
-                    ->get(),
-                ],
+            'dict' => $this->getDictionaryData(),
         ]);
     }
 
     public function update(Request $request, Offer $offer)
     {
+        \Log::info('=== OFFER UPDATE (ARRAY VERSION) ===');
+
         $validated = $request->validate([
             'title'       => 'required|string|max:255',
             'description' => 'required|string',
 
             'duties'         => 'array',
-            'duties.*'       => 'integer|exists:duties,id',
+            'duties.*'       => 'string|max:255',
             'requirements'   => 'array',
-            'requirements.*' => 'integer|exists:offer_requirements,id',
+            'requirements.*' => 'string|max:255',
             'perks'          => 'array',
-            'perks.*'        => 'integer|exists:offer_perks,id',
-            'skills'         => 'array',
-            'skills.*'       => 'integer|exists:skills,id',
-            'recruitment_requirements'   => 'array',
-            'recruitment_requirements.*' => 'integer|exists:recruitment_requirements,id',
+            'perks.*'        => 'string|max:255',
 
             'experience_id' => 'nullable|integer|exists:experiences,id',
             'experiences'   => 'nullable|string|max:255',
@@ -276,14 +223,17 @@ class OfferController extends Controller
             'bonus'       => 'nullable|string|max:50',
 
             'hero_image'  => 'nullable|file|image|max:4096',
-            'care_recipient_gender' => 'nullable|in:female,male',
-            'mobility'              => 'nullable|in:mobile,limited,immobile',
+            'care_recipient_gender' => 'nullable|string|max:50',
+            'mobility'              => 'nullable|string|max:50',
             'lives_alone'           => 'nullable|boolean',
         ]);
 
         $payload = [
             'title'       => $validated['title'],
             'description' => $validated['description'],
+            'duties'       => $validated['duties'] ?? [],
+            'requirements' => $validated['requirements'] ?? [],
+            'benefits'     => $validated['perks'] ?? [],
             'country'     => $validated['country']     ?? null,
             'city'        => $validated['city']        ?? null,
             'postal_code' => $validated['postal_code'] ?? null,
@@ -295,7 +245,7 @@ class OfferController extends Controller
 
             'care_recipient_gender' => $validated['care_recipient_gender'] ?? null,
             'mobility'              => $validated['mobility'] ?? null,
-            'lives_alone'           => $validated['lives_alone'] ?? null,
+            'lives_alone'           => $validated['lives_alone'] ?? false,
 
             'experience_id' => $validated['experience_id'] ?? null,
             'experiences'   => $validated['experiences']   ?? null,
@@ -310,12 +260,6 @@ class OfferController extends Controller
         }
 
         $offer->update($payload);
-
-        $offer->duties()->sync($validated['duties'] ?? []);
-        $offer->requirements()->sync($validated['requirements'] ?? []);
-        $offer->perks()->sync($validated['perks'] ?? []);
-        $offer->skills()->sync($validated['skills'] ?? []);
-        $offer->recruitmentRequirements()->sync($validated['recruitment_requirements'] ?? []);
 
         return redirect()->route('admin.offers.index')
             ->with('success', 'Oferta zaktualizowana.');
@@ -333,15 +277,6 @@ class OfferController extends Controller
 
     public function show(Offer $offer)
     {
-        $offer->load([
-            'duties:id,name',
-            'requirements:id,name',
-            'perks:id,name',
-            'skills:id,name_pl',
-            'recruitmentRequirements:id,name',
-            'experience:id,name',
-        ]);
-
         $payload = [
             'id'          => $offer->id,
             'title'       => $offer->title,
@@ -357,18 +292,60 @@ class OfferController extends Controller
             'care_recipient_gender' => $offer->care_recipient_gender,
             'mobility'    => $offer->mobility,
             'lives_alone' => (bool) $offer->lives_alone,
-            'experience'  => optional($offer->experience)->name,
+            'experience'  => optional($offer->experience)->name_pl,
             'experiences' => $offer->experiences,
             'care_target' => $offer->care_target,
 
-            'duties'                   => $this->normalizeRelation($offer->duties),
-            'requirements'             => $this->normalizeRelation($offer->requirements),
-            'perks'                    => $this->normalizeRelation($offer->perks),
-            'skills'                   => collect($offer->skills)->map(fn($s)=>['id'=>$s->id,'name'=>$s->name_pl,'checked'=>true])->all(),
-            'recruitment_requirements' => $this->normalizeRelation($offer->recruitmentRequirements),
+            'duties'       => $this->normalizeArray($offer->duties),
+            'requirements' => $this->normalizeArray($offer->requirements),
+            'perks'        => $this->normalizeArray($offer->benefits),
+            'skills'       => [],
+            'recruitment_requirements' => [],
         ];
 
         return Inertia::render('Admin/Offers/Show', ['offer' => $payload]);
+    }
+
+    private function getDictionaryData()
+    {
+        return [
+            'duties'       => Duty::orderBy('position')->get(['id','name']),
+            'requirements' => OfferRequirement::orderBy('position')->get(['id','name']),
+            'perks'        => OfferPerk::orderBy('position')->get(['id','name']),
+            'skills'       => Skill::select('id','name_pl','is_visible_pl','name_de','is_visible_de')
+                ->where('is_visible_pl', true)
+                ->orderBy('position')->get(),
+            'mobilities'   => Mobility::select('id','name_pl','name_de','is_visible_pl','is_visible_de')
+                ->orderBy('position')->get(),
+            'recruitment_requirements' => RecruitmentRequirement::orderBy('position')->get(['id','title as name']),
+            'experience' => Experience::select('id','name_pl','is_visible_pl','is_visible_de')
+                ->where('is_visible_pl', true)
+                ->orderBy('position')
+                ->get(),
+            'care_targets' => CareTarget::select('id','name_pl','name_de','is_visible_pl','is_visible_de')
+                ->where('is_visible_pl', true)
+                ->orderBy('position')
+                ->get(),
+            'genders' => Gender::select('id','name_pl','is_visible_pl','is_visible_de')
+                ->where('is_visible_pl', true)
+                ->orderBy('position')
+                ->get(),
+        ];
+    }
+
+    private function normalizeArray($items): array
+    {
+        if (empty($items)) {
+            return [];
+        }
+
+        return collect($items)->map(function ($item, $key) {
+            return [
+                'id' => $key,
+                'name' => $item,
+                'checked' => true,
+            ];
+        })->values()->all();
     }
 
     private function normalizeRelation($items): array
