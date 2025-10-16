@@ -18,7 +18,7 @@ class FormController extends Controller
         'language_level' => 'applications.language_level',
         'experience'     => 'applications.experience',
         'created_at'     => 'applications.created_at',
-        // 'is_read' — nie istnieje w DB; nie sortujemy po nim
+        'is_read'        => 'applications.is_read', // DODANO - teraz istnieje w DB
     ];
 
     public function index(Request $request)
@@ -27,7 +27,7 @@ class FormController extends Controller
             'q'          => (string)$request->query('q', ''),
             'level'      => (string)$request->query('level', ''),
             'experience' => (string)$request->query('experience', ''),
-            'read'       => (string)$request->query('read', ''),   // ignorujemy – brak kolumny
+            'read'       => (string)$request->query('read', ''),   // 'all' | 'yes' | 'no'
             'per_page'   => (int)$request->query('per_page', 25),
             'sort'       => (string)$request->query('sort', 'created_at'),
             'dir'        => strtolower((string)$request->query('dir', 'desc')) === 'asc' ? 'asc' : 'desc',
@@ -36,16 +36,16 @@ class FormController extends Controller
         $sortCol = $this->colMap[$filters['sort']] ?? 'applications.created_at';
 
         $rows = Application::query()
-            ->selectRaw("
-                applications.id,
-                applications.name as full_name,
-                applications.email,
-                applications.phone,
-                applications.language_level,
-                applications.experience,
-                applications.created_at,
-                0 as is_read
-            ")
+            ->select([
+                'applications.id',
+                'applications.name as full_name',
+                'applications.email',
+                'applications.phone',
+                'applications.language_level',
+                'applications.experience',
+                'applications.created_at',
+                'applications.is_read', // DODANO - pobieramy rzeczywistą kolumnę
+            ])
             ->when($filters['q'] !== '', function ($q) use ($filters) {
                 $t = $filters['q'];
                 $q->where(function ($qq) use ($t) {
@@ -56,7 +56,14 @@ class FormController extends Controller
             })
             ->when($filters['level'] !== '', fn($q) => $q->where('applications.language_level', $filters['level']))
             ->when($filters['experience'] !== '', fn($q) => $q->where('applications.experience', $filters['experience']))
-            // UWAGA: brak kolumny is_read — filtr 'read' ignorujemy.
+            // DODANO: Filtr dla is_read
+            ->when($filters['read'] !== '', function ($q) use ($filters) {
+                if ($filters['read'] === 'yes') {
+                    $q->where('applications.is_read', true);
+                } elseif ($filters['read'] === 'no') {
+                    $q->where('applications.is_read', false);
+                }
+            })
             ->orderBy($sortCol, $filters['dir'])
             ->paginate(max(5, min(200, $filters['per_page'])))
             ->withQueryString();
@@ -69,7 +76,6 @@ class FormController extends Controller
 
     public function show(Application $form)
     {
-        // dopasowane pola do widoku Show (możesz rozszerzyć według potrzeb)
         return Inertia::render('Admin/messages/pl/forms/Show', [
             'form' => [
                 'id'                   => $form->id,
@@ -77,13 +83,13 @@ class FormController extends Controller
                 'email'                => $form->email,
                 'phone'                => $form->phone,
                 'language_level'       => $form->language_level,
-                'profession_trained'   => $form->education ?? null,           // jeśli masz inne nazwy – podmień
+                'profession_trained'   => $form->education ?? null,
                 'profession_performed' => $form->current_profession ?? null,
                 'experience'           => $form->experience,
-                'skills'               => null,                                // brak w DB – zostaw null/[] jeśli potrzebne
+                'skills'               => null,
                 'salary'               => $form->salary_expectations ?? null,
                 'references'           => $form->references_path ?? null,
-                'is_read'              => false,                               // brak kolumny
+                'is_read'              => (bool)$form->is_read, // DODANO - rzeczywista wartość
                 'created_at'           => optional($form->created_at)->toIso8601String(),
             ],
         ]);
@@ -101,10 +107,10 @@ class FormController extends Controller
                 'profession_trained'   => $form->education ?? null,
                 'profession_performed' => $form->current_profession ?? null,
                 'experience'           => $form->experience,
-                'skills'               => [],   // brak kolumny — dostosuj, jeśli dodasz
+                'skills'               => [],
                 'salary'               => $form->salary_expectations ?? null,
                 'references'           => $form->references_path ?? null,
-                'is_read'              => false,
+                'is_read'              => (bool)$form->is_read, // DODANO - rzeczywista wartość
                 'created_at'           => optional($form->created_at)->toIso8601String(),
             ],
         ]);
@@ -112,7 +118,6 @@ class FormController extends Controller
 
     public function update(Request $request, Application $form)
     {
-        // minimalna walidacja pod dane, które realnie istnieją
         $data = $request->validate([
             'full_name'            => ['required','string','max:255'],
             'email'                => ['required','email','max:255'],
@@ -120,9 +125,9 @@ class FormController extends Controller
             'language_level'       => ['nullable','string','max:255'],
             'experience'           => ['nullable','string','max:255'],
             'salary'               => ['nullable','string','max:255'],
+            'is_read'              => ['sometimes','boolean'], // DODANO - walidacja is_read
         ]);
 
-        // mapowanie z aliasów do kolumn
         $form->update([
             'name'               => $data['full_name'],
             'email'              => $data['email'],
@@ -130,9 +135,20 @@ class FormController extends Controller
             'language_level'     => $data['language_level'] ?? null,
             'experience'         => $data['experience'] ?? null,
             'salary_expectations'=> $data['salary'] ?? null,
+            'is_read'            => $data['is_read'] ?? $form->is_read, // DODANO - aktualizacja is_read
         ]);
 
         return to_route('admin.msg.pl.forms.index')->with('success','Zaktualizowano.');
+    }
+
+    // DODAJ METODĘ TOGGLE-READ
+    public function toggleRead(Application $form)
+    {
+        $form->update([
+            'is_read' => !$form->is_read,
+        ]);
+
+        return back()->with('success', 'Zmieniono status przeczytania.');
     }
 
     public function destroy(Application $form)
@@ -140,5 +156,4 @@ class FormController extends Controller
         $form->delete();
         return to_route('admin.msg.pl.forms.index')->with('success','Usunięto.');
     }
-
 }

@@ -2,7 +2,7 @@ import { Link, router, usePage } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
 import { useState } from 'react'
 import * as React from 'react'
-import { CheckCircle2 } from 'lucide-react'
+import { CheckCircle2, XCircle, RefreshCw } from 'lucide-react' // Dodano RefreshCw
 
 type Form = {
     id: number
@@ -32,6 +32,7 @@ export default function Edit() {
     const [form, setForm] = useState<Form>({ ...initial })
     const [skillsStr, setSkillsStr] = useState<string>((initial.skills ?? []).join(', '))
     const [saved, setSaved] = useState(false)
+    const [isToggling, setIsToggling] = useState(false) // Dodano stan dla toggle
 
     const save = (stay = false) => {
         const skillsArr = skillsStr
@@ -52,6 +53,22 @@ export default function Edit() {
                 },
             }
         )
+    }
+
+    // DODANO: Funkcja do szybkiego zmieniania statusu is_read
+    const quickToggleRead = async () => {
+        setIsToggling(true)
+        try {
+            await router.patch(`${BASE}/${form.id}/toggle-read`, {}, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    // Aktualizuj lokalny stan
+                    setForm(prev => ({ ...prev, is_read: !prev.is_read }))
+                },
+            })
+        } finally {
+            setIsToggling(false)
+        }
     }
 
     const created =
@@ -170,14 +187,18 @@ export default function Edit() {
                         </Row>
 
                         <Row label="Czy przeczytany">
-                            <label className="inline-flex items-center gap-2">
-                                <input
-                                    type="checkbox"
-                                    checked={form.is_read}
-                                    onChange={(e) => setForm({ ...form, is_read: e.target.checked })}
-                                />
-                                <span>Tak</span>
-                            </label>
+                            <div className="flex items-center gap-4">
+                                <label className="inline-flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={form.is_read}
+                                        onChange={(e) => setForm({ ...form, is_read: e.target.checked })}
+                                    />
+                                    <span>Tak</span>
+                                </label>
+
+
+                            </div>
                         </Row>
 
                         <Row label="Data wysłania">

@@ -32,7 +32,8 @@ class Application extends Model
         'consent1',
         'consent2',
         'consent3',
-        'status'
+        'status',
+        'is_read',
     ];
 
     protected $casts = [

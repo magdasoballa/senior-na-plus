@@ -208,6 +208,13 @@ function NavList({ items }: { items: NavItem[] }) {
 function isActive(currentUrl: string, href: string) {
     const cur = currentUrl.split('?')[0].replace(/\/+$/, '')
     const base = href.split('?')[0].replace(/\/+$/, '')
-    return cur === base
+
+    // Dokładne dopasowanie
+    if (cur === base) return true
+
+
+    if (cur.startsWith(base + '/')) return true
+
+    return false
 }
 
