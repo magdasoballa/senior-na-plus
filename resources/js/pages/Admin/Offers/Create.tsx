@@ -84,81 +84,115 @@ export default function Create(){
                     <section className="rounded-xl border bg-white p-5">
                         <div className="grid gap-4 md:grid-cols-2">
                             <Field label="Tytuł" required>
-                                <input className="w-full rounded border px-3 py-2"
-                                       value={form.data.title}
-                                       onChange={e=>form.setData('title', e.target.value)} />
+                                <input
+                                    className="w-full rounded border px-3 py-2"
+                                    value={form.data.title}
+                                    onChange={e=>form.setData('title', e.target.value)}
+                                    required
+                                />
                                 <Err msg={form.errors.title} />
                             </Field>
 
-                            <Field label="Język">
-                                <input className="w-full rounded border px-3 py-2"
-                                       value={form.data.language ?? ''}
-                                       onChange={e=>form.setData('language', e.target.value)} />
+                            <Field label="Język" required>
+                                <input
+                                    className="w-full rounded border px-3 py-2"
+                                    value={form.data.language ?? ''}
+                                    onChange={e=>form.setData('language', e.target.value)}
+                                    required
+                                />
                                 <Err msg={form.errors.language} />
                             </Field>
 
-                            <Field label="Kraj">
-                                <input className="w-full rounded border px-3 py-2"
-                                       value={form.data.country ?? ''}
-                                       onChange={e=>form.setData('country', e.target.value)} />
+                            <Field label="Kraj" required>
+                                <input
+                                    className="w-full rounded border px-3 py-2"
+                                    value={form.data.country ?? ''}
+                                    onChange={e=>form.setData('country', e.target.value)}
+                                    required
+                                />
                                 <Err msg={form.errors.country} />
                             </Field>
 
-                            <Field label="Miasto">
-                                <input className="w-full rounded border px-3 py-2"
-                                       value={form.data.city ?? ''}
-                                       onChange={e=>form.setData('city', e.target.value)} />
+                            <Field label="Miasto" required>
+                                <input
+                                    className="w-full rounded border px-3 py-2"
+                                    value={form.data.city ?? ''}
+                                    onChange={e=>form.setData('city', e.target.value)}
+                                    required
+                                />
                                 <Err msg={form.errors.city} />
                             </Field>
 
-                            <Field label="Kod pocztowy">
-                                <input className="w-full rounded border px-3 py-2"
-                                       value={form.data.postal_code ?? ''}
-                                       onChange={e=>form.setData('postal_code', e.target.value)} />
+                            <Field label="Kod pocztowy" required>
+                                <input
+                                    className="w-full rounded border px-3 py-2"
+                                    value={form.data.postal_code ?? ''}
+                                    onChange={e=>form.setData('postal_code', e.target.value)}
+                                    required
+                                />
                                 <Err msg={form.errors.postal_code} />
                             </Field>
 
-                            <Field label="Data wyjazdu">
-                                <input className="w-full rounded border px-3 py-2"
-                                       placeholder="np. 2025-10-15"
-                                       value={form.data.start_date ?? ''}
-                                       onChange={e=>form.setData('start_date', e.target.value)} />
+                            <Field label="Data wyjazdu" required>
+                                <input
+                                    className="w-full rounded border px-3 py-2"
+                                    placeholder="np. 2025-10-15"
+                                    value={form.data.start_date ?? ''}
+                                    onChange={e=>form.setData('start_date', e.target.value)}
+                                    required
+                                />
                                 <Err msg={form.errors.start_date} />
                             </Field>
 
-                            <Field label="Czas trwania">
-                                <input className="w-full rounded border px-3 py-2"
-                                       value={form.data.duration ?? ''}
-                                       onChange={e=>form.setData('duration', e.target.value)} />
+                            <Field label="Czas trwania" required>
+                                <input
+                                    className="w-full rounded border px-3 py-2"
+                                    value={form.data.duration ?? ''}
+                                    onChange={e=>form.setData('duration', e.target.value)}
+                                    required
+                                />
                                 <Err msg={form.errors.duration} />
                             </Field>
 
-                            <Field label="Stawka">
-                                <input className="w-full rounded border px-3 py-2"
-                                       placeholder="np. 1900 €"
-                                       value={form.data.wage ?? ''}
-                                       onChange={e=>form.setData('wage', e.target.value)} />
+                            <Field label="Stawka" required>
+                                <input
+                                    className="w-full rounded border px-3 py-2"
+                                    placeholder="np. 1900 €"
+                                    value={form.data.wage ?? ''}
+                                    onChange={e=>form.setData('wage', e.target.value)}
+                                    required
+                                />
                                 <Err msg={form.errors.wage} />
                             </Field>
 
-                            <Field label="Premia">
-                                <input className="w-full rounded border px-3 py-2"
-                                       value={form.data.bonus ?? ''}
-                                       onChange={e=>form.setData('bonus', e.target.value)} />
+                            <Field label="Premia" required>
+                                <input
+                                    className="w-full rounded border px-3 py-2"
+                                    value={form.data.bonus ?? ''}
+                                    onChange={e=>form.setData('bonus', e.target.value)}
+                                    required
+                                />
                                 <Err msg={form.errors.bonus} />
                             </Field>
 
-                            <Field label="Zdjęcie">
-                                <input type="file" accept="image/*"
-                                       onChange={e=>form.setData('hero_image', e.target.files?.[0] ?? null)} />
+                            <Field label="Zdjęcie" required>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={e=>form.setData('hero_image', e.target.files?.[0] ?? null)}
+                                    required
+                                />
                                 <Err msg={form.errors.hero_image} />
                             </Field>
                         </div>
 
                         <Field label="Opis" required wide>
-                            <textarea className="w-full rounded border px-3 py-2 min-h-[140px]"
-                                      value={form.data.description}
-                                      onChange={e=>form.setData('description', e.target.value)} />
+                            <textarea
+                                className="w-full rounded border px-3 py-2 min-h-[140px]"
+                                value={form.data.description}
+                                onChange={e=>form.setData('description', e.target.value)}
+                                required
+                            />
                             <Err msg={form.errors.description} />
                         </Field>
                     </section>
@@ -172,6 +206,7 @@ export default function Create(){
                                 value={form.data.care_target}
                                 onChange={(val)=>form.setData('care_target', val)}
                                 placeholder="—"
+                                required
                             />
                             <Err msg={form.errors.care_target} />
 
@@ -181,13 +216,17 @@ export default function Create(){
                                 value={form.data.experience_id}
                                 onChange={(id)=>form.setData('experience_id', id)}
                                 placeholder="—"
+                                required
                             />
 
-                            <Field label="Szczegóły doświadczenia">
-                                <input className="w-full rounded border px-3 py-2"
-                                       placeholder="np. 2 lata, praca z osobą leżącą"
-                                       value={form.data.experiences}
-                                       onChange={e=>form.setData('experiences', e.target.value)} />
+                            <Field label="Szczegóły doświadczenia" required>
+                                <input
+                                    className="w-full rounded border px-3 py-2"
+                                    placeholder="np. 2 lata, praca z osobą leżącą"
+                                    value={form.data.experiences}
+                                    onChange={e=>form.setData('experiences', e.target.value)}
+                                    required
+                                />
                                 <Err msg={form.errors.experiences} />
                             </Field>
                         </div>
@@ -196,11 +235,12 @@ export default function Create(){
                     {/* Parametry opieki */}
                     <section className="rounded-xl border bg-white p-5">
                         <div className="grid gap-4 md:grid-cols-3">
-                            <Field label="Płeć podopiecznego">
+                            <Field label="Płeć podopiecznego" required>
                                 <select
                                     className="w-full rounded border px-3 py-2"
                                     value={form.data.care_recipient_gender}
                                     onChange={e=>form.setData('care_recipient_gender', e.target.value)}
+                                    required
                                 >
                                     <option value="">—</option>
                                     {dict.genders.map(g => (
@@ -212,11 +252,12 @@ export default function Create(){
                                 <Err msg={form.errors.care_recipient_gender} />
                             </Field>
 
-                            <Field label="Mobilność">
+                            <Field label="Mobilność" required>
                                 <select
                                     className="w-full rounded border px-3 py-2"
                                     value={form.data.mobility}
                                     onChange={e=>form.setData('mobility', e.target.value)}
+                                    required
                                 >
                                     <option value="">—</option>
                                     {dict.mobilities.map((m)=>(
@@ -228,10 +269,13 @@ export default function Create(){
                                 <Err msg={form.errors.mobility} />
                             </Field>
 
-                            <Field label="Mieszka sam">
-                                <select className="w-full rounded border px-3 py-2"
-                                        value={form.data.lives_alone ? '1':'0'}
-                                        onChange={e=>form.setData('lives_alone', e.target.value==='1')}>
+                            <Field label="Mieszka sam" required>
+                                <select
+                                    className="w-full rounded border px-3 py-2"
+                                    value={form.data.lives_alone ? '1':'0'}
+                                    onChange={e=>form.setData('lives_alone', e.target.value==='1')}
+                                    required
+                                >
                                     <option value="0">Nie</option>
                                     <option value="1">Tak</option>
                                 </select>
@@ -248,6 +292,7 @@ export default function Create(){
                                 items={dict.duties}
                                 value={form.data.duties}
                                 onChange={(names) => form.setData('duties', names)}
+                                required
                             />
 
                             <MultiSelect
@@ -255,6 +300,7 @@ export default function Create(){
                                 items={dict.requirements}
                                 value={form.data.requirements}
                                 onChange={(names) => form.setData('requirements', names)}
+                                required
                             />
 
                             <MultiSelect
@@ -262,6 +308,7 @@ export default function Create(){
                                 items={dict.perks}
                                 value={form.data.perks}
                                 onChange={(names) => form.setData('perks', names)}
+                                required
                             />
                         </div>
                     </section>
@@ -294,16 +341,17 @@ function Field({label, children, required=false, wide=false}:{label:string; chil
 function Err({msg}:{msg?:string}){ return msg ? <p className="mt-1 text-sm text-rose-600">{msg}</p> : null }
 
 function MultiSelect({
-                         label, items, value, onChange, hint
+                         label, items, value, onChange, hint, required = false
                      }:{
     label: string;
     items: any[];
     value: string[];
     onChange: (names:string[])=>void;
     hint?: string;
+    required?: boolean;
 }) {
     return (
-        <Field label={label}>
+        <Field label={label} required={required}>
             <select
                 multiple
                 className="w-full rounded border px-3 py-2 min-h-[120px]"
@@ -312,6 +360,7 @@ function MultiSelect({
                     const selected = Array.from(e.target.selectedOptions, o => o.text)
                     onChange(selected)
                 }}
+                required={required}
             >
                 {items.map(it => (
                     <option key={it.id} value={labelOf(it)}>
@@ -321,23 +370,25 @@ function MultiSelect({
             </select>
             <div className="mt-1 text-xs text-gray-500">
                 {hint ?? 'Przytrzymaj Ctrl (Cmd na Mac), aby wybrać wiele.'}
+                {required && <span className="text-rose-600"> *</span>}
             </div>
         </Field>
     )
 }
 
 function SingleSelect({
-                          label, items, value, onChange, placeholder='—'
+                          label, items, value, onChange, placeholder='—', required = false
                       }:{
     label: string;
     items: any[];
     value: number|null;
     onChange: (id:number|null)=>void;
     placeholder?: string;
+    required?: boolean;
 }) {
     const v = value===null ? '' : String(value)
     return (
-        <Field label={label}>
+        <Field label={label} required={required}>
             <select
                 className="w-full rounded border px-3 py-2"
                 value={v}
@@ -345,6 +396,7 @@ function SingleSelect({
                     const val = e.target.value
                     onChange(val === '' ? null : parseInt(val))
                 }}
+                required={required}
             >
                 <option value="">{placeholder}</option>
                 {items.map(it=>(
@@ -356,20 +408,22 @@ function SingleSelect({
 }
 
 function StringSelect({
-                          label, items, value, onChange, placeholder='—'
+                          label, items, value, onChange, placeholder='—', required = false
                       }:{
     label: string;
     items: any[];
     value: string;
     onChange: (val:string)=>void;
     placeholder?: string;
+    required?: boolean;
 }) {
     return (
-        <Field label={label}>
+        <Field label={label} required={required}>
             <select
                 className="w-full rounded border px-3 py-2"
                 value={value ?? ''}
                 onChange={e=>onChange(e.target.value)}
+                required={required}
             >
                 <option value="">{placeholder}</option>
                 {items.map(it=>{

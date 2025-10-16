@@ -111,31 +111,41 @@ class OfferController extends Controller
             'title'       => 'required|string|max:255',
             'description' => 'required|string',
 
-            // Array z nazwami (stringami)
-            'duties'         => 'array',
-            'duties.*'       => 'string|max:255',
-            'requirements'   => 'array',
-            'requirements.*' => 'string|max:255',
-            'perks'          => 'array',
-            'perks.*'        => 'string|max:255',
+            // Array z nazwami (stringami) - teraz obowiązkowe
+            'duties'         => 'required|array|min:1',
+            'duties.*'       => 'required|string|max:255',
+            'requirements'   => 'required|array|min:1',
+            'requirements.*' => 'required|string|max:255',
+            'perks'          => 'required|array|min:1',
+            'perks.*'        => 'required|string|max:255',
 
-            'experience_id' => 'nullable|integer|exists:experiences,id',
-            'experiences'   => 'nullable|string|max:255',
-            'care_target'   => 'nullable|string|max:255',
+            // Pola które były nullable - teraz required
+            'experience_id' => 'required|integer|exists:experiences,id',
+            'experiences'   => 'required|string|max:255',
+            'care_target'   => 'required|string|max:255',
 
-            'country'     => 'nullable|string|max:100',
-            'city'        => 'nullable|string|max:100',
-            'postal_code' => 'nullable|string|max:20',
-            'start_date'  => 'nullable|string|max:50',
-            'duration'    => 'nullable|string|max:50',
-            'language'    => 'nullable|string|max:50',
-            'wage'        => 'nullable|string|max:50',
-            'bonus'       => 'nullable|string|max:50',
+            'country'     => 'required|string|max:100',
+            'city'        => 'required|string|max:100',
+            'postal_code' => 'required|string|max:20',
+            'start_date'  => 'required|string|max:50',
+            'duration'    => 'required|string|max:50',
+            'language'    => 'required|string|max:50',
+            'wage'        => 'required|string|max:50',
+            'bonus'       => 'required|string|max:50',
 
-            'hero_image'  => 'nullable|file|image|max:4096',
-            'care_recipient_gender' => 'nullable|string|max:50',
-            'mobility'              => 'nullable|string|max:50',
-            'lives_alone'           => 'nullable|boolean',
+            'hero_image'  => 'required|file|image|max:4096',
+            'care_recipient_gender' => 'required|string|max:50',
+            'mobility'              => 'required|string|max:50',
+            'lives_alone'           => 'required|boolean',
+        ], [
+            // Custom messages
+            'duties.required' => 'Przynajmniej jeden obowiązek jest wymagany.',
+            'duties.min' => 'Przynajmniej jeden obowiązek jest wymagany.',
+            'requirements.required' => 'Przynajmniej jedno wymaganie jest wymagane.',
+            'requirements.min' => 'Przynajmniej jedno wymaganie jest wymagane.',
+            'perks.required' => 'Przynajmniej jeden benefit jest wymagany.',
+            'perks.min' => 'Przynajmniej jeden benefit jest wymagany.',
+            'hero_image.required' => 'Zdjęcie główne jest wymagane.',
         ]);
 
         \Log::info('Validated data:', $validated);
@@ -144,25 +154,27 @@ class OfferController extends Controller
             'title'       => $validated['title'],
             'description' => $validated['description'],
             // Zapisujemy jako array
-            'duties'       => $validated['duties'] ?? [],
-            'requirements' => $validated['requirements'] ?? [],
-            'benefits'     => $validated['perks'] ?? [], // Uwaga: benefits zamiast perks
-            'country'     => $validated['country']     ?? null,
-            'city'        => $validated['city']        ?? null,
-            'postal_code' => $validated['postal_code'] ?? null,
-            'start_date'  => $validated['start_date']  ?? null,
-            'duration'    => $validated['duration']    ?? null,
-            'language'    => $validated['language']    ?? null,
-            'wage'        => $validated['wage']        ?? null,
-            'bonus'       => $validated['bonus']       ?? null,
+            'duties'       => $validated['duties'],
+            'requirements' => $validated['requirements'],
+            'benefits'     => $validated['perks'], // Uwaga: benefits zamiast perks
 
-            'care_recipient_gender' => $validated['care_recipient_gender'] ?? null,
-            'mobility'              => $validated['mobility'] ?? null,
-            'lives_alone'           => $validated['lives_alone'] ?? false,
+            // Teraz wszystkie pola są required, więc nie potrzebujemy null coalescing
+            'country'     => $validated['country'],
+            'city'        => $validated['city'],
+            'postal_code' => $validated['postal_code'],
+            'start_date'  => $validated['start_date'],
+            'duration'    => $validated['duration'],
+            'language'    => $validated['language'],
+            'wage'        => $validated['wage'],
+            'bonus'       => $validated['bonus'],
 
-            'experience_id' => $validated['experience_id'] ?? null,
-            'experiences'   => $validated['experiences']   ?? null,
-            'care_target'   => $validated['care_target']   ?? null,
+            'care_recipient_gender' => $validated['care_recipient_gender'],
+            'mobility'              => $validated['mobility'],
+            'lives_alone'           => $validated['lives_alone'],
+
+            'experience_id' => $validated['experience_id'],
+            'experiences'   => $validated['experiences'],
+            'care_target'   => $validated['care_target'],
         ];
 
         if ($file = $request->file('hero_image')) {
@@ -202,54 +214,68 @@ class OfferController extends Controller
             'title'       => 'required|string|max:255',
             'description' => 'required|string',
 
-            'duties'         => 'array',
-            'duties.*'       => 'string|max:255',
-            'requirements'   => 'array',
-            'requirements.*' => 'string|max:255',
-            'perks'          => 'array',
-            'perks.*'        => 'string|max:255',
+            // Array z nazwami (stringami) - teraz obowiązkowe
+            'duties'         => 'required|array|min:1',
+            'duties.*'       => 'required|string|max:255',
+            'requirements'   => 'required|array|min:1',
+            'requirements.*' => 'required|string|max:255',
+            'perks'          => 'required|array|min:1',
+            'perks.*'        => 'required|string|max:255',
 
-            'experience_id' => 'nullable|integer|exists:experiences,id',
-            'experiences'   => 'nullable|string|max:255',
-            'care_target'   => 'nullable|string|max:255',
+            // Pola które były nullable - teraz required
+            'experience_id' => 'required|integer|exists:experiences,id',
+            'experiences'   => 'required|string|max:255',
+            'care_target'   => 'required|string|max:255',
 
-            'country'     => 'nullable|string|max:100',
-            'city'        => 'nullable|string|max:100',
-            'postal_code' => 'nullable|string|max:20',
-            'start_date'  => 'nullable|string|max:50',
-            'duration'    => 'nullable|string|max:50',
-            'language'    => 'nullable|string|max:50',
-            'wage'        => 'nullable|string|max:50',
-            'bonus'       => 'nullable|string|max:50',
+            'country'     => 'required|string|max:100',
+            'city'        => 'required|string|max:100',
+            'postal_code' => 'required|string|max:20',
+            'start_date'  => 'required|string|max:50',
+            'duration'    => 'required|string|max:50',
+            'language'    => 'required|string|max:50',
+            'wage'        => 'required|string|max:50',
+            'bonus'       => 'required|string|max:50',
 
-            'hero_image'  => 'nullable|file|image|max:4096',
-            'care_recipient_gender' => 'nullable|string|max:50',
-            'mobility'              => 'nullable|string|max:50',
-            'lives_alone'           => 'nullable|boolean',
+            // Hero image nie jest required przy update, chyba że nie ma istniejącego
+            'hero_image'  => $offer->hero_image ? 'nullable|file|image|max:4096' : 'required|file|image|max:4096',
+            'care_recipient_gender' => 'required|string|max:50',
+            'mobility'              => 'required|string|max:50',
+            'lives_alone'           => 'required|boolean',
+        ], [
+            // Custom messages
+            'duties.required' => 'Przynajmniej jeden obowiązek jest wymagany.',
+            'duties.min' => 'Przynajmniej jeden obowiązek jest wymagany.',
+            'requirements.required' => 'Przynajmniej jedno wymaganie jest wymagane.',
+            'requirements.min' => 'Przynajmniej jedno wymaganie jest wymagane.',
+            'perks.required' => 'Przynajmniej jeden benefit jest wymagany.',
+            'perks.min' => 'Przynajmniej jeden benefit jest wymagany.',
+            'hero_image.required' => 'Zdjęcie główne jest wymagane.',
         ]);
 
         $payload = [
             'title'       => $validated['title'],
             'description' => $validated['description'],
-            'duties'       => $validated['duties'] ?? [],
-            'requirements' => $validated['requirements'] ?? [],
-            'benefits'     => $validated['perks'] ?? [],
-            'country'     => $validated['country']     ?? null,
-            'city'        => $validated['city']        ?? null,
-            'postal_code' => $validated['postal_code'] ?? null,
-            'start_date'  => $validated['start_date']  ?? null,
-            'duration'    => $validated['duration']    ?? null,
-            'language'    => $validated['language']    ?? null,
-            'wage'        => $validated['wage']        ?? null,
-            'bonus'       => $validated['bonus']       ?? null,
+            'duties'       => $validated['duties'],
+            'requirements' => $validated['requirements'],
+            'benefits'     => $validated['perks'],
 
-            'care_recipient_gender' => $validated['care_recipient_gender'] ?? null,
-            'mobility'              => $validated['mobility'] ?? null,
-            'lives_alone'           => $validated['lives_alone'] ?? false,
+            // Wszystkie pola są required
+            'country'     => $validated['country'],
+            'city'        => $validated['city'],
+            'postal_code' => $validated['postal_code'],
+            'start_date'  => $validated['start_date'],
+            'duration'    => $validated['duration'],
+            'language'    => $validated['language'],
+            'wage'        => $validated['wage'],
+            'bonus'       => $validated['bonus'],
 
-            'experience_id' => $validated['experience_id'] ?? null,
-            'experiences'   => $validated['experiences']   ?? null,
-            'care_target'   => $validated['care_target']   ?? null,
+            'care_recipient_gender' => $validated['care_recipient_gender'],
+            'mobility'              => $validated['mobility'],
+            'lives_alone'           => $validated['lives_alone'],
+
+            'experience_id' => $validated['experience_id'],
+            'experiences'   => $validated['experiences'],
+            'care_target'   => $validated['care_target'],
         ];
 
         if ($file = $request->file('hero_image')) {
