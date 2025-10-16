@@ -55,11 +55,30 @@ export default function Index() {
         });
     };
 
+    const handlePerPageChange = (per_page: number) => {
+        setLocal((prev) => ({ ...prev, per_page }));
+        router.get('/admin/offers', { ...local, per_page }, {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+        });
+    };
+
     const del = (id: number | string) => {
         if (!confirm('Usunąć tę ofertę?')) return;
         router.delete(`/admin/offers/${encodeURIComponent(String(id))}`, {
             preserveScroll: true,
             preserveState: true,
+        });
+    };
+
+    // Funkcja do formatowania daty
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('pl-PL', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
         });
     };
 
@@ -77,7 +96,7 @@ export default function Index() {
                     </Link>
                 </div>
 
-                {/* FILTRY - POPRAWIONE WYRÓWNANIE */}
+                {/* FILTRY - POPRAWIONE */}
                 <section className="mb-6 rounded-lg bg-[#F5F5F4] p-4">
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 items-end">
                         <label className="flex flex-col">
@@ -122,7 +141,7 @@ export default function Index() {
                             <select
                                 className="h-[38px] rounded border px-3 py-2 bg-white"
                                 value={local.per_page}
-                                onChange={(e) => setLocal((s) => ({ ...s, per_page: Number(e.target.value) }))}
+                                onChange={(e) => handlePerPageChange(Number(e.target.value))}
                             >
                                 {[10, 20, 50, 100].map((n) => (
                                     <option key={n} value={n}>
@@ -158,7 +177,7 @@ export default function Index() {
                     </div>
                 </section>
 
-                {/* TABELA */}
+                {/* TABELA Z DODANĄ KOLUMNĄ DATA UTWORZENIA */}
                 <div className="rounded-xl border bg-white overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="min-w-full table-auto text-sm">
@@ -166,9 +185,10 @@ export default function Index() {
                             <tr>
                                 <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                                 <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tytuł</th>
+                                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Data utworzenia</th>
                                 <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Lokalizacja</th>
-                                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Język</th>
-                                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">Stawka</th>
+                                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">Język</th>
+                                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden 2xl:table-cell">Stawka</th>
                                 <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Obowiązki</th>
                                 <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Wymagania</th>
                                 <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Oferujemy</th>
@@ -180,11 +200,14 @@ export default function Index() {
                                 <tr key={o.id} className="hover:bg-gray-50">
                                     <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">{o.id}</td>
                                     <td className="px-3 py-4 text-sm font-medium text-gray-900 max-w-xs truncate">{o.title}</td>
+                                    <td className="px-3 py-4 text-sm text-gray-500 hidden lg:table-cell whitespace-nowrap">
+                                        {formatDate(o.created_at)}
+                                    </td>
                                     <td className="px-3 py-4 text-sm text-gray-500 hidden md:table-cell">
                                         {[o.city, o.country].filter(Boolean).join(', ')}
                                     </td>
-                                    <td className="px-3 py-4 text-sm text-gray-500 hidden lg:table-cell">{o.language}</td>
-                                    <td className="px-3 py-4 text-sm text-gray-500 hidden xl:table-cell">{o.wage}</td>
+                                    <td className="px-3 py-4 text-sm text-gray-500 hidden xl:table-cell">{o.language}</td>
+                                    <td className="px-3 py-4 text-sm text-gray-500 hidden 2xl:table-cell">{o.wage}</td>
                                     <td className="px-3 py-4 text-sm text-gray-500 hidden sm:table-cell text-center">{o.duties_count ?? 0}</td>
                                     <td className="px-3 py-4 text-sm text-gray-500 hidden sm:table-cell text-center">{o.requirements_count ?? 0}</td>
                                     <td className="px-3 py-4 text-sm text-gray-500 hidden sm:table-cell text-center">{o.perks_count ?? 0}</td>
@@ -224,7 +247,7 @@ export default function Index() {
                             ))}
                             {offers.data.length === 0 && (
                                 <tr>
-                                    <td colSpan={9} className="px-4 py-8 text-center text-gray-500">
+                                    <td colSpan={10} className="px-4 py-8 text-center text-gray-500">
                                         Brak ofert.
                                     </td>
                                 </tr>

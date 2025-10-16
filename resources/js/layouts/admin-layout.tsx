@@ -204,14 +204,11 @@ function NavList({ items }: { items: NavItem[] }) {
 }
 
 /** Aktywność linku: aktywny także dla /id, /id/edit, /create, query */
+/** PROSTA funkcja - tylko dokładne dopasowanie */
 function isActive(currentUrl: string, href: string) {
-    const cur = stripTrailingSlash(currentUrl)
-    const base = stripTrailingSlash(href)
-    return (
-        cur === base ||
-        cur.startsWith(base + '?') ||
-        cur.startsWith(base + '/')
-    )
+    const cur = currentUrl.split('?')[0].replace(/\/+$/, '')
+    const base = href.split('?')[0].replace(/\/+$/, '')
+    return cur === base
 }
 
 function stripTrailingSlash(u: string) {

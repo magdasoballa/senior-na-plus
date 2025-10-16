@@ -54,7 +54,11 @@ export default function Edit(){
 
     const submit = (e:React.FormEvent)=>{
         e.preventDefault()
-        form.post(`${BASE}/${offer.id}`, { method:'put', forceFormData:true, preserveScroll:true })
+        // POPRAWA: Użyj form.put() zamiast form.post() z metodą put
+        form.put(`${BASE}/${offer.id}`, {
+            forceFormData: true,
+            preserveScroll: true
+        })
     }
 
     const toggleId = (field:'duties'|'requirements'|'perks', id:number, checked:boolean)=>{
@@ -219,7 +223,7 @@ export default function Edit(){
                         <Link href={BASE} className="rounded-full border px-4 py-2">Anuluj</Link>
                         <button type="submit" disabled={form.processing}
                                 className="rounded-full bg-mint px-5 py-2 font-semibold text-white">
-                            Zapisz zmiany
+                            {form.processing ? 'Zapisywanie...' : 'Zapisz zmiany'}
                         </button>
                     </div>
                 </form>
