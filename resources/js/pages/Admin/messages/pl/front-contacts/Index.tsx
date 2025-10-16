@@ -2,7 +2,7 @@ import AdminLayout from '@/layouts/admin-layout'
 import { Link, router, usePage } from '@inertiajs/react'
 import * as React from 'react'
 import { useEffect, useRef, useState } from 'react'
-import { Eye, Trash2, Pencil, CheckCircle2, Filter, XCircle } from 'lucide-react'
+import { Eye, Trash2, Pencil, CheckCircle2, Filter, XCircle, X } from 'lucide-react'
 import { FilterPopover, FilterRow, Select, TriStateRead } from '@/components/admin/FilterPopover'
 
 type Row = {
@@ -87,6 +87,16 @@ export default function Index() {
         router.get(BASE, { q, sort, dir }, { preserveState: true, replace: true })
     }
 
+    // DODANA FUNKCJA: Czyszczenie wyszukiwarki
+    const clearSearch = () => {
+        setQ('')
+        router.get(
+            BASE,
+            { sort, dir, level: level || undefined, read, per_page: perPage },
+            { preserveState: true, replace: true }
+        )
+    }
+
     const changeSort = (col: string) => {
         const next = sort === col ? (dir === 'asc' ? 'desc' : 'asc') : 'asc'
         setSort(col as any)
@@ -124,9 +134,21 @@ export default function Index() {
                                 value={q}
                                 onChange={(e) => setQ(e.target.value)}
                                 placeholder="Szukaj"
-                                className="w-full rounded-full border bg-white px-4 py-2 pl-10"
+                                className="w-full rounded-full border bg-white px-4 py-2 pl-10 pr-10"
                             />
                             <span className="pointer-events-none absolute left-3 top-2.5">🔎</span>
+
+                            {/* DODANY PRZYCISK CZYSZCZENIA */}
+                            {q && (
+                                <button
+                                    type="button"
+                                    onClick={clearSearch}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                    title="Wyczyść wyszukiwanie"
+                                >
+                                    <X className="h-4 w-4" />
+                                </button>
+                            )}
                         </div>
                     </form>
 

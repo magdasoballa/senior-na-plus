@@ -211,6 +211,3 @@ function isActive(currentUrl: string, href: string) {
     return cur === base
 }
 
-function stripTrailingSlash(u: string) {
-    return u.replace(/\/+$/, '')
-}

@@ -1,9 +1,7 @@
-import AppLogoIcon from '@/components/app-logo-icon';
 import { home } from '@/routes';
 import { Link } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
-import LogoMobile from '../../../../public/icons/logoMobile';
-import LogoMobileWhite from '../../../../public/icons/logoMobileWhite';
+
 
 interface AuthLayoutProps {
     name?: string;
@@ -21,7 +19,15 @@ export default function AuthSimpleLayout({ children, title, description }: Props
                     <div className="flex flex-col items-center gap-4">
                         <Link href={home()} className="flex flex-col items-center gap-2 font-medium">
                             <div className="mb-1 flex  items-center justify-center rounded-md">
-                                {isDarkMode ? <LogoMobileWhite  width='250px'/> :  <LogoMobile className=" fill-current text-black dark:text-white" width='250px'/> }
+                                {isDarkMode ? <img
+                                    src="/img/logo-mobile-white.png"
+                                    alt="Logo"
+                                    className="h-auto max-w-[250px]"
+                                /> :  <img
+                                    src="/img/logo-mobile.png"
+                                    alt="Logo"
+                                    className="h-auto max-w-[250px]"
+                                /> }
                             </div>
                             <span className="sr-only">{title}</span>
                         </Link>
