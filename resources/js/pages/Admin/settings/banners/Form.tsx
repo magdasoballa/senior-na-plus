@@ -97,6 +97,10 @@ export default function Form() {
     return (
         <AdminLayout>
             <main className="p-6">
+                <div className="text-sm text-slate-500">
+                    <Link href={BASE} className="text-sky-700 hover:underline">Banery</Link>
+                              &nbsp;&rsaquo;&nbsp; {isCreate ? 'Utwórz' : `Aktualizacja #${banner.id}`}
+                           </div>
                 <p className="text-2xl font-bold">
                     {isCreate ? 'Utwórz Baner' : `Aktualizacja Baner: ${banner.id}`}
                 </p>

@@ -38,17 +38,36 @@ export default function Show(){
     return (
         <AdminLayout>
             <main className="mx-auto max-w-[110rem] p-6">
-                <p className="mt-1 text-2xl font-bold">Szczegóły Kontakt Strona (pl): {showOrDash(contact.subject)}</p>
+                {/* --- Breadcrumbs (powrót do listy) --- */}
+                <div className="text-sm text-slate-500">
+                    <Link href={BASE} className="text-sky-700 hover:underline">
+                        Kontakty Strona (pl)
+                    </Link>
+                    &nbsp;&rsaquo;&nbsp; Szczegóły kontaktu #{contact.id}
+                </div>
+
+                {/* Tytuł */}
+                <p className="mt-1 text-2xl font-bold">
+                    Szczegóły Kontakt Strona (pl): {showOrDash(contact.subject)}
+                </p>
 
                 <div className="mt-4 overflow-hidden rounded-xl border bg-white">
                     <div className="flex items-center justify-end gap-2 border-b px-4 py-3">
                         <button onClick={toggle} className="rounded border px-2 py-1 text-sm">
                             Oznacz jako {contact.is_read ? 'nieprzeczytany' : 'przeczytany'}
                         </button>
-                        <Link href={`${BASE}/${contact.id}/edit`} className="inline-flex h-8 w-8 items-center justify-center rounded border" title="Edytuj">
+                        <Link
+                            href={`${BASE}/${contact.id}/edit`}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded border"
+                            title="Edytuj"
+                        >
                             <Pencil className="h-4 w-4"/>
                         </Link>
-                        <button onClick={destroyIt} className="inline-flex h-8 w-8 items-center justify-center rounded border text-rose-600" title="Usuń">
+                        <button
+                            onClick={destroyIt}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded border text-rose-600"
+                            title="Usuń"
+                        >
                             <Trash2 className="h-4 w-4"/>
                         </button>
                     </div>
@@ -57,7 +76,11 @@ export default function Show(){
                         <Row label="ID">{contact.id}</Row>
                         <Row label="Imię i nazwisko">{showOrDash(contact.full_name)}</Row>
                         <Row label="E-mail">
-                            {contact.email ? <a href={`mailto:${contact.email}`} className="text-sky-700 hover:underline">{contact.email}</a> : '—'}
+                            {contact.email ? (
+                                <a href={`mailto:${contact.email}`} className="text-sky-700 hover:underline">
+                                    {contact.email}
+                                </a>
+                            ) : '—'}
                         </Row>
                         <Row label="Telefon">{showOrDash(contact.phone)}</Row>
                         <Row label="Temat">{showOrDash(contact.subject)}</Row>

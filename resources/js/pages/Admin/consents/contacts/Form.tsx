@@ -77,8 +77,8 @@ export default function Form() {
 
 
                 <div className="text-sm text-slate-500">
-                    Zasoby ›{' '}
-                    <Link href={BASE} className="text-mint">
+
+                    <Link href={BASE} >
                         Kontakty
                     </Link>{' '}
                     › {isEdit ? `Edycja: ${contact!.name}` : 'Utwórz Kontakt'}

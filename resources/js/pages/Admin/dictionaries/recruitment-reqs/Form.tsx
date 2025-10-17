@@ -128,9 +128,10 @@ export default function Form() {
     return (
         <AdminLayout>
             <main className="p-6">
-                <div className="text-sm text-slate-500">
-                    {isEdit ? `Wymagania rekrutacyjne › Aktualizacja: ${req!.title}` : 'Wymagania rekrutacyjne › Utwórz'}
-                </div>
+                 <div className="text-sm text-slate-500">
+                   <Link href={BASE} >Wymagania rekrutacyjne</Link>
+                  &nbsp;&rsaquo;&nbsp; {isEdit ? `Aktualizacja: ${req!.title}` : 'Utwórz'}
+                 </div>
                 <p className="mt-1 text-2xl font-bold">
                     {isEdit ? `Aktualizacja Wymaganie rekrutacyjne: ${req!.id}` : 'Utwórz Wymaganie rekrutacyjne'}
                 </p>

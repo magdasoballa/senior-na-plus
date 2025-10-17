@@ -31,7 +31,7 @@ export default function Show() {
         <AdminLayout>
             <main className="p-6">
                 <div className="text-sm text-slate-500">
-                    Zasoby › <Link href={BASE} className="text-mint hover:underline">Formularze</Link> › Podgląd
+                  <Link href={BASE} >Formularze</Link> › Podgląd
                 </div>
 
 

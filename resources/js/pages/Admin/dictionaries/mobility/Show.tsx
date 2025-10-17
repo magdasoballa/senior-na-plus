@@ -15,8 +15,10 @@ export default function Show(){
     return (
         <AdminLayout>
             <main className="p-6">
-                <div className="text-sm text-slate-500">Zasoby › Mobilność podopiecznych › Szczegóły</div>
-                <div className="mt-1 flex items-center justify-between">
+                <div className="text-sm text-slate-500">
+                  <Link href={BASE} >Mobilność podopiecznych</Link>
+                       &nbsp;&rsaquo;&nbsp; Szczegóły
+                    </div>                <div className="mt-1 flex items-center justify-between">
                     <p className="text-2xl font-bold">Szczegóły Mobilność podopiecznego: {row.name_pl}</p>
                     <div className="flex gap-2">
                         <Link href={`${BASE}/${row.id}/edit`} className="rounded-lg border px-3 py-1 hover:bg-slate-50"><Pencil/></Link>

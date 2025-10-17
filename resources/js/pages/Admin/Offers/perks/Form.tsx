@@ -33,7 +33,7 @@ export default function Form(){
         <AdminLayout>
             <main className="p-6">
                 <div className="text-sm text-slate-500">
-                    Zasoby › <Link href={BASE} className="text-mint">Oferujemy</Link> › {isEdit ? `Edycja: ${perk!.name}` : 'Utwórz Oferujemy'}
+                  <Link href={BASE} >Oferujemy</Link> › {isEdit ? `Edycja: ${perk!.name}` : 'Utwórz Oferujemy'}
                 </div>
                 <p className="mt-1 text-2xl font-bold">{isEdit ? `Aktualizacja #${perk!.id}` : 'Utwórz Oferujemy'}</p>
 

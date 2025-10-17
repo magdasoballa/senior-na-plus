@@ -11,8 +11,10 @@ export default function Show(){
     return (
         <AdminLayout>
             <main className="p-6">
-                <div className="text-sm text-slate-500">Zasoby › Wymagania rekrutacyjne › #{req.id}</div>
-                <div className="mt-1 flex items-center justify-between">
+                <div className="text-sm text-slate-500">
+                   <Link href={BASE} >Wymagania rekrutacyjne</Link>
+                  &nbsp;&rsaquo;&nbsp; Szczegóły: {req.title}
+                 </div>                <div className="mt-1 flex items-center justify-between">
                     <p className="text-2xl font-bold">Szczegóły Wymaganie rekrutacyjne: {req.title}</p>
                     <div className="flex gap-2">
                         <Link href={`${BASE}/${req.id}/edit`} className="rounded-lg border px-3 py-1 hover:bg-slate-50"><Pencil/></Link>
@@ -39,7 +41,6 @@ export default function Show(){
                     </dl>
                 </div>
 
-                <div className="py-6 text-center text-xs text-slate-500">Senior na plus {new Date().getFullYear()}</div>
             </main>
         </AdminLayout>
     )

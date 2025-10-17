@@ -32,8 +32,10 @@ export default function Show() {
     return (
         <AdminLayout>
             <main className="p-6">
-                <div className="text-sm text-slate-500">Zasoby › Ustawienia portalu › #{setting.id}</div>
-                <div className="mt-1 flex items-center justify-between">
+                <div className="text-sm text-slate-500">
+                    <Link href={BASE} className="text-sky-700 hover:underline">Ustawienia portalu</Link>
+                       &nbsp;&rsaquo;&nbsp; Szczegóły
+                     </div>                <div className="mt-1 flex items-center justify-between">
                     <p className="text-2xl font-bold">Szczegóły Ustawienie portalu: {setting.id}</p>
                     <div className="flex gap-2">
                         <Link href={`${BASE}/${setting.id}/edit`} className="rounded-lg border px-3 py-1 hover:bg-slate-50" aria-label="Edytuj">

@@ -54,8 +54,10 @@ export default function Form() {
             <main className="p-6">
                 {/* breadcrumbs */}
                 <div className="text-sm text-slate-500">
-                    {isEdit ? `Obowiązki › Aktualizacja: ${duty!.name}` : 'Obowiązki › Utwórz'}
+                    <Link href={BASE} >Obowiązki </Link>
+                    &nbsp;&rsaquo;&nbsp; {isEdit ? `Aktualizacja: ${duty?.name ?? ''}` : 'Utwórz'}
                 </div>
+
                 <p className="mt-1 text-3xl font-bold text-emerald-900">
                     {isEdit ? `Aktualizacja Obowiązek: ${duty!.id}` : 'Utwórz Obowiązek'}
                 </p>

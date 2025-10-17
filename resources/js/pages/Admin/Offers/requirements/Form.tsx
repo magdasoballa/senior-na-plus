@@ -42,7 +42,10 @@ export default function Form(){
     return (
         <AdminLayout>
             <main className="p-6">
-                <div className="text-sm text-slate-500">{isEdit ? `Wymagania › Aktualizacja: ${req!.name}` : 'Wymagania › Utwórz'}</div>
+                <div className="text-sm text-slate-500">
+                    <Link href={BASE} >Wymagania</Link>
+                    &nbsp;&rsaquo;&nbsp; {isEdit ? `Aktualizacja: ${req?.name ?? ''}` : 'Utwórz'}
+                </div>
                 <p className="mt-1 text-2xl font-bold">{isEdit ? `Aktualizacja Wymaganie: ${req!.id}` : 'Utwórz Wymaganie'}</p>
 
                 <form onSubmit={submit} className="mt-6 rounded-xl border bg-white p-6">

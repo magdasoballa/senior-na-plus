@@ -33,6 +33,13 @@ export default function Show() {
     return (
         <AdminLayout>
             <main className="p-6">
+                {/* --- Breadcrumbs (powrót do listy) --- */}
+                <div className="text-sm text-slate-500">
+                    <Link href="/admin/offers" className="text-sky-700 hover:underline">
+                        Oferty
+                    </Link>
+                    &nbsp;&rsaquo;&nbsp; Szczegóły oferty #{offer?.id}
+                </div>
                 <div className="flex items-center justify-between">
                     <p className="text-xl font-semibold">
                         Szczegóły Oferta: {offer?.title}

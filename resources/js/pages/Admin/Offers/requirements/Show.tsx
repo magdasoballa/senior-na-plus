@@ -11,8 +11,12 @@ export default function Show(){
     return (
         <AdminLayout>
             <main className="p-6">
-                <div className="text-sm text-slate-500">Oferty › Wymagania › Szczegóły: {req.name}</div>
-                <div className="mt-1 flex items-center justify-between">
+                <div className="text-sm text-slate-500">
+                    <Link href={BASE} >
+                        Wymagania
+                    </Link>
+                    &nbsp;&rsaquo;&nbsp; Szczegóły: {req?.name ?? '—'}
+                </div>                <div className="mt-1 flex items-center justify-between">
                     <p className="text-2xl font-bold">Szczegóły Wymaganie: {req.name}</p>
                     <div className="flex gap-2">
 

@@ -24,9 +24,11 @@ export default function Show() {
     return (
         <AdminLayout>
             <main className="p-6">
+
                 <div className="text-sm text-slate-500">
-                    Zasoby › Banery › Szczegóły #{banner.id}
-                </div>
+                   <Link href={BASE} className="text-sky-700 hover:underline">Banery</Link>
+                              &nbsp;&rsaquo;&nbsp; Szczegóły
+                           </div>
                 <div className="mt-1 flex items-center justify-between">
                     <p className="text-2xl font-bold">Szczegóły banera</p>
                     <div className="flex gap-2">

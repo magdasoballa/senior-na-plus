@@ -53,6 +53,14 @@ export default function Edit() {
     return (
         <AdminLayout>
             <main className="mx-auto max-w-[110rem] p-6">
+
+                {/* --- Breadcrumbs (powrót do listy) --- */}
+                <div className="text-sm text-slate-500">
+                    <Link href={BASE} className="text-sky-700 hover:underline">
+                        Kontakty Strona (pl)
+                    </Link>
+                    &nbsp;&rsaquo;&nbsp; Aktualizacja kontaktu #{contact.id}
+                </div>
                 <p className="mt-1 text-2xl font-bold">
                     Aktualizacja Kontakt Strona (pl): {contact.subject}
                 </p>

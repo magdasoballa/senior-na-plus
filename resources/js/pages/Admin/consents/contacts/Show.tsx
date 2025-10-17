@@ -20,7 +20,7 @@ export default function Show(){
     return (
         <AdminLayout>
             <main className="p-6">
-                <div className="text-sm text-slate-500">Zasoby › <Link href={BASE} className="text-mint">Kontakty</Link> › Szczegóły Kontakt: {contact.id}</div>
+                <div className="text-sm text-slate-500"> <Link href={BASE} >Kontakty</Link> › Szczegóły Kontakt: {contact.id}</div>
                 <div className="mt-1 flex items-center justify-between">
                     <p className="text-2xl font-bold">Szczegóły Kontakt: {contact.id}</p>
                     <div className="flex gap-2">

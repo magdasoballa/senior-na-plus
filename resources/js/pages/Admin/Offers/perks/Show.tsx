@@ -28,7 +28,7 @@ export default function Show() {
             <main className="p-6">
                 {/* breadcrumb */}
                 <div className="text-sm text-slate-500">
-                    Zasoby › <Link href={BASE} className="text-mint hover:underline">Oferujemy</Link> › Podgląd
+                  <Link href={BASE} >Oferujemy</Link> › Podgląd
                 </div>
 
                 <div className="mt-1 flex items-center justify-between">

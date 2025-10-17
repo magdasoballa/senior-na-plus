@@ -65,7 +65,10 @@ export default function Form(){
     return (
         <AdminLayout>
             <main className="p-6">
-                <div className="text-sm text-slate-500">Zasoby › Doświadczenia w opiece › {isEdit ? `Aktualizacja ${row!.name_pl}` : 'Utwórz'}</div>
+                <div className="text-sm text-slate-500">
+                       <Link href={BASE} >Doświadczenia w opiece</Link>
+                      &nbsp;&rsaquo;&nbsp; {isEdit ? `Aktualizacja: ${row!.name_pl}` : 'Utwórz'}
+                     </div>
                 <p className="mt-1 text-2xl font-bold">
                     {isEdit ? `Aktualizacja Doświadczenie w opiece: ${row!.id}` : 'Utwórz Doświadczenie w opiece'}
                 </p>

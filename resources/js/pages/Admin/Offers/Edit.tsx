@@ -146,7 +146,13 @@ export default function Edit(){
     return (
         <AdminLayout>
             <div className="max-w-5xl p-6">
-                <Link href={BASE} className="text-coral">&larr; Wróć</Link>
+                {/* --- Breadcrumbs --- */}
+                <div className="text-sm text-slate-500">
+                    <Link href={BASE} className="text-sky-700 hover:underline">
+                        Oferty
+                    </Link>
+                    &nbsp;&rsaquo;&nbsp; Edycja oferty: {offer.title}
+                </div>
 
                 <div className="mb-4 mt-5 flex items-center justify-between">
                     <p className="text-2xl font-bold">Edycja oferty</p>

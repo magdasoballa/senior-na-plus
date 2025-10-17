@@ -14,8 +14,7 @@ export default function Show(){
             <main className="p-6">
                 {/* breadcrumbs – styl jak na screenie */}
                 <div className="mb-2 text-sm text-slate-500">
-                    <Link href="/admin" className="hover:underline">Zasoby</Link>
-                    {' › '}
+
                     <Link href={BASE} className="hover:underline">Obowiązki</Link>
                     {' › '}
                     <span className="text-slate-700">#{duty.id}</span>

@@ -97,8 +97,10 @@ export default function Form(){
     return (
         <AdminLayout>
             <main className="p-6">
-                <div className="text-sm text-slate-500">Zasoby › Ustawienia portalu › Edycja #{setting.id}</div>
-                <p className="mt-1 text-2xl font-bold">Aktualizacja Ustawienie portalu: {setting.id}</p>
+                <div className="text-sm text-slate-500">
+                 <Link href={BASE} className="text-sky-700 hover:underline">Ustawienia portalu</Link>
+                   &nbsp;&rsaquo;&nbsp; Edycja
+                 </div>                <p className="mt-1 text-2xl font-bold">Aktualizacja Ustawienie portalu: {setting.id}</p>
 
                 {/* komunikat sukcesu (flash z backendu lub lokalny po „kontynuuj edycję”) */}
                 {(saved || flash?.success) && (

@@ -88,6 +88,10 @@ export default function Edit({
     return (
         <AdminLayout>
             <form onSubmit={submit} className="p-6 space-y-4">
+                <div className="text-sm text-slate-500">
+                   <Link href="/admin/settings/social-links" >Linki społecznościowe</Link>
+                    &nbsp;&rsaquo;&nbsp; {mode === 'create' ? 'Utwórz' : `Aktualizacja #${record.id}`}
+                          </div>
                 <p className="mb-2 text-2xl font-bold">
                     {mode === 'create' ? 'Utwórz' : 'Aktualizacja'} Link społecznościowy
                     {record.name ? `: ${record.name}` : ''}

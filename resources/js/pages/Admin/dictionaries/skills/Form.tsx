@@ -60,8 +60,9 @@ export default function Form(){
         <AdminLayout>
             <main className="p-6">
                 <div className="text-sm text-slate-500">
-                    {isEdit ? `Aktualizacja Umiejętność: ${skill!.id}` : 'Nowa Umiejętność'}
-                </div>
+                    <Link href={BASE} >Umiejętności</Link>
+                       &nbsp;&rsaquo;&nbsp; {isEdit ? `Aktualizacja: ${skill?.name_pl ?? skill?.id}` : 'Utwórz'}
+                     </div>
                 <p className="mt-1 text-2xl font-bold">
                     {isEdit ? `Aktualizacja Umiejętność: ${skill!.id}` : 'Utwórz Umiejętność'}
                 </p>

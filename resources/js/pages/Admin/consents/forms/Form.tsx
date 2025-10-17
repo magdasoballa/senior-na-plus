@@ -83,8 +83,8 @@ export default function Form() {
 
 
                 <div className="text-sm text-slate-500">
-                    Zasoby ›{' '}
-                    <Link href={BASE} className="text-mint">
+
+                    <Link href={BASE}>
                         Formularze
                     </Link>{' '}
                     › {isEdit ? `Edycja: ${current!.name}` : 'Utwórz Formularz'}
