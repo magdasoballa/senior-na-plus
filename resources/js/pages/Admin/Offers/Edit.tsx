@@ -35,8 +35,8 @@ type PageProps = {
         duties:DictItem[];
         requirements:DictItem[];
         perks:DictItem[];
-        experience:DictItem[];     // <— dodane
-        care_targets:DictItem[];   // <— dodane
+        experience:DictItem[];
+        care_targets:DictItem[];
     }
 }
 
@@ -73,7 +73,7 @@ export default function Edit(){
         care_target: offer.care_target ?? '',
 
         processing: false,
-        errors: {} as Record<string,string>,
+        errors: {} as Record<string, string | string[]>,
     })
 
     const setData = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) =>
@@ -122,7 +122,7 @@ export default function Edit(){
         fd.append('experiences',   form.experiences ?? '')
         fd.append('care_target',   form.care_target ?? '')
 
-        // tablice jako field[]
+        // tablice jako field[] – wysyłamy nazwy (jak wcześniej)
         dutiesNames.forEach(v       => fd.append('duties[]', v))
         requirementsNames.forEach(v => fd.append('requirements[]', v))
         perksNames.forEach(v        => fd.append('perks[]', v))
@@ -141,6 +141,41 @@ export default function Edit(){
             onError: (errors:any)=> setData('errors', errors),
             onFinish: ()=> setData('processing', false),
         })
+    }
+
+    // === helpers błędów dla tablic (duties/requirements/perks) ===
+    const firstArrayError = (base: 'duties'|'requirements'|'perks') => {
+        const errs = form.errors
+        const candidates = [
+            base,             // 'duties'
+            `${base}[]`,      // 'duties[]'
+            `${base}_ids`,    // alternatywne nazewnictwo
+            `${base}_names`,  // alternatywne nazewnictwo
+        ]
+
+        // 1) dopasowania 1:1
+        for (const k of candidates) {
+            const v = errs[k]
+            if (v) return Array.isArray(v) ? v[0] : v
+        }
+
+        // 2) prefiksy w stylu duties.0, duties.* itp.
+        const prefixed = Object.entries(errs).find(([k]) =>
+            k === base || k.startsWith(`${base}.`)
+        )
+        if (prefixed) {
+            const v = prefixed[1]
+            return Array.isArray(v) ? v[0] : v
+        }
+
+        // 3) luźne dopasowanie po fragmencie nazwy
+        const loose = Object.entries(errs).find(([k]) => k.includes(base))
+        if (loose) {
+            const v = loose[1]
+            return Array.isArray(v) ? v[0] : v
+        }
+
+        return undefined
     }
 
     return (
@@ -164,82 +199,111 @@ export default function Edit(){
                     <section className="rounded-xl border bg-white p-5">
                         <div className="grid gap-4 md:grid-cols-2">
                             <Field label="Tytuł" required>
-                                <input className="w-full rounded border px-3 py-2"
-                                       value={form.title}
-                                       onChange={e=>setData('title', e.target.value)} />
+                                <input
+                                    className="w-full rounded border px-3 py-2"
+                                    value={form.title}
+                                    onChange={e=>setData('title', e.target.value)}
+                                />
                                 <Err msg={form.errors.title} />
                             </Field>
 
                             <Field label="Język">
-                                <input className="w-full rounded border px-3 py-2"
-                                       value={form.language}
-                                       onChange={e=>setData('language', e.target.value)} />
+                                <input
+                                    className="w-full rounded border px-3 py-2"
+                                    value={form.language}
+                                    onChange={e=>setData('language', e.target.value)}
+                                />
                                 <Err msg={form.errors.language} />
                             </Field>
 
                             <Field label="Kraj">
-                                <input className="w-full rounded border px-3 py-2"
-                                       value={form.country}
-                                       onChange={e=>setData('country', e.target.value)} />
+                                <input
+                                    className="w-full rounded border px-3 py-2"
+                                    value={form.country}
+                                    onChange={e=>setData('country', e.target.value)}
+                                />
                                 <Err msg={form.errors.country} />
                             </Field>
 
                             <Field label="Miasto">
-                                <input className="w-full rounded border px-3 py-2"
-                                       value={form.city}
-                                       onChange={e=>setData('city', e.target.value)} />
+                                <input
+                                    className="w-full rounded border px-3 py-2"
+                                    value={form.city}
+                                    onChange={e=>setData('city', e.target.value)}
+                                />
                                 <Err msg={form.errors.city} />
                             </Field>
 
                             <Field label="Kod pocztowy">
-                                <input className="w-full rounded border px-3 py-2"
-                                       value={form.postal_code}
-                                       onChange={e=>setData('postal_code', e.target.value)} />
+                                <input
+                                    className="w-full rounded border px-3 py-2"
+                                    value={form.postal_code}
+                                    onChange={e=>setData('postal_code', e.target.value)}
+                                />
                                 <Err msg={form.errors.postal_code} />
                             </Field>
 
                             <Field label="Data wyjazdu">
-                                <input className="w-full rounded border px-3 py-2"
-                                       value={form.start_date}
-                                       onChange={e=>setData('start_date', e.target.value)} />
+                                <input
+                                    className="w-full rounded border px-3 py-2"
+                                    value={form.start_date}
+                                    onChange={e=>setData('start_date', e.target.value)}
+                                />
                                 <Err msg={form.errors.start_date} />
                             </Field>
 
                             <Field label="Czas trwania">
-                                <input className="w-full rounded border px-3 py-2"
-                                       value={form.duration}
-                                       onChange={e=>setData('duration', e.target.value)} />
+                                <input
+                                    className="w-full rounded border px-3 py-2"
+                                    value={form.duration}
+                                    onChange={e=>setData('duration', e.target.value)}
+                                />
                                 <Err msg={form.errors.duration} />
                             </Field>
 
                             <Field label="Stawka">
-                                <input className="w-full rounded border px-3 py-2"
-                                       value={form.wage}
-                                       onChange={e=>setData('wage', e.target.value)} />
+                                <input
+                                    className="w-full rounded border px-3 py-2"
+                                    value={form.wage}
+                                    onChange={e=>setData('wage', e.target.value)}
+                                />
                                 <Err msg={form.errors.wage} />
                             </Field>
 
                             <Field label="Premia">
-                                <input className="w-full rounded border px-3 py-2"
-                                       value={form.bonus}
-                                       onChange={e=>setData('bonus', e.target.value)} />
+                                <input
+                                    className="w-full rounded border px-3 py-2"
+                                    value={form.bonus}
+                                    onChange={e=>setData('bonus', e.target.value)}
+                                />
                                 <Err msg={form.errors.bonus} />
                             </Field>
 
                             <Field label="Zdjęcie (hero)">
                                 <div className="flex items-center gap-3">
-                                    {offer.hero_image && <img src={`/storage/${offer.hero_image}`} alt="" className="h-14 w-14 rounded object-cover" />}
-                                    <input type="file" accept="image/*"
-                                           onChange={e=>setData('hero_image', e.target.files?.[0] ?? null)} />
+                                    {offer.hero_image && (
+                                        <img
+                                            src={`/storage/${offer.hero_image}`}
+                                            alt=""
+                                            className="h-14 w-14 rounded object-cover"
+                                        />
+                                    )}
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={e=>setData('hero_image', e.target.files?.[0] ?? null)}
+                                    />
                                 </div>
                                 <Err msg={form.errors.hero_image} />
                             </Field>
                         </div>
 
                         <Field label="Opis" required wide>
-              <textarea className="w-full rounded border px-3 py-2 min-h-[140px]"
-                        value={form.description}
-                        onChange={e=>setData('description', e.target.value)} />
+              <textarea
+                  className="w-full rounded border px-3 py-2 min-h-[140px]"
+                  value={form.description}
+                  onChange={e=>setData('description', e.target.value)}
+              />
                             <Err msg={form.errors.description} />
                         </Field>
                     </section>
@@ -272,9 +336,11 @@ export default function Edit(){
                             </Field>
 
                             <Field label="Mobilność">
-                                <select className="w-full rounded border px-3 py-2"
-                                        value={form.mobility}
-                                        onChange={e=>setData('mobility', e.target.value as any)}>
+                                <select
+                                    className="w-full rounded border px-3 py-2"
+                                    value={form.mobility}
+                                    onChange={e=>setData('mobility', e.target.value as any)}
+                                >
                                     <option value="" disabled>— wybierz —</option>
                                     <option value="mobile">mobilny</option>
                                     <option value="limited">ograniczona</option>
@@ -342,22 +408,38 @@ export default function Edit(){
                     {/* Słowniki */}
                     <section className="rounded-xl border bg-white p-5">
                         <h2 className="mb-3 text-lg font-semibold">Obowiązki</h2>
-                        <GridChecks list={dict.duties} selected={form.duties}
-                                    onToggle={(id,checked)=>toggleId('duties',id,checked)} />
+                        <GridChecks
+                            list={dict.duties}
+                            selected={form.duties}
+                            onToggle={(id,checked)=>toggleId('duties',id,checked)}
+                        />
+                        {/* błąd bezpośrednio pod gridem */}
+                        <Err msg={firstArrayError('duties')} />
 
                         <h2 className="mt-6 mb-3 text-lg font-semibold">Wymagania</h2>
-                        <GridChecks list={dict.requirements} selected={form.requirements}
-                                    onToggle={(id,checked)=>toggleId('requirements',id,checked)} />
+                        <GridChecks
+                            list={dict.requirements}
+                            selected={form.requirements}
+                            onToggle={(id,checked)=>toggleId('requirements',id,checked)}
+                        />
+                        <Err msg={firstArrayError('requirements')} />
 
                         <h2 className="mt-6 mb-3 text-lg font-semibold">Oferujemy</h2>
-                        <GridChecks list={dict.perks} selected={form.perks}
-                                    onToggle={(id,checked)=>toggleId('perks',id,checked)} />
+                        <GridChecks
+                            list={dict.perks}
+                            selected={form.perks}
+                            onToggle={(id,checked)=>toggleId('perks',id,checked)}
+                        />
+                        <Err msg={firstArrayError('perks')} />
                     </section>
 
                     <div className="flex items-center justify-end gap-3">
                         <Link href={BASE} className="rounded-full border px-4 py-2">Anuluj</Link>
-                        <button type="submit" disabled={form.processing}
-                                className="rounded-full bg-mint px-5 py-2 font-semibold text-white">
+                        <button
+                            type="submit"
+                            disabled={form.processing}
+                            className="rounded-full bg-mint px-5 py-2 font-semibold text-white"
+                        >
                             {form.processing ? 'Zapisywanie...' : 'Zapisz zmiany'}
                         </button>
                     </div>
@@ -367,17 +449,38 @@ export default function Edit(){
     )
 }
 
-function Field({label, children, required=false, wide=false}:{label:string; children:React.ReactNode; required?:boolean; wide?:boolean}){
+function Field({
+                   label,
+                   children,
+                   required=false,
+                   wide=false
+               }:{
+    label:string;
+    children:React.ReactNode;
+    required?:boolean;
+    wide?:boolean
+}){
     return (
         <div className={wide ? 'md:col-span-2' : ''}>
-            <div className="text-sm font-medium">{label}{required && <span className="text-rose-600"> *</span>}</div>
+            <div className="text-sm font-medium">
+                {label}{required && <span className="text-rose-600"> *</span>}
+            </div>
             <div className="mt-2">{children}</div>
         </div>
     )
 }
-function Err({msg}:{msg?:string}){ return msg ? <p className="mt-1 text-sm text-rose-600">{msg}</p> : null }
 
-function GridChecks({list, selected, onToggle}:{list:DictItem[]; selected:number[]; onToggle:(id:number,checked:boolean)=>void}){
+// Err obsługuje string LUB string[]
+function Err({msg}:{msg?:string|string[]}) {
+    const text = Array.isArray(msg) ? msg[0] : msg
+    return text ? <p className="mt-1 text-sm text-rose-600">{text}</p> : null
+}
+
+function GridChecks({
+                        list,
+                        selected,
+                        onToggle
+                    }:{list:DictItem[]; selected:number[]; onToggle:(id:number,checked:boolean)=>void}){
     const label = (it:DictItem)=> it.name ?? it.name_pl ?? ''
     return (
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -386,7 +489,8 @@ function GridChecks({list, selected, onToggle}:{list:DictItem[]; selected:number
                     <input
                         type="checkbox"
                         checked={selected.includes(it.id)}
-                        onChange={e=>onToggle(it.id, e.target.checked)} />
+                        onChange={e=>onToggle(it.id, e.target.checked)}
+                    />
                     <span>{label(it)}</span>
                 </label>
             ))}
