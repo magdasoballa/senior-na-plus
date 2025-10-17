@@ -88,10 +88,8 @@ class HandleInertiaRequests extends Middleware
         /*
         |--------------------------------------------------------------------------
         | social_links -> props.portal.socials (facebook/instagram/linkedin)
-        |  Używa kolumn: name, url, icon, visible_pl, visible_de, position (jeśli są)
         |--------------------------------------------------------------------------
         */
-        // === SOCIAL LINKS z bazy -> props.portal.socials ===
         $socials = Cache::remember("portal.social_links.$locale", 300, function () use ($locale) {
 
             if (!Schema::hasTable('social_links')) {
@@ -101,8 +99,6 @@ class HandleInertiaRequests extends Middleware
             $rows = DB::table('social_links')
                 ->when(Schema::hasColumn('social_links', 'position'), fn($q) => $q->orderBy('position'))
                 ->get();
-
-
 
             $normUrl = function (?string $u): ?string {
                 $u = trim((string) $u);
@@ -174,8 +170,6 @@ class HandleInertiaRequests extends Middleware
                 'linkedin' => $pickVisible['linkedin'] ,
             ];
 
-
-
             return $finalResult;
         });
 
@@ -190,6 +184,68 @@ class HandleInertiaRequests extends Middleware
                 ->map(fn($r) => ['id' => $r->id, 'name' => $r->name, 'slug' => $r->slug])
                 ->all();
         });
+
+        /*
+        |--------------------------------------------------------------------------
+        | NEW: activePopup -> props.activePopup (tylko na publicu, nie w /admin)
+        |--------------------------------------------------------------------------
+        */
+        $activePopup = Cache::remember('active_popup.current', 60, function () use ($request) {
+            // nie pokazujemy na ścieżkach admina
+            if (str_starts_with($request->path(), 'admin')) {
+                return null;
+            }
+            if (!Schema::hasTable('popups')) {
+                return null;
+            }
+
+            // bierzemy tylko to, co faktycznie masz w tabeli
+            $q = DB::table('popups')->where('is_visible', 1);
+
+            // (opcjonalnie) okno czasowe jeśli kiedyś dodasz kolumny:
+            if (Schema::hasColumn('popups', 'starts_at')) {
+                $q->where(function ($qq) {
+                    $qq->whereNull('starts_at')->orWhere('starts_at', '<=', now());
+                });
+            }
+            if (Schema::hasColumn('popups', 'ends_at')) {
+                $q->where(function ($qq) {
+                    $qq->whereNull('ends_at')->orWhere('ends_at', '>=', now());
+                });
+            }
+
+            // wybierz realne kolumny z Twojej tabeli
+            $row = $q->orderByDesc('id')->first(['id','name','link','image_path']);
+            if (!$row) return null;
+
+            // zbuduj URL do obrazka:
+            $imageUrl = null;
+            if (!empty($row->image_path)) {
+                $path = (string) $row->image_path;
+
+                // jeżeli w bazie jest już pełny URL – użyj go
+                if (preg_match('#^https?://#i', $path)) {
+                    $imageUrl = $path;
+                } else {
+                    // zakładam upload na dysku "public" -> storage/app/public/
+                    // i symlink public/storage -> storage/app/public (php artisan storage:link)
+                    try {
+                        $imageUrl = Storage::disk('public')->url($path);
+                    } catch (\Throwable $e) {
+                        // awaryjnie: spróbuj przez asset() jeśli plik jest w public/
+                        $imageUrl = url(trim($path, '/'));
+                    }
+                }
+            }
+
+            return [
+                'id'        => (int) $row->id,
+                'name'      => (string) ($row->name ?? ''),
+                'link'      => $row->link ? (string) $row->link : null,
+                'image_url' => $imageUrl, // front oczekuje image_url
+            ];
+        });
+
 
         return [
             ...parent::share($request),
@@ -208,7 +264,6 @@ class HandleInertiaRequests extends Middleware
             'sidebarOpen' => ! $request->hasCookie('sidebar_state')
                 || $request->cookie('sidebar_state') === 'true',
 
-
             'msg_badges' => Cache::remember('admin.msg_badges_v2', 5, fn () => $this->messageBadgesSafe()),
 
             // --> dane do frontu (Footer itp.)
@@ -224,6 +279,9 @@ class HandleInertiaRequests extends Middleware
                 'socials' => $socials, // { facebook|null, instagram|null, linkedin|null }
             ],
 
+            // PRZEKAZUJEMY DO FRONTU:
+            'activePopup' => $activePopup,
+
             // przydatne globalnie
             'menuPages' => $menuPages,
             'locale'    => $locale,
@@ -234,7 +292,6 @@ class HandleInertiaRequests extends Middleware
     {
         try {
             // --- Kontakty Strona (PL) ---
-            // Preferuj nową tabelę contact_messages; jeśli jej nie ma, fallback do site_contacts.
             if (\Illuminate\Support\Facades\Schema::hasTable('contact_messages')) {
                 $plSite = (int) \Illuminate\Support\Facades\DB::table('contact_messages')->count();
             } else {
@@ -242,9 +299,7 @@ class HandleInertiaRequests extends Middleware
                 if (\Illuminate\Support\Facades\Schema::hasColumn('site_contacts', 'locale')) {
                     $q->where('locale', 'pl');
                 }
-                // jeśli nie masz kolumny is_read – usuń ten warunek
                 if (\Illuminate\Support\Facades\Schema::hasColumn('site_contacts', 'is_read')) {
-                    // jeśli chcesz liczyć wszystkie, usuń tę linię:
                     // $q->where('is_read', 0);
                 }
                 $plSite = (int) $q->count();
@@ -253,7 +308,7 @@ class HandleInertiaRequests extends Middleware
             // --- Formularze (PL) -> applications (jak w liście) ---
             $plFormsQ = \Illuminate\Support\Facades\DB::table('applications');
             if (\Illuminate\Support\Facades\Schema::hasColumn('applications', 'status')) {
-                $plFormsQ->where('status', 'new'); // jeżeli lista pokazuje „new”; usuń jeśli ma być total
+                $plFormsQ->where('status', 'new');
             }
             $plForms = (int) $plFormsQ->count();
 
@@ -265,8 +320,4 @@ class HandleInertiaRequests extends Middleware
             return [];
         }
     }
-
-
-
-
 }

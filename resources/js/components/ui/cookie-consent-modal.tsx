@@ -12,7 +12,7 @@ type Consent = {
     marketing: boolean
 }
 
-const STORAGE_KEY = 'cookieConsent'
+const STORAGE_KEY = 'cookie_consent'
 
 export default function CookieConsentModal({ isOpen, onClose }: CookieConsentModalProps = {}) {
     const [open, setOpen] = useState(false)
@@ -24,8 +24,10 @@ export default function CookieConsentModal({ isOpen, onClose }: CookieConsentMod
         marketing: false,
     })
 
-    // Pokaż baner gdy brak zapisu; odczytaj poprzednie zgody
+    // Pokaż baner, jeśli brak zapisu; odczytaj poprzednie zgody
     useEffect(() => {
+        if (typeof window === 'undefined') return
+
         if (isOpen !== undefined) {
             setOpen(isOpen)
         } else {
@@ -49,20 +51,34 @@ export default function CookieConsentModal({ isOpen, onClose }: CookieConsentMod
         }
     }, [isOpen])
 
-    const persistAndClose = (c: Consent) => {
+    const persist = (c: Consent) => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(c))
         setConsent(c)
+    }
+
+    const close = () => {
         setOpen(false)
         onClose?.()
     }
 
+    const persistAndClose = (c: Consent, emitAcceptedEvent = false) => {
+        persist(c)
+        if (emitAcceptedEvent) {
+            // poinformuj aplikację, że zgoda została udzielona
+            window.dispatchEvent(new Event('cookie-consent:accepted'))
+        }
+        close()
+    }
+
     const handleAcceptAll = () =>
-        persistAndClose({ necessary: true, functional: true, statistics: true, marketing: true })
+        persistAndClose({ necessary: true, functional: true, statistics: true, marketing: true }, true)
 
     const handleRejectAll = () =>
-        persistAndClose({ necessary: true, functional: false, statistics: false, marketing: false })
+        persistAndClose({ necessary: true, functional: false, statistics: false, marketing: false }, false)
 
-    const handleSave = () => persistAndClose({ ...consent, necessary: true })
+    const handleSave = () =>
+        // traktujemy jako zgodę (może być tylko „necessary” lub z dodatkowymi)
+        persistAndClose({ ...consent, necessary: true }, true)
 
     if (!open) return null
 
@@ -72,7 +88,7 @@ export default function CookieConsentModal({ isOpen, onClose }: CookieConsentMod
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="cookie-title"
-                className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl"
+                className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl"
             >
                 {/* Opis */}
                 <div className="space-y-3">
@@ -80,15 +96,12 @@ export default function CookieConsentModal({ isOpen, onClose }: CookieConsentMod
                         Zgody na pliki cookies
                     </p>
 
-                    <p className="text-xs leading-6 text-gray-700">
-                        Serwis <strong>seniornaplus.pl</strong> korzysta z plików cookies, w celu poprawy komfortu
-                        korzystania przez użytkowników oraz do przechowywania lub uzyskiwania dostępu do informacji
-                        o ich urządzeniu. W przeglądarce użytkownika zapisywane są tylko niezbędne do działania
-                        podstawowych funkcji serwisu pliki cookies. Witryna korzysta również z innych plików cookies,
-                        które pomagają analizować sposób korzystania z serwisu przez użytkowników. Te pliki cookies
-                        są zapisywane w przeglądarce użytkownika wyłącznie za jego zgodą, która w każdym czasie może
-                        zostać wycofana. Brak zgody lub jej wycofanie może mieć negatywny wpływ na niektóre cechy i
-                        funkcje. Więcej na ten temat w&nbsp;
+                    <p className="text-sm leading-6 text-gray-700">
+                        Serwis <strong>seniornaplus.pl</strong> korzysta z plików cookies w celu poprawy komfortu
+                        korzystania oraz do przechowywania lub uzyskiwania dostępu do informacji o Twoim urządzeniu.
+                        Niezbędne pliki cookies są wymagane do działania serwisu. Dodatkowe pliki (funkcjonalne, statystyczne,
+                        marketingowe) wykorzystywane są wyłącznie za Twoją zgodą. Zgodę możesz w każdej chwili wycofać w ustawieniach
+                        przeglądarki. Więcej informacji znajdziesz w&nbsp;
                         <a href="/privacy-policy" className="underline text-gray-900 hover:text-black">
                             Polityce Prywatności
                         </a>
@@ -100,7 +113,7 @@ export default function CookieConsentModal({ isOpen, onClose }: CookieConsentMod
                         <button
                             type="button"
                             onClick={handleAcceptAll}
-                            className="w-full rounded-md bg-gray-900 px-4 py-3 text-xs font-semibold text-white shadow hover:bg-black focus:outline-none focus:ring-2 focus:ring-gray-400"
+                            className="w-full rounded-md bg-gray-900 px-4 py-3 text-sm font-semibold text-white shadow hover:bg-black focus:outline-none focus:ring-2 focus:ring-gray-400"
                         >
                             Włącz wszystko i przejdź do serwisu
                         </button>
@@ -109,7 +122,7 @@ export default function CookieConsentModal({ isOpen, onClose }: CookieConsentMod
                             type="button"
                             aria-expanded={expanded}
                             onClick={() => setExpanded((v) => !v)}
-                            className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold text-gray-900 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400"
+                            className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400"
                         >
                             Zarządzaj zgodami na pliki cookies
                         </button>
@@ -121,21 +134,16 @@ export default function CookieConsentModal({ isOpen, onClose }: CookieConsentMod
                     <div className="mt-4 space-y-4">
                         {/* Niezbędne */}
                         <ConsentRow
-                            label={
-                                <span className="font-semibold">
-
-                  niezbędne
-                </span>
-                            }
-                            description="Konieczne do funkcjonowania serwisu. "
+                            label={<span className="font-semibold">niezbędne</span>}
+                            description="Konieczne do funkcjonowania serwisu."
                             checked
                             disabled
                         />
 
                         {/* Funkcjonalne */}
                         <ConsentRow
-                            label={<span className="font-semibold">funkcjonalne pliki cookies</span>}
-                            description="Umożliwiają zapisanie ustawień wybranych przez użytkownika."
+                            label={<span className="font-semibold">funkcjonalne</span>}
+                            description="Umożliwiają zapamiętywanie Twoich ustawień i preferencji."
                             checked={consent.functional}
                             onChange={(v) => setConsent((c) => ({ ...c, functional: v }))}
                         />
@@ -143,7 +151,7 @@ export default function CookieConsentModal({ isOpen, onClose }: CookieConsentMod
                         {/* Statystyczne */}
                         <ConsentRow
                             label={<span className="font-semibold">statystyczne</span>}
-                            description="Umożliwiają przechowywanie techniczne lub dostęp, który jest używany wyłącznie do anonimowych celów statystycznych."
+                            description="Służą do anonimowej analizy ruchu i wydajności serwisu."
                             checked={consent.statistics}
                             onChange={(v) => setConsent((c) => ({ ...c, statistics: v }))}
                         />
@@ -151,24 +159,24 @@ export default function CookieConsentModal({ isOpen, onClose }: CookieConsentMod
                         {/* Marketingowe */}
                         <ConsentRow
                             label={<span className="font-semibold">marketingowe</span>}
-                            description="Stosowane w celu śledzenia użytkowników, celem wyświetlania reklam, które mogą być dla nich istotne i interesujące."
+                            description="Pomagają dopasować treści reklamowe do Twoich zainteresowań."
                             checked={consent.marketing}
                             onChange={(v) => setConsent((c) => ({ ...c, marketing: v }))}
                         />
 
-                        {/* Akcje w stopce preferencji */}
+                        {/* Stopka preferencji */}
                         <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
                             <button
                                 type="button"
                                 onClick={handleSave}
-                                className="rounded-md bg-gray-900 px-4 py-2 text-xs font-semibold text-white shadow hover:bg-black focus:outline-none focus:ring-2 focus:ring-gray-400"
+                                className="rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-black focus:outline-none focus:ring-2 focus:ring-gray-400"
                             >
                                 Zapisz wybory i przejdź
                             </button>
                             <button
                                 type="button"
                                 onClick={handleRejectAll}
-                                className="text-xs text-gray-700 underline underline-offset-2 hover:text-black"
+                                className="text-sm text-gray-700 underline underline-offset-2 hover:text-black"
                             >
                                 Brak zgody
                             </button>
@@ -194,8 +202,8 @@ function ConsentRow({
     disabled?: boolean
 }) {
     return (
-        <div className="rounded-md border border-gray-200 p-2">
-            <label className="flex items-center gap-3">
+        <div className="rounded-md border border-gray-200 p-3">
+            <label className="flex items-start gap-3">
                 <input
                     type="checkbox"
                     className="mt-0.5 h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-2 focus:ring-gray-400"
@@ -204,8 +212,8 @@ function ConsentRow({
                     disabled={disabled}
                 />
                 <div className={`flex-1 ${disabled ? 'opacity-80' : ''}`}>
-                    <div className="text-xs text-gray-900">{label}</div>
-                    <div className="mt-1 text-xs leading-5 text-gray-600">{description}</div>
+                    <div className="text-sm text-gray-900">{label}</div>
+                    <div className="mt-1 text-sm leading-5 text-gray-600">{description}</div>
                 </div>
             </label>
         </div>

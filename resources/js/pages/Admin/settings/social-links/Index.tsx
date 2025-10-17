@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Link, router } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
-import { CheckCircle2, Eye, Pencil, Trash2, XCircle } from 'lucide-react';
+import { CheckCircle2, Eye, Pencil, Trash2, XCircle, X } from 'lucide-react';
 
 type Row = {
     id: number
@@ -26,12 +26,22 @@ export default function Index({
     filters: { q?: string }
 }) {
     const [q, setQ] = React.useState(filters?.q ?? '')
+
     const submit = () =>
         router.get(
             '/admin/settings/social-links',
             q ? { q } : {},
             { preserveState: true, replace: true }
         )
+
+    const clearSearch = () => {
+        setQ('')
+        router.get(
+            '/admin/settings/social-links',
+            {},
+            { preserveState: true, replace: true }
+        )
+    }
 
     const resolveFa = (icon?: string | null) => {
         if (!icon) return null
@@ -52,13 +62,26 @@ export default function Index({
                 </div>
 
                 <div className="mb-3">
-                    <input
-                        value={q}
-                        onChange={(e) => setQ(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && submit()}
-                        placeholder="Szukaj"
-                        className="w-80 rounded-full border bg-white px-4 py-2"
-                    />
+                    <div className="relative w-80">
+                        <input
+                            value={q}
+                            onChange={(e) => setQ(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && submit()}
+                            placeholder="Szukaj"
+                            className="w-full rounded-full border bg-white px-4 py-2 pr-10 outline-none"
+                        />
+                        {/* Przycisk czyszczenia - pokazuje się tylko gdy jest tekst */}
+                        {q && (
+                            <button
+                                type="button"
+                                onClick={clearSearch}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                title="Wyczyść wyszukiwanie"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 <div className="overflow-hidden rounded-xl border bg-white">

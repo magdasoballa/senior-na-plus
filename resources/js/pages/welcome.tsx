@@ -3,11 +3,16 @@ import AppLayout from '@/layouts/app-layout';
 import OffersSwiper from '@/components/offersSwiper';
 import AboutSection from '@/components/about';
 import ContactFormCard from '@/components/contactFormCard';
-import FooterCard from '@/components/footer';
 import { usePage } from '@inertiajs/react';
 
+// ⬇️ dodaj
+import ActivePopupModal from '@/components/ActivePopupModal';
+
 export default function Welcome() {
-    const { offers } = usePage().props as { offers: any[] };
+    const { offers, activePopup } = usePage().props as {
+        offers: any[];
+        activePopup?: { id:number; name:string; link:string|null; image_url:string|null } | null;
+    };
 
     return (
         <AppLayout>
@@ -15,17 +20,16 @@ export default function Welcome() {
                 <FirstBanner />
 
                 <section id="oferty" className="w-full scroll-mt-4">
-                    <OffersSwiper  offers={offers ?? []} />
+                    <OffersSwiper offers={offers ?? []} />
                 </section>
 
-                <section id="o-nas" className="w-full ">
+                <section id="o-nas" className="w-full">
                     <AboutSection />
                 </section>
 
                 <section id="kontakt" className="w-full scroll-mt-4">
                     <ContactFormCard />
                 </section>
-
             </div>
 
         </AppLayout>

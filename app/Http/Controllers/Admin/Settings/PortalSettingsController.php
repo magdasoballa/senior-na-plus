@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Settings;
 use App\Http\Controllers\Controller;
 use App\Models\PortalSettings;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 
 class PortalSettingsController extends Controller
@@ -87,19 +88,26 @@ class PortalSettingsController extends Controller
             'email_de'   => ['nullable', 'email'],
         ]);
 
-        // miękka normalizacja: twarde spacje -> zwykłe, zbij wielokrotne, trim
-        $data = collect($data)
-            ->map(function ($v, $k) {
-                if ($v === null) return null;
-                $v = str_replace("\xC2\xA0", ' ', $v);    // NBSP -> spacja
-                $v = preg_replace('/\s+/u', ' ', $v);     // wielokrotne -> pojedyncza
-                $v = trim($v);
-                return $v === '' ? null : $v;             // puste jako NULL
-            })
-            ->toArray();
+        // normalizacja
+        $data = collect($data)->map(function ($v) {
+            if ($v === null) return null;
+            $v = str_replace("\xC2\xA0", ' ', $v);
+            $v = preg_replace('/\s+/u', ' ', $v);
+            $v = trim($v);
+            return $v === '' ? null : $v;
+        })->toArray();
 
         $setting->update($data);
 
-        return back()->with('success', 'Zapisano');
+        // wyczyść cache używany w middleware
+        Cache::forget('portal_settings.current.pl');
+        Cache::forget('portal_settings.current.de');
+
+        // gdzie przekierować?
+        $redirectTo = (string) $request->input('redirectTo', 'index');
+
+        return $redirectTo === 'continue'
+            ? to_route('admin.settings.portal.edit', $setting)->with('success', 'Zapisano')
+            : to_route('admin.settings.portal.index')->with('success', 'Zapisano');
     }
 }
