@@ -9,7 +9,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <AppLayout>
             <div className="flex min-h-[calc(100vh-64px)]">
                 <AdminSidebar />
-                {/* <- to zmieniamy */}
                 <main className="flex-1 min-w-0 overflow-x-hidden p-6">
                     {children}
                 </main>
@@ -59,7 +58,7 @@ function AdminSidebar() {
                 { label: 'Obowiązki', href: '/admin/offers/duties' },
                 { label: 'Wymagania', href: '/admin/offers/requirements' },
                 { label: 'Oferujemy', href: '/admin/offers/perks' },
-                { label: 'Oferty', href: '/admin/offers' },
+                { label: 'Oferty', href: '/admin/offers', exact: true }, // <- ważne
             ],
         },
         {
@@ -73,13 +72,8 @@ function AdminSidebar() {
             title: 'Wiadomości',
             items: [
                 { kind: 'label', label: 'WERSJA PL' },
-                // { label: 'Kontakty Front (pl)',  href: '/admin/messages/pl/front-contacts' },
                 { label: 'Kontakty Strona (pl)', href: '/admin/messages/pl/site-contacts' },
-                { label: 'Formularze (pl)',      href: '/admin/messages/pl/forms' },
-
-                // { kind: 'label', label: 'WERSJA DE' },
-                // { label: 'Kontakty Strona (de)', href: '/admin/messages/de/site-contacts' },
-                // { label: 'Formularze (de)',      href: '/admin/messages/de/forms' },
+                { label: 'Formularze (pl)', href: '/admin/messages/pl/forms' },
             ],
         },
         { title: 'Partnerzy',   items: [{ label: 'Partnerzy',   href: '/admin/partners' }] },
@@ -106,19 +100,17 @@ function Section({ title, items }: { title: string; items: NavItem[] }) {
         (items[0] as NavItemLink).label === title
 
     // hasActive: dla singleLink sprawdzamy pojedynczy href,
-    // dla zwykłej sekcji — czy którykolwiek href jest prefiksem bieżącego URL
+    // dla zwykłej sekcji — czy którykolwiek href jest prefiksem bieżącego URL (chyba że exact)
     const hasActive = useMemo(() => {
         if (singleLink) {
             const link = items[0] as NavItemLink
-            return isActive(url, link.href)
+            return isActive(url, link.href, !!link.exact)
         }
-        return items.some((i) => 'href' in i && isActive(url, (i as NavItemLink).href))
+        return items.some((i) => 'href' in i && isActive(url, (i as NavItemLink).href, !!(i as NavItemLink).exact))
     }, [url, items, singleLink])
 
-    // stan rozwinięcia — hook zawsze wywołany
     const [open, setOpen] = useState<boolean>(hasActive)
 
-    // auto-otwieranie po zmianie URL na pasujący — hook zawsze wywołany
     useEffect(() => {
         if (hasActive) setOpen(true)
     }, [hasActive])
@@ -126,7 +118,7 @@ function Section({ title, items }: { title: string; items: NavItem[] }) {
     // render „pojedynczego linku”
     if (singleLink) {
         const link = items[0] as NavItemLink
-        const active = isActive(url, link.href)
+        const active = isActive(url, link.href, !!link.exact)
         return (
             <div className="mt-2">
                 <Link
@@ -178,7 +170,7 @@ function NavList({ items }: { items: NavItem[] }) {
                 }
 
                 const link = item as NavItemLink
-                const active = isActive(url, link.href)
+                const active = isActive(url, link.href, !!link.exact)
                 const badge = Number(msg_badges[link.href] ?? 0)
 
                 return (
@@ -203,18 +195,15 @@ function NavList({ items }: { items: NavItem[] }) {
     )
 }
 
-/** Aktywność linku: aktywny także dla /id, /id/edit, /create, query */
-/** PROSTA funkcja - tylko dokładne dopasowanie */
-function isActive(currentUrl: string, href: string) {
-    const cur = currentUrl.split('?')[0].replace(/\/+$/, '')
+/** Aktywność linku:
+ *  - exact === true  -> tylko idealne dopasowanie
+ *  - exact === false -> dopasowanie prefiksu (np. /admin/offers i /admin/offers/123)
+ */
+function isActive(currentUrl: string, href: string, exact = false) {
+    const cur  = currentUrl.split('?')[0].replace(/\/+$/, '')
     const base = href.split('?')[0].replace(/\/+$/, '')
 
-    // Dokładne dopasowanie
-    if (cur === base) return true
+    if (exact) return cur === base
 
-
-    if (cur.startsWith(base + '/')) return true
-
-    return false
+    return cur === base || cur.startsWith(base + '/')
 }
-

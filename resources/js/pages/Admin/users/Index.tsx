@@ -1,8 +1,9 @@
 import { Link, router, usePage } from '@inertiajs/react'
 import { useState } from 'react'
 import AdminLayout from '@/layouts/admin-layout'
-import { Eye, Pencil, Trash2, Plus } from 'lucide-react'
+import { Eye, Pencil, Trash2, Plus, Filter } from 'lucide-react';
 import { FilterPopover, FilterRow, Select } from '@/components/admin/FilterPopover'
+import * as React from 'react';
 
 type Row = { id:number; name:string|null; email:string; avatar_url:string; created_at:string|null }
 type Paginated<T> = { data:T[]; links:{url:string|null; label:string; active:boolean}[]; current_page:number; last_page:number; per_page:number; total:number }
@@ -30,21 +31,22 @@ export default function Index(){
             <main className="p-6">
                 <div className="flex items-center justify-between">
                     <p className="text-2xl font-bold">Użytkownicy</p>
-                    <Link href={`${BASE}/create`} className="inline-flex items-center gap-2 rounded-md bg-mint px-3 py-2 text-white text-sm">
-                        <Plus className="h-4 w-4" /> Utwórz Użytkownik
+                    <Link href={`${BASE}/create`} className="rounded-lg bg-mint px-4 py-2 font-semibold text-white">
+                        Utwórz Użytkownika
                     </Link>
                 </div>
 
                 <div className="mt-4 flex items-center gap-3">
-                    <form onSubmit={submit} className="flex w-full max-w-xl items-center gap-3">
-                        <div className="relative flex-1">
+                    <form onSubmit={submit} className="flex  items-center gap-3">
+                        <div className="relative w-80">
                             <input value={q} onChange={(e)=>setQ(e.target.value)} placeholder="Szukaj" className="w-full rounded-full border bg-white px-4 py-2 pl-10"/>
                             <span className="pointer-events-none absolute left-3 top-2.5">🔎</span>
                         </div>
                     </form>
 
                     <div className="relative">
-                        <button type="button" onClick={()=>setOpen(v=>!v)} className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-slate-50">
+                        <button onClick={() => setOpen((v) => !v)} aria-expanded={open} className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-slate-50">
+                            <Filter className="h-4 w-4" />
                             <span>Filtry</span>
                         </button>
 

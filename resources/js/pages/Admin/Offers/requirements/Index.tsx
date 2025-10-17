@@ -24,7 +24,7 @@ export default function Index(){
             <main className="p-6">
                 <div className="mt-1 flex items-center justify-between">
                     <p className="text-2xl font-bold">Wymagania</p>
-                    <Link href={`${BASE}/create`} className="rounded-lg bg-mint px-3 py-1 font-semibold text-white hover:brightness-110">Utwórz Wymaganie</Link>
+                    <Link href={`${BASE}/create`} className="rounded-lg bg-mint px-4 py-2 font-semibold text-white hover:brightness-110">Utwórz Wymaganie</Link>
                 </div>
 
                 <form onSubmit={submit} className="mt-4 max-w-md">

@@ -63,12 +63,17 @@ export default function Form() {
                 )}
 
                 <form
+                    autoComplete="off" // wyłącz autofill na całym formularzu
                     onSubmit={(e) => {
                         e.preventDefault()
                         submit(false)
                     }}
                     className="mt-4 space-y-4 rounded-xl border bg-white p-6"
                 >
+                    {/* HONEYPOT — ukryte pola przed właściwymi, by zniechęcić Chrome do autofillu */}
+                    <input type="text" name="fake-username" autoComplete="username" className="hidden" tabIndex={-1} />
+                    <input type="password" name="fake-password" autoComplete="current-password" className="hidden" tabIndex={-1} />
+
                     <div>
                         <label className="block text-sm font-medium">
                             Imię <span className="text-rose-600">*</span>
@@ -78,6 +83,8 @@ export default function Form() {
                             onChange={(e) => form.setData('name', e.target.value)}
                             className="mt-2 w-full rounded-lg border bg-white px-3 py-2"
                             required
+                            name="user_name"          // nietypowa nazwa (utrudnia autofill)
+                            autoComplete="off"         // dodatkowo wyłącz bezpośrednio na polu
                         />
                         {form.errors.name && <p className="mt-1 text-sm text-rose-600">{form.errors.name}</p>}
                     </div>
@@ -91,6 +98,9 @@ export default function Form() {
                             onChange={(e) => form.setData('email', e.target.value)}
                             className="mt-2 w-full rounded-lg border bg-white px-3 py-2"
                             required
+                            name="user_email"         // nie „email”, by ograniczyć autofill
+                            autoComplete="off"
+                            inputMode="email"
                         />
                         {form.errors.email && <p className="mt-1 text-sm text-rose-600">{form.errors.email}</p>}
                     </div>
@@ -105,6 +115,8 @@ export default function Form() {
                             onChange={(e) => form.setData('password', e.target.value)}
                             className="mt-2 w-full rounded-lg border bg-white px-3 py-2"
                             placeholder="Hasło"
+                            name="new_password"        // nie „password”
+                            autoComplete="new-password"// standard na wyłączenie podpowiedzi haseł
                             {...(mode === 'create' ? { required: true } : {})}
                         />
                         {form.errors.password && <p className="mt-1 text-sm text-rose-600">{form.errors.password}</p>}
