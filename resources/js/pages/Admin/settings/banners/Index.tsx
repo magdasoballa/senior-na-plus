@@ -1,7 +1,8 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import AdminLayout from '@/layouts/admin-layout';
 import { useState } from 'react';
-import { CheckCircle2, XCircle, Pencil, Trash2, MoveUpRight, MoveDownLeft, Filter, Eye } from 'lucide-react';
+import { CheckCircle2, XCircle, Pencil, Trash2, MoveUpRight, MoveDownLeft, Filter, Eye, Search, X } from 'lucide-react';
+import * as React from 'react';
 
 type Banner = {
     id: number;
@@ -9,8 +10,6 @@ type Banner = {
     image_url?: string | null;
     visible: boolean;
     position: number;
-    // jeśli masz w DB, możesz dodać też:
-    // link?: string | null;
 };
 type Paginated<T> = {
     data: T[];
@@ -29,6 +28,11 @@ export default function Index() {
     const submitSearch = (e: React.FormEvent) => {
         e.preventDefault();
         router.get(BASE, { q }, { preserveState: true, replace: true });
+    };
+
+    const clearSearch = () => {
+        setQ('');
+        router.get(BASE, {}, { preserveState: true, replace: true });
     };
 
     const toggle = (id: number) => {
@@ -66,18 +70,28 @@ export default function Index() {
                     </Link>
                 </div>
 
-                <form onSubmit={submitSearch} className="mt-4 flex items-center gap-3">
-                    <div className="relative flex-1">
+                {/* WYSZUKIWARKA - krótsza i z lupką */}
+                <form onSubmit={submitSearch} className="mt-4">
+                    <div className="relative w-80">
                         <input
                             value={q}
                             onChange={(e) => setQ(e.target.value)}
                             placeholder="Szukaj"
-                            className="w-full rounded-xl border bg-white px-4 py-2"
+                            className="w-full rounded-full border bg-white px-4 py-2 pl-10 pr-10 outline-none"
                         />
+                        <span className="pointer-events-none absolute left-3 top-2.5">🔎</span>
+                        {/* Przycisk czyszczenia */}
+                        {q && (
+                            <button
+                                type="button"
+                                onClick={clearSearch}
+                                className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400 hover:text-gray-600"
+                                title="Wyczyść wyszukiwanie"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        )}
                     </div>
-                    <button className="rounded-xl border px-3 py-2" type="submit">
-                        <Filter className="h-4 w-4" />
-                    </button>
                 </form>
 
                 <div className="mt-4 overflow-hidden rounded-xl border bg-white">
@@ -121,7 +135,7 @@ export default function Index() {
                                 </td>
                                 <td className="p-3">
                                     <div className="flex justify-center">
-                                            {b.visible ? <CheckCircle2 className="h-5 w-5 text-emerald-600" /> : <XCircle className="h-5 w-5 text-rose-600" />}
+                                        {b.visible ? <CheckCircle2 className="h-5 w-5 text-emerald-600" /> : <XCircle className="h-5 w-5 text-rose-600" />}
                                     </div>
                                 </td>
 
@@ -129,7 +143,7 @@ export default function Index() {
                                     <div className="flex justify-end gap-2">
                                         {/* PODGLĄD */}
                                         <Link href={`${BASE}/${b.id}`} className="rounded border px-2 py-1" title="Szczegóły">
-                                             <Eye className="h-4 w-4" />
+                                            <Eye className="h-4 w-4" />
                                         </Link>
 
                                         {/* EDYCJA */}

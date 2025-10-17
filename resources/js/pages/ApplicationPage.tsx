@@ -200,26 +200,23 @@ export default function ApplicationPage() {
 
         post('/aplikuj', {
             data: formData,
-            preserveScroll: true,
+            // preserveScroll: true,  // ⬅️ usuń
             forceFormData: true,
             onSuccess: () => {
-                console.log('Form submitted successfully');
+                // ⬇️ przewiń do góry
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
                 setFileError(undefined);
                 setConsentErrors({});
                 setShowSuccessMessage(true);
                 if (fileInputRef.current) fileInputRef.current.value = '';
                 reset();
-
-                // Automatyczne ukrycie komunikatu po 5 sekundach
-                setTimeout(() => {
-                    setShowSuccessMessage(false);
-                }, 5000);
+                setTimeout(() => setShowSuccessMessage(false), 5000);
             },
             onError: (errors) => {
                 console.error('Form submission errors:', errors);
-            },
-            onFinish: () => {
-                console.log('Form submission finished');
+                // jeśli chcesz również przy błędach przewinąć do góry:
+                // window.scrollTo({ top: 0, behavior: 'smooth' });
             },
         });
     };

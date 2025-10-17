@@ -119,26 +119,14 @@ export default function Index() {
                 {/* Szukaj + filtry */}
                 <div className="mt-4 flex flex-wrap items-center gap-3">
                     <form onSubmit={submit} className="flex items-center gap-3">
-                        <div className="relative w-full md:w-[36rem] max-w-xl">
+                        <div className="relative w-80">
                             <input
                                 value={q}
-                                onChange={(e) => setQ(e.target.value)}
+                                onChange={e=>setQ(e.target.value)}
                                 placeholder="Szukaj"
-                                className="w-full rounded-full border bg-white px-4 py-2 pl-10 pr-10"
+                                className="w-full rounded-full border bg-white px-4 py-2 pl-10"
                             />
                             <span className="pointer-events-none absolute left-3 top-2.5">🔎</span>
-
-                            {/* DODANY PRZYCISK CZYSZCZENIA */}
-                            {q && (
-                                <button
-                                    type="button"
-                                    onClick={clearSearch}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                                    title="Wyczyść wyszukiwanie"
-                                >
-                                    <X className="h-4 w-4" />
-                                </button>
-                            )}
                         </div>
                     </form>
 

@@ -43,7 +43,7 @@ export default function Index() {
                 <p className="mt-1 text-2xl font-bold">Ustawienia portalu</p>
 
                 <form onSubmit={submit} className="mt-4 max-w-md">
-                    <div className="relative">
+                    <div className="relative w-80">
                         <input
                             value={q}
                             onChange={(e) => setQ(e.target.value)}

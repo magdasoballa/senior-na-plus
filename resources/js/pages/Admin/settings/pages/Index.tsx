@@ -49,7 +49,7 @@ export default function PagesIndex({ pages, filters }: Props) {
                 {/* wyszukiwarka */}
                 <div className="mt-5">
                     <form onSubmit={submitSearch} className="w-full max-w-xl">
-                        <div className="relative">
+                        <div className="relative w-80">
                             <input
                                 value={q}
                                 onChange={(e) => setQ(e.target.value)}

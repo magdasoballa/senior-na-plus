@@ -69,18 +69,21 @@ function ActionCard({
 }
 
 const FirstBanner: React.FC = () => {
+    // Ile kafelki mają „najechać” na baner:
+    const overlapMobile = "-mt-8";   // ~2rem
+    const overlapDesktop = "md:-mt-2"; // ~3rem
+
     return (
-        <section className="relative overflow-hidden w-full bg-[#FDFDFC]">
+        <section className="relative w-full bg-[#FDFDFC]">
             <div className="pointer-events-none absolute top-10 -right-24 rounded-full" />
 
             <div className="p-6 sm:p-10">
-                {/* Rząd: tekst + obrazek */}
-                <div className="flex flex-col-reverse items-center gap-8 md:flex-row md:items-end">
+                {/* Rząd: tekst + obrazek (BANER POD spodem) */}
+                <div className="relative z-0 flex flex-col-reverse items-center gap-8 md:flex-row md:items-end">
                     {/* Tekst (lewa kolumna) */}
                     <div className="md:max-w-[40%] md:self-start">
-                        <h1 className="text-6xl ">
+                        <h1 className="text-6xl">
                             <span className="block text-center">Troska i pomoc </span>
-
                             <span className="block text-center">- Twoja praca,</span>
                             <span className="block text-center">nasza misja!</span>
                         </h1>
@@ -88,12 +91,15 @@ const FirstBanner: React.FC = () => {
 
                     {/* Obrazek (prawa kolumna) */}
                     <div className="w-full md:flex-1 md:self-stretch flex justify-center md:justify-end">
-                        <Baner1 className="w-full h-auto" />
+                        {/* pointer-events-none, żeby kafelki na wierzchu łapały klik */}
+                        <Baner1 className="block w-full h-auto pointer-events-none" />
                     </div>
                 </div>
 
-                {/* Kafelki pod spodem */}
-                <div className=" grid grid-cols-1 gap-4 sm:grid-cols-3 mt-15 md:mt-0">
+                {/* Kafelki NA wierzchu, nasunięte na baner */}
+                <div
+                    className={`relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-4 ${overlapMobile} ${overlapDesktop}`}
+                >
                     <ActionCard
                         title="KONTAKT"
                         icon={<Kontakt width="100px" className="max-h-[90px]" />}

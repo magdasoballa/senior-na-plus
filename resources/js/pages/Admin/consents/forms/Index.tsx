@@ -2,6 +2,7 @@ import { Link, useForm, usePage } from '@inertiajs/react'
 import AdminLayout from '@/layouts/admin-layout'
 import { useState } from 'react'
 import { CheckCircle2, Eye, Pencil, Trash2, XCircle } from 'lucide-react'
+import * as React from 'react';
 
 type Row = {
     id: number
@@ -43,8 +44,10 @@ export default function Index() {
                                 }
                             }}
                             placeholder="Szukaj"
-                            className="w-full rounded-lg border bg-white px-3 py-2"
+                            className="w-full rounded-full border bg-white px-4 py-2 pl-10"
                         />
+                        <span className="pointer-events-none absolute left-3 top-2.5">🔎</span>
+
                     </div>
                 </div>
                 <div className="mt-4 overflow-hidden rounded-xl border bg-white">

@@ -37,7 +37,7 @@ export default function Index(){
                 </div>
 
                 <form onSubmit={submit} className="mt-4 max-w-md">
-                    <div className="relative">
+                    <div className="relative w-80">
                         <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Szukaj"
                                className="w-full rounded-full border bg-white px-4 py-2 pl-10" />
                         <span className="pointer-events-none absolute left-3 top-2.5">🔎</span>

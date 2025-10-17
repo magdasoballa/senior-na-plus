@@ -66,10 +66,10 @@ export default function Index({
                         <input
                             value={q}
                             onChange={(e) => setQ(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && submit()}
                             placeholder="Szukaj"
-                            className="w-full rounded-full border bg-white px-4 py-2 pr-10 outline-none"
+                            className="w-full rounded-full border bg-white px-4 py-2 pl-10 pr-10 outline-none"
                         />
+                        <span className="pointer-events-none absolute left-3 top-2.5">🔎</span>
                         {/* Przycisk czyszczenia - pokazuje się tylko gdy jest tekst */}
                         {q && (
                             <button

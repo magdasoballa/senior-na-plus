@@ -2,6 +2,7 @@ import AdminLayout from '@/layouts/admin-layout'
 import { Link, useForm, usePage } from '@inertiajs/react'
 import { useState } from 'react'
 import { CheckCircle2, Eye, Pencil, Trash2, XCircle } from 'lucide-react'
+import * as React from 'react';
 
 type Row = { id:number; name:string; visible_pl:boolean; visible_de:boolean }
 type PageProps = { contacts: { data: Row[]; links:any; from:number; to:number; total:number }, filters:{ q:string } }
@@ -24,14 +25,16 @@ export default function Index(){
                 </div>
 
                 <div className="mt-4 flex items-center gap-3">
-                    <div className="relative w-72">
+                    <div className="relative w-80">
                         <input
                             value={q}
                             onChange={e=>setQ(e.target.value)}
                             onKeyDown={e=>{ if(e.key==='Enter'){ window.location.href = `${BASE}?q=${encodeURIComponent(q)}` }}}
                             placeholder="Szukaj"
-                            className="w-full rounded-lg border bg-white px-3 py-2"
+                            className="w-full rounded-full border bg-white px-4 py-2 pl-10"
                         />
+                        <span className="pointer-events-none absolute left-3 top-2.5">🔎</span>
+
                     </div>
                 </div>
 

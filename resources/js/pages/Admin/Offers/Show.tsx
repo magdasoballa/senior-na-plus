@@ -34,9 +34,9 @@ export default function Show() {
         <AdminLayout>
             <main className="p-6">
                 <div className="flex items-center justify-between">
-                    <h1 className="text-xl font-semibold">
+                    <p className="text-xl font-semibold">
                         Szczegóły Oferta: {offer?.title}
-                    </h1>
+                    </p>
                     <div className="flex items-center gap-2">
                         <Link
                             href={`/admin/offers/${encodeURIComponent(String(offer?.id))}/edit`}

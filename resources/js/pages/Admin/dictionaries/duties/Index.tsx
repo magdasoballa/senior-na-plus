@@ -52,7 +52,7 @@ export default function Index(){
 
                 {/* search „pill” */}
                 <form onSubmit={search} className="mt-4">
-                    <div className="relative w-[420px] max-w-full">
+                    <div className="relative w-80">
                         <input
                             placeholder="Szukaj"
                             className="w-full rounded-full border border-slate-200 bg-white px-4 py-2 pl-10 outline-none focus:ring-2 focus:ring-emerald-300"

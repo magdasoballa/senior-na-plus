@@ -161,7 +161,7 @@ export default function OffersSwiper({ offers }: Props) {
     }
 
     return (
-        <section className="select-none px-3 sm:px-4">
+        <section className="select-none px-3 sm:px-4 mb-15">
             <header className="mb-4 sm:mb-6 text-center">
                 <h2 className={`text-3xl md:text-6xl leading-tight tracking-tight ${isDarkMode ? 'text-white' : ''}`}>Oferty pracy</h2>
             </header>
@@ -257,7 +257,7 @@ function SlideCard({
     };
 }) {
     const go = () => router.visit(slide.href);
-
+console.log(slide)
     return (
         // Slajd MA dokładnie 100% szerokości toru; zero poziomego paddingu tutaj
         <article className="basis-full flex-none py-2 sm:py-3">

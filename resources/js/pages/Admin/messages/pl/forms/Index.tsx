@@ -124,26 +124,17 @@ export default function Index() {
                 <div className="text-sm text-slate-500">Wiadomości</div>
                 <p className="mt-1 text-2xl font-bold">Formularze (pl)</p>
 
-                {/* Szukaj + filtry */}
-                <form onSubmit={submit} className="mt-4 flex items-center gap-3">
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                    <form onSubmit={submit} className="flex items-center gap-3">
                     <div className="relative w-full max-w-xl">
-                        <div className="relative">
+                        <div className="relative w-80">
                             <input
                                 value={q}
-                                onChange={(e) => setQ(e.target.value)}
+                                onChange={e=>setQ(e.target.value)}
                                 placeholder="Szukaj"
-                                className="w-full rounded-full border bg-white px-4 py-2 pl-10 pr-10"
+                                className="w-full rounded-full border bg-white px-4 py-2 pl-10"
                             />
-                            <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                            {q && (
-                                <button
-                                    type="button"
-                                    onClick={resetSearch}
-                                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600"
-                                >
-                                    <X className="h-4 w-4" />
-                                </button>
-                            )}
+                            <span className="pointer-events-none absolute left-3 top-2.5">🔎</span>
                         </div>
                     </div>
 
@@ -202,7 +193,7 @@ export default function Index() {
                         </FilterPopover>
                     </div>
                 </form>
-
+                </div>
                 {/* Reszta kodu pozostaje bez zmian */}
                 <div className="mt-4 rounded-xl border bg-white">
                     <div className="w-full max-w-full overflow-x-auto">

@@ -5,8 +5,6 @@ import AboutSection from '@/components/about';
 import ContactFormCard from '@/components/contactFormCard';
 import { usePage } from '@inertiajs/react';
 
-// ⬇️ dodaj
-import ActivePopupModal from '@/components/ActivePopupModal';
 
 export default function Welcome() {
     const { offers, activePopup } = usePage().props as {
@@ -23,9 +21,9 @@ export default function Welcome() {
                     <OffersSwiper offers={offers ?? []} />
                 </section>
 
-                <section id="o-nas" className="w-full">
-                    <AboutSection />
-                </section>
+                {/*<section id="o-nas" className="w-full">*/}
+                {/*    <AboutSection />*/}
+                {/*</section>*/}
 
                 <section id="kontakt" className="w-full scroll-mt-4">
                     <ContactFormCard />
